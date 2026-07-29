@@ -18,3 +18,10 @@ D14: Up Limit Switch
 D10: Down Limit Switch
 
 
+M1+: Left Motor Positive
+
+M1-: Left Motor Negative
+
+M2+: Right Motor Positive
+
+M2-: Right Motor Negative
