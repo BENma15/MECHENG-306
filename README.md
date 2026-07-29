@@ -25,3 +25,8 @@ M1-: Left Motor Negative
 M2+: Right Motor Positive
 
 M2-: Right Motor Negative
+
+
+5V: VCC
+
+GND: GND
