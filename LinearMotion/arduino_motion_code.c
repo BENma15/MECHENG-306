@@ -33,15 +33,20 @@ void updateA() {
     uint8_t index = (stateA << 2) | newState;   // Set index to a 4 digits binary
     countA += encTable[index];                  // Sets countA to a number corresponding a direction
     stateA = newState;                          // Current state of encoders is updated
+
+    digitalwrite(stateA)
 }
 
 void updateB() {
     uint8_t a = digitalRead(B_ENCA);
     uint8_t b = digitalRead(B_ENCB);
+
     uint8_t newState = (a << 1) | b;
     uint8_t index = (stateB << 2) | newState;
     countB += encTable[index];
     stateB = newState;
+    
+    digitalwrite(stateB)
 }
 
 void setup() {
@@ -53,12 +58,13 @@ void setup() {
 
     cli();
     EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3);
-    EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30); // any-edge on all 4
+    EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
     sei();
 }
 
 void loop() {
-  
+    
+    digitalprint(countA)
 }
 
 ISR(INT0_vect) { updateB(); } // B_ENCB
