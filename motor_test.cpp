@@ -18,13 +18,6 @@ const int B_POSITIVE = HIGH;
 const int B_NEGATIVE = LOW;
 
 
-void stopMotors()
-{
-    analogWrite(E1, 0);
-    analogWrite(E2, 0);
-}
-
-
 void moveRight()
 {
     digitalWrite(M1, A_POSITIVE);
@@ -32,6 +25,11 @@ void moveRight()
 
     analogWrite(E1, MOTOR_SPEED);
     analogWrite(E2, MOTOR_SPEED);
+
+    delay(MOVE_TIME);
+
+    analogWrite(E1, 0);
+    analogWrite(E2, 0);
 }
 
 
@@ -42,6 +40,11 @@ void moveLeft()
 
     analogWrite(E1, MOTOR_SPEED);
     analogWrite(E2, MOTOR_SPEED);
+
+    delay(MOVE_TIME);
+
+    analogWrite(E1, 0);
+    analogWrite(E2, 0);
 }
 
 
@@ -52,6 +55,11 @@ void moveUp()
 
     analogWrite(E1, MOTOR_SPEED);
     analogWrite(E2, MOTOR_SPEED);
+
+    delay(MOVE_TIME);
+
+    analogWrite(E1, 0);
+    analogWrite(E2, 0);
 }
 
 
@@ -62,16 +70,11 @@ void moveDown()
 
     analogWrite(E1, MOTOR_SPEED);
     analogWrite(E2, MOTOR_SPEED);
-}
-
-
-void moveForHalfSecond(void (*movementFunction)())
-{
-    movementFunction();
 
     delay(MOVE_TIME);
 
-    stopMotors();
+    analogWrite(E1, 0);
+    analogWrite(E2, 0);
 }
 
 
@@ -84,7 +87,8 @@ void setup()
     pinMode(M2, OUTPUT);
     pinMode(E2, OUTPUT);
 
-    stopMotors();
+    analogWrite(E1, 0);
+    analogWrite(E2, 0);
 
     Serial.println("Enter: up, down, left, or right");
 }
@@ -102,27 +106,22 @@ void loop()
         if (command == "up")
         {
             Serial.println("Moving up for 0.5 seconds");
-            moveForHalfSecond(moveUp);
+            moveUp();
         }
         else if (command == "down")
         {
             Serial.println("Moving down for 0.5 seconds");
-            moveForHalfSecond(moveDown);
+            moveDown();
         }
         else if (command == "left")
         {
             Serial.println("Moving left for 0.5 seconds");
-            moveForHalfSecond(moveLeft);
+            moveLeft();
         }
         else if (command == "right")
         {
             Serial.println("Moving right for 0.5 seconds");
-            moveForHalfSecond(moveRight);
-        }
-        else if (command == "stop")
-        {
-            stopMotors();
-            Serial.println("Motors stopped");
+            moveRight();
         }
         else
         {
