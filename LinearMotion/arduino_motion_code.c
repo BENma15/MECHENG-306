@@ -11,7 +11,7 @@ const int B_ENCB = 21;   // INT0
 const int E1 = 5;
 const int M1 = 4;
 const int E2 = 6;
-const int M2 = 7
+const int M2 = 7;
 
 volatile long countA = 0;
 volatile long countB = 0;
@@ -39,7 +39,7 @@ void updateA() {
     countA += encTable[index];                  // Sets countA to a number corresponding a direction
     stateA = newState;                          // Current state of encoders is updated
 
-    digitalwrite(stateA)
+    Serial.println(countA);
 }
 
 void updateB() {
@@ -51,7 +51,7 @@ void updateB() {
     countB += encTable[index];
     stateB = newState;
 
-    digitalwrite(stateB)
+    Serial.println(countB);
 }
 
 void setup() {
@@ -68,14 +68,19 @@ void setup() {
     EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3);
     EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
     sei();
+
+
+
+    //digitalWrite(M1,LOW);
+    digitalWrite(M2, HIGH);
+    //analogWrite(E1, 128);
+    analogWrite(E2, 128); 
+    delay(1000);
+    analogWrite(E2, 0);
 }
 
 void loop() {
-    digitalWrite(M1,HIGH);
-    digitalWrite(M2, HIGH);
-    analogWrite(E1, 128);
-    analogWrite(E2, 128); 
-    delay(30);
+    
 }
 
 ISR(INT0_vect) { updateB(); } // B_ENCB
