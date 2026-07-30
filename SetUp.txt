@@ -27,3 +27,5 @@ M2-: Right Motor Negative
 5V: VCC
 
 GND: GND
+
+L_Count = 8256deltaA / 2piR

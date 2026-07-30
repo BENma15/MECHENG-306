@@ -18,10 +18,10 @@ const int B_POSITIVE = HIGH;
 const int B_NEGATIVE = LOW;
 
 
-void moveRight()
+void moveForDuration(int motor1Direction, int motor2Direction)
 {
-    digitalWrite(M1, A_POSITIVE);
-    digitalWrite(M2, B_POSITIVE);
+    digitalWrite(M1, motor1Direction);
+    digitalWrite(M2, motor2Direction);
 
     analogWrite(E1, MOTOR_SPEED);
     analogWrite(E2, MOTOR_SPEED);
@@ -30,51 +30,30 @@ void moveRight()
 
     analogWrite(E1, 0);
     analogWrite(E2, 0);
+}
+
+
+void moveRight()
+{
+    moveForDuration(A_POSITIVE, B_POSITIVE);
 }
 
 
 void moveLeft()
 {
-    digitalWrite(M1, A_NEGATIVE);
-    digitalWrite(M2, B_NEGATIVE);
-
-    analogWrite(E1, MOTOR_SPEED);
-    analogWrite(E2, MOTOR_SPEED);
-
-    delay(MOVE_TIME);
-
-    analogWrite(E1, 0);
-    analogWrite(E2, 0);
+    moveForDuration(A_NEGATIVE, B_NEGATIVE);
 }
 
 
 void moveUp()
 {
-    digitalWrite(M1, A_POSITIVE);
-    digitalWrite(M2, B_NEGATIVE);
-
-    analogWrite(E1, MOTOR_SPEED);
-    analogWrite(E2, MOTOR_SPEED);
-
-    delay(MOVE_TIME);
-
-    analogWrite(E1, 0);
-    analogWrite(E2, 0);
+    moveForDuration(A_POSITIVE, B_NEGATIVE);
 }
 
 
 void moveDown()
 {
-    digitalWrite(M1, A_NEGATIVE);
-    digitalWrite(M2, B_POSITIVE);
-
-    analogWrite(E1, MOTOR_SPEED);
-    analogWrite(E2, MOTOR_SPEED);
-
-    delay(MOVE_TIME);
-
-    analogWrite(E1, 0);
-    analogWrite(E2, 0);
+    moveForDuration(A_NEGATIVE, B_POSITIVE);
 }
 
 
