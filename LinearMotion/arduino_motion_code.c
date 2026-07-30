@@ -2,113 +2,56 @@
 #include <avr/interrupt.h>
 
 // Motor A encoder pins
-const int A_ENCA = 18;   // INT3
-const int A_ENCB = 19;   // INT2
+const int L_ENCA = 18;   // INT3
+const int L_ENCB = 19;   // INT2
 // Motor B encoder pins
-const int B_ENCA = 20;   // INT1
-const int B_ENCB = 21;   // INT0
+const int R_ENCA = 20;   // INT1
+const int R_ENCB = 21;   // INT0
 
 const int E1 = 5;
 const int M1 = 4;
 const int E2 = 6;
-const int M2 = 7;
-
-const int MOVE_SPEED = 150;   // constant drive PWM while moving (0-255)
+const int M2 = 7
 
 volatile long countA = 0;
 volatile long countB = 0;
 volatile uint8_t stateA = 0;
 volatile uint8_t stateB = 0;
 
-volatile long targetCountA = 0;
-volatile long targetCountB = 0;
-volatile bool movingA = false;
-volatile bool movingB = false;
-volatile int8_t dirA = 1;
-volatile int8_t dirB = 1;
 
 // 0 - Not Moving
 // 1 - Forward or Reverse
 // -1 - Forward or Reverse
 const int8_t encTable[16] = {
-   0, -1, +1,  0,
-  +1,  0,  0, -1,
-  -1,  0,  0, +1,
-   0, +1, -1,  0
+    0, -1, +1,  0,
+    +1,  0,  0, -1,
+    -1,  0,  0, +1,
+    0, +1, -1,  0
 };
 
 void updateA() {
     // Read both A and B encoders
-    uint8_t a = digitalRead(A_ENCA);
-    uint8_t b = digitalRead(A_ENCB);
+    uint8_t a = digitalRead(L_ENCA);
+    uint8_t b = digitalRead(L_ENCB);
 
     uint8_t newState = (a << 1) | b;            // Set newState to a 2 digit binary
     uint8_t index = (stateA << 2) | newState;   // Set index to a 4 digits binary
     countA += encTable[index];                  // Sets countA to a number corresponding a direction
     stateA = newState;                          // Current state of encoders is updated
 
-    if (movingA) {
-        if ((dirA > 0 && countA >= targetCountA) || (dirA < 0 && countA <= targetCountA)) {
-            analogWrite(E1, 0);
-            movingA = false;
-        }
-    }
-
     Serial.println(countA);
-    
 }
 
 void updateB() {
-    uint8_t a = digitalRead(B_ENCA);
-    uint8_t b = digitalRead(B_ENCB);
+    uint8_t a = digitalRead(R_ENCA);
+    uint8_t b = digitalRead(R_ENCB);
 
     uint8_t newState = (a << 1) | b;
     uint8_t index = (stateB << 2) | newState;
     countB += encTable[index];
     stateB = newState;
 
-    if (movingB) {
-        if ((dirB > 0 && countB >= targetCountB) || (dirB < 0 && countB <= targetCountB)) {
-            analogWrite(E2, 0);
-            movingB = false;
-        }
-    }
-
     Serial.println(countB);
-}
-
-long leftEncoderCounts(float dx_mm, float dy_mm) {
-  return (long)((8256*(dx_mm - dy_mm))/(16*PI));
-}
-
-long rightEncoderCounts(float dx_mm, float dy_mm) {
-  return (long)((8256*(dx_mm + dy_mm))/(16*PI));
-}
-
-void move(float dx_mm, float dy_mm) {
-  long deltaA = leftEncoderCounts(dx_mm, dy_mm);
-  long deltaB = rightEncoderCounts(dx_mm, dy_mm);
-
-  noInterrupts();
-  targetCountA = countA + deltaA;
-  targetCountB = countB + deltaB;
-  interrupts();
-
-  dirA = (deltaA >= 0) ? 1 : -1;
-  dirB = (deltaB >= 0) ? 1 : -1;
-
-  digitalWrite(M1, dirA > 0 ? HIGH : LOW);
-  digitalWrite(M2, dirB > 0 ? HIGH : LOW);
-
-  movingA = (deltaA != 0);
-  movingB = (deltaB != 0);
-
-  analogWrite(E1, movingA ? MOVE_SPEED : 0);
-  analogWrite(E2, movingB ? MOVE_SPEED : 0);
-}
-
-bool moving() {
-  return movingA || movingB;
 }
 
 void setup() {
@@ -128,17 +71,17 @@ void setup() {
 }
 
 void loop() {
-    digitalWrite(M1, HIGH);
-    analogWrite(E1, MOVE_SPEED);
-    delay(500);
-    analogWrite(E1, 0);
-    Serial.print("Motor A, M1=HIGH, countA = ");
-    Serial.println(countA);
-    /*static bool testSent = false;
-    if (!testSent && !moving()) {
-        move(10, -5);
-        testSent = true;
-    }*/
+    digitalWrite(M1,HIGH);
+
+
+    //digitalWrite(M1,LOW);
+    digitalWrite(M2, HIGH);
+    analogWrite(E1, 128);
+    //analogWrite(E1, 128);
+    analogWrite(E2, 128); 
+    delay(30);
+    delay(1000);
+    analogWrite(E2, 0);
 }
 
 ISR(INT0_vect) { updateB(); } // B_ENCB
