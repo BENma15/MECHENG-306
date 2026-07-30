@@ -128,11 +128,17 @@ void setup() {
 }
 
 void loop() {
-    static bool testSent = false;
+    digitalWrite(M1, HIGH);
+    analogWrite(E1, MOVE_SPEED);
+    delay(500);
+    analogWrite(E1, 0);
+    Serial.print("Motor A, M1=HIGH, countA = ");
+    Serial.println(countA);
+    /*static bool testSent = false;
     if (!testSent && !moving()) {
         move(10, -5);
         testSent = true;
-    }
+    }*/
 }
 
 ISR(INT0_vect) { updateB(); } // B_ENCB
