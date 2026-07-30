@@ -8,6 +8,11 @@ const int A_ENCB = 19;   // INT2
 const int B_ENCA = 20;   // INT1
 const int B_ENCB = 21;   // INT0
 
+const int E1 = 5;
+const int M1 = 4;
+const int E2 = 6;
+const int M2 = 7
+
 volatile long countA = 0;
 volatile long countB = 0;
 volatile uint8_t stateA = 0;
@@ -45,7 +50,7 @@ void updateB() {
     uint8_t index = (stateB << 2) | newState;
     countB += encTable[index];
     stateB = newState;
-    
+
     digitalwrite(stateB)
 }
 
@@ -56,6 +61,9 @@ void setup() {
     pinMode(B_ENCA, INPUT_PULLUP);
     pinMode(B_ENCB, INPUT_PULLUP);
 
+    pinMode(M1, OUTPUT);
+    pinMode(M2, OUTPUT);
+
     cli();
     EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3);
     EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
@@ -63,8 +71,11 @@ void setup() {
 }
 
 void loop() {
-    
-    digitalprint(countA)
+    digitalWrite(M1,HIGH);
+    digitalWrite(M2, HIGH);
+    analogWrite(E1, 128);
+    analogWrite(E2, 128); 
+    delay(30);
 }
 
 ISR(INT0_vect) { updateB(); } // B_ENCB
