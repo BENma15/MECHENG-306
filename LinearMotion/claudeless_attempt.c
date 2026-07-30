@@ -93,10 +93,19 @@ void runAxis(double deltaA_mm, double deltaB_mm) {
     bool doneA = (absTargetA == 0);
     bool doneB = (absTargetB == 0);
 
-    if (!doneA) setLeftMotor(dirA, moveSpeed);
-    if (!doneB) setRightMotor(dirB, moveSpeed);
+    long largerTarget = (absTargetA > absTargetB) ? absTargetA : absTargetB;
+    int pwmA = moveSpeed;
+    int pwmB = moveSpeed;
+    if (largerTarget > 0) {
+        pwmA = (int) round(moveSpeed * ((double) absTargetA / largerTarget));
+        pwmB = (int) round(moveSpeed * ((double) absTargetB / largerTarget));
+    }
+
+    if (!doneA) setLeftMotor(dirA, pwmA);
+    if (!doneB) setRightMotor(dirB, pwmB);
 
     while (!doneA || !doneB) {
+
         if (!doneA && labs(countA - startA) >= absTargetA) {
             setLeftMotor(0, 0);
             doneA = true;
@@ -110,8 +119,7 @@ void runAxis(double deltaA_mm, double deltaB_mm) {
 }
 
 void moveTo(double dx, double dy) {
-    runAxis(dx, dx);
-    runAxis(dy, -dy);
+    runAxis(dx + dy, dx - dy);
 }
 
 void setup() {
