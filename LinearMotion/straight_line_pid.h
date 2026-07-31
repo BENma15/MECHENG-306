@@ -7,7 +7,7 @@ class StraightLinePID {
     double _integral, _prev_error;
   public:
     StraightLinePID (double kp, double ki, double kd);
-    double compute (double setpoint, double measured);
+    double compute (double setpoint, double measured, double dt);
     void reset();
 };
 

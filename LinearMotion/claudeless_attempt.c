@@ -29,7 +29,7 @@ volatile uint8_t stateB = 0;
 
 // Distance to encoder count equation variables
 const double COUNTS_PER_REV = 8256.0;
-const double WHEEL_RADIUS_MM = 4.0;
+const double WHEEL_RADIUS_MM = 8.0;
 
 // Current movement speed (TO BE CHANGED)
 int moveSpeed = 150;
