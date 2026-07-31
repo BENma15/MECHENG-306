@@ -8,26 +8,32 @@ const int L_ENCB = 19;   // INT2
 const int R_ENCA = 20;   // INT1
 const int R_ENCB = 21;   // INT0
 
+// Limit switch pins
 const int L_LIMIT = 13;
 const int R_LIMIT = 12;
 const int U_LIMIT = 10;
 const int D_LIMIT = 11;
 
+// Motors pins
 const int E1 = 5;
 const int M1 = 4;
 const int E2 = 6;
 const int M2 = 7;
 
+// Encoder variables to keep track of encoder count and encoder reading
 volatile long countA = 0;
 volatile long countB = 0;
 volatile uint8_t stateA = 0;
 volatile uint8_t stateB = 0;
 
+// Distance to encoder count equation variables
 const double COUNTS_PER_REV = 8256.0;
 const double WHEEL_RADIUS_MM = 4.0;
 
+// Current movement speed (TO BE CHANGED)
 int moveSpeed = 150;
 
+// Predetermined tables to see which way the motor is spinning
 const int8_t encTable[16] = {
     0, -1, +1,  0,
     +1,  0,  0, -1,
@@ -35,16 +41,23 @@ const int8_t encTable[16] = {
     0, +1, -1,  0
 };
 
+// Left encoder reading function
 void updateA() {
+    // Read both values from the two left encoder channels
     uint8_t a = digitalRead(L_ENCA);
     uint8_t b = digitalRead(L_ENCB);
 
+    // Left shift a encoder value and insert b into LSB to store both
     uint8_t newState = (a << 1) | b;
+    // Left shift the current state by 2 bits and insert new state in the 2 LSB's
     uint8_t index = (stateA << 2) | newState;
+    // Looking at table to figure out which way the motor is spinning
     countA += encTable[index];
+    // Set current state to previous state
     stateA = newState;
 }
 
+// Right encoder reading function
 void updateB() {
     uint8_t a = digitalRead(R_ENCA);
     uint8_t b = digitalRead(R_ENCB);
@@ -55,7 +68,9 @@ void updateB() {
     stateB = newState;
 }
 
+// Left motor movement
 void setLeftMotor(int8_t dir, int pwm) {
+    // 
     if (dir == 0) {
         analogWrite(E1, 0);
         return;
@@ -64,6 +79,7 @@ void setLeftMotor(int8_t dir, int pwm) {
     analogWrite(E1, pwm);
 }
 
+// Right motor movement
 void setRightMotor(int8_t dir, int pwm) {
     if (dir == 0) {
         analogWrite(E2, 0);
