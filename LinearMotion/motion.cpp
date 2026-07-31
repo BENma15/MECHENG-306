@@ -2,6 +2,8 @@
 #include <avr/interrupt.h>
 #include "limitSwitch.h"
 
+#include "motion.h"
+
 // Motor A encoder pins
 const int L_ENCA = 18;   // INT3
 const int L_ENCB = 19;   // INT2
