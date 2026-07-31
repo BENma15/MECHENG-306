@@ -166,49 +166,8 @@ void setup() {
 
 void loop()
 {
-
-    if (!isMotor1LimitStopped())
-    {
-        analogWrite(E1, 128);
-    }
-    else
-    {
-        analogWrite(E1, 0);
-    }
-
-    if (!isMotor2LimitStopped())
-    {
-        analogWrite(E2, 128);
-    }
-    else
-    {
-        analogWrite(E2, 0);
-    }
-
-    uint8_t events = getLimitEvents();
-
-    if (events & LIMIT_LEFT)
-    {
-        Serial.println("ERROR: LEFT limit switch hit");
-    }
-
-    if (events & LIMIT_RIGHT)
-    {
-        Serial.println("ERROR: RIGHT limit switch hit");
-    }
-
-    if (events & LIMIT_BOTTOM)
-    {
-        Serial.println("ERROR: BOTTOM limit switch hit");
-    }
-
-    if (events & LIMIT_TOP)
-    {
-        Serial.println("ERROR: TOP limit switch hit");
-    }
-
-    digitalWrite(M1, HIGH);
-    digitalWrite(M2, HIGH);
+    moveTo(10,-20);
+    delay(2000);
 }
 
 ISR(INT0_vect) { updateB(); }
