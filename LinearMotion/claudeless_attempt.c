@@ -166,8 +166,6 @@ void setup() {
 
 void loop()
 {
-    digitalWrite(M1, HIGH);
-    digitalWrite(M2, HIGH);
 
     if (!isMotor1LimitStopped())
     {
@@ -208,6 +206,9 @@ void loop()
     {
         Serial.println("ERROR: TOP limit switch hit");
     }
+
+    digitalWrite(M1, HIGH);
+    digitalWrite(M2, HIGH);
 }
 
 ISR(INT0_vect) { updateB(); }
