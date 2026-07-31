@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <avr/interrupt.h>
+#include "limitSwitch.h"
 
 // Motor A encoder pins
 const int L_ENCA = 18;   // INT3
@@ -155,18 +156,57 @@ void setup() {
     pinMode(E1, OUTPUT);
     pinMode(E2, OUTPUT);
 
+    setupLimitSwitches(E1, E2);
+
     cli();
     EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3);
     EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
     sei();
 }
 
-void loop() {
-    static bool hasMoved = false;
+void loop()
+{
+    digitalWrite(M1, HIGH);
+    digitalWrite(M2, HIGH);
 
-    if (!hasMoved) {
-        moveTo(20, -10);
-        hasMoved = true;
+    if (!isMotor1LimitStopped())
+    {
+        analogWrite(E1, 128);
+    }
+    else
+    {
+        analogWrite(E1, 0);
+    }
+
+    if (!isMotor2LimitStopped())
+    {
+        analogWrite(E2, 128);
+    }
+    else
+    {
+        analogWrite(E2, 0);
+    }
+
+    uint8_t events = getLimitEvents();
+
+    if (events & LIMIT_LEFT)
+    {
+        Serial.println("ERROR: LEFT limit switch hit");
+    }
+
+    if (events & LIMIT_RIGHT)
+    {
+        Serial.println("ERROR: RIGHT limit switch hit");
+    }
+
+    if (events & LIMIT_BOTTOM)
+    {
+        Serial.println("ERROR: BOTTOM limit switch hit");
+    }
+
+    if (events & LIMIT_TOP)
+    {
+        Serial.println("ERROR: TOP limit switch hit");
     }
 }
 
