@@ -45,7 +45,7 @@ const int8_t encTable[16] = {
 };
 
 // Left encoder reading function
-void updateA() {
+void updateLeft() {
     // Read both values from the two left encoder channels
     uint8_t a = digitalRead(L_ENCA);
     uint8_t b = digitalRead(L_ENCB);
@@ -61,7 +61,7 @@ void updateA() {
 }
 
 // Right encoder reading function
-void updateB() {
+void updateRight() {
     uint8_t a = digitalRead(R_ENCA);
     uint8_t b = digitalRead(R_ENCB);
 
@@ -96,50 +96,16 @@ long distanceToCounts(double distance_mm) {
     return (long) round(COUNTS_PER_REV * distance_mm / (2.0 * PI * WHEEL_RADIUS_MM));
 }
 
-void runAxis(double deltaA_mm, double deltaB_mm) {
-    long targetA = distanceToCounts(deltaA_mm);
-    long targetB = distanceToCounts(deltaB_mm);
+void moveToPID(double dx, double dy) {
+    long dx_enc = distanceToCounts(dx);
+    long dy_enc = distanceToCounts(dy);
 
-    long startA = countA;
-    long startB = countB;
-
-    long absTargetA = abs(targetA);
-    long absTargetB = abs(targetB);
-
-    int8_t dirA = (targetA > 0) ? 1 : (targetA < 0 ? -1 : 0);
-    int8_t dirB = (targetB > 0) ? 1 : (targetB < 0 ? -1 : 0);
-
-    bool doneA = (absTargetA == 0);
-    bool doneB = (absTargetB == 0);
-
-    long largerTarget = (absTargetA > absTargetB) ? absTargetA : absTargetB;
-    int pwmA = moveSpeed;
-    int pwmB = moveSpeed;
-    if (largerTarget > 0) {
-        pwmA = (int) round(moveSpeed * ((double) absTargetA / largerTarget));
-        pwmB = (int) round(moveSpeed * ((double) absTargetB / largerTarget));
-    }
-
-    if (!doneA) setLeftMotor(dirA, pwmA);
-    if (!doneB) setRightMotor(dirB, pwmB);
-
-    while (!doneA || !doneB) {
-
-        if (!doneA && labs(countA - startA) >= absTargetA) {
-            setLeftMotor(0, 0);
-            doneA = true;
-        }
-
-        if (!doneB && labs(countB - startB) >= absTargetB) {
-            setRightMotor(0, 0);
-            doneB = true;
-        }
-    }
+    a_target = dx_enc + dy_enc;
+    b_target = 
+    
+    
 }
 
-void moveTo(double dx, double dy) {
-    runAxis(dx + dy, dx - dy);
-}
 
 void setup() {
     Serial.begin(115200);
@@ -164,9 +130,6 @@ void setup() {
     EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3);
     EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
     sei();
-
-    moveTo(10,-20);
-    delay(2000);
 }
 
 void loop()
@@ -174,7 +137,7 @@ void loop()
  
 }
 
-ISR(INT0_vect) { updateB(); }
-ISR(INT1_vect) { updateB(); }
-ISR(INT2_vect) { updateA(); }
-ISR(INT3_vect) { updateA(); }
+ISR(INT0_vect) { updateRight(); }
+ISR(INT1_vect) { updateRight(); }
+ISR(INT2_vect) { updateLeft(); }
+ISR(INT3_vect) { updateLeft(); }
