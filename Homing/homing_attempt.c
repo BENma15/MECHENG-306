@@ -41,8 +41,6 @@ void setup() {
 }
 
 void driveUntilTopLimit() {
-    resetLimitStops();
-
     digitalWrite(M1, HIGH);
     digitalWrite(M2, LOW);
     analogWrite(E1, HOMING_PWM);
@@ -57,8 +55,6 @@ void driveUntilTopLimit() {
 }
 
 void driveUntilLeftLimit() {
-    resetLimitStops();
-
     digitalWrite(M1, LOW);
     digitalWrite(M2, LOW);
     analogWrite(E1, HOMING_PWM);
