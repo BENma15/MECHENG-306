@@ -104,58 +104,50 @@ long distanceToCounts(double distance_mm)
 
 void moveToPID(double dx, double dy, int speed)
 {
-    long a_start = countA;
-    long b_start = countB;
-
     long dx_enc = distanceToCounts(dx);
     long dy_enc = distanceToCounts(dy);
 
-    long a_move_target = dx_enc + dy_enc + a_start;
-    long b_move_target = dx_enc - dy_enc + b_start;
-    long a_move_current = a_start;
-    long b_move_current = b_start;
-
-    double theta = atan(abs(dy/dx));
+    double theta = atan2(dy, dx);
 
     double x_speed_mm_s = speed * cos(theta);
     double y_speed_mm_s = speed * sin(theta);
 
-    double a_speed_mm_s = x_speed_mm_s + y_speed_mm_s;
-    double b_speed_mm_s = x_speed_mm_s - y_speed_mm_s;
+    cli();
+    long a_start = countA;
+    long b_start = countB;
+    sei();
 
-    long a_speed_target = distanceToCounts(a_speed_mm_s);
-    long b_speed_target = distanceToCounts(b_speed_mm_s);
+    // Motor A variables
+    long a_move_target = a_start + dx_enc + dy_enc;
+    long a_move_current = a_start;
+    long a_move_prev = a_start;
+
+    double a_speed_mm_s = x_speed_mm_s + y_speed_mm_s;
+    long a_speed_target = abs(distanceToCounts(a_speed_mm_s));
+    double a_speed_current = 0.0;
+    double a_speed_error = 0.0;
+    int a_pwm = 0;
+
+    // Motor B variables
+    long b_move_target = b_start + dx_enc - dy_enc;
+    long b_move_current = b_start;
+    long b_move_prev = b_start;
+
+    double b_speed_mm_s = x_speed_mm_s - y_speed_mm_s;
+    long b_speed_target = abs(distanceToCounts(b_speed_mm_s));
+    double b_speed_current = 0.0;
+    double b_speed_error = 0.0;
+    int b_pwm = 0;
 
     long tolerance = 10;
-    long period = 10; //milliseconds
+    const unsigned long period = 10; // milliseconds
 
     int8_t a_direction = 0;
     int8_t b_direction = 0;
 
-    long prev_time = millis();
+    unsigned long prev_time = millis();
 
-    if (a_move_target > a_move_current)
-    {
-        a_direction = 1;
-    }
-    else if (a_move_target < a_move_current)
-    {
-        a_direction = -1;
-    }
-
-    if (b_move_target > b_move_current)
-    {
-        b_direction = 1;
-    }
-    else if (b_move_target < b_move_current)
-    {
-        b_direction = -1;
-    }
- 
-    //introduce velocity gradient here to avoid sudden acceleration
-    while(){
-
-    }
+    // introduce velocity gradient here to avoid sudden acceleration
 
     while (abs(a_move_target - a_move_current) > tolerance ||
            abs(b_move_target - b_move_current) > tolerance)
@@ -165,17 +157,90 @@ void moveToPID(double dx, double dy, int speed)
         b_move_current = countB;
         sei();
 
-        if(millis() - prev_time > period){
-            double time_elapsed = (millis() - prev_time) / 1000.0; //seconds
-            prev_time = millis();
+        unsigned long current_time = millis();
+        unsigned long elapsed_ms = current_time - prev_time;
+        
+        // velocity calculator
+        if (elapsed_ms >= period)
+        {
+
+            double time_elapsed = elapsed_ms / 1000.0; // seconds
+            prev_time = current_time;
+
+            a_speed_current = fabs((a_move_current - a_move_prev) / time_elapsed);
+            b_speed_current = fabs((b_move_current - b_move_prev) / time_elapsed);
+            a_move_prev = a_move_current;
+            b_move_prev = b_move_current;
+
+            a_speed_error = a_speed_target - a_speed_current;
+            b_speed_error = b_speed_target - b_speed_current;
         }
 
-        setLeftMotor(a_direction, a_speed_target);
-        setRightMotor(b_direction, b_speed_target);
+        a_pwm = constrain((int)(a_speed_error * 0.02), 0, 255);
+        b_pwm = constrain((int)(b_speed_error * 0.02), 0, 255);
 
+        bool a_finished = false;
+
+        if (a_move_target > a_move_current)
+        {
+            a_direction = 1;
+        }
+        else if (a_move_target < a_move_current)
+        {
+            a_direction = -1;
+        }
+
+        if (b_move_target > b_move_current)
+        {
+            b_direction = 1;
+        }
+        else if (b_move_target < b_move_current)
+        {
+            b_direction = -1;
+        }
+
+        if (abs(a_move_target - a_move_current) <= tolerance)
+        {
+            a_finished = true;
+        }
+        else
+        {
+            a_finished = false;
+        }
+
+        bool b_finished = false;
+        if (abs(b_move_target - b_move_current) <= tolerance)
+        {
+            b_finished = true;
+        }
+        else
+        {
+            b_finished = false;
+        }
+
+        if (a_finished)
+        {
+            setLeftMotor(0, 0);
+        }
+        else
+        {
+            setLeftMotor(a_direction, a_pwm);
+        }
+
+        if (b_finished)
+        {
+            setRightMotor(0, 0);
+        }
+        else
+        {
+            setRightMotor(b_direction, b_pwm);
+        }
     }
 
-    //introduce velocity gradient here to avoid sudden deceleration
+    // introduce velocity gradient here to avoid sudden deceleration
+
+    setLeftMotor(0, 0);
+    setRightMotor(0, 0);
 }
 
 void setup()
@@ -206,6 +271,7 @@ void setup()
 
 void loop()
 {
+    moveToPID(10, 20, 20);
 }
 
 ISR(INT0_vect) { updateRight(); }
