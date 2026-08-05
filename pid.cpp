@@ -104,13 +104,16 @@ long distanceToCounts(double distance_mm)
 
 void moveToPID(double dx, double dy, int speed)
 {
+    long a_start = countA;
+    long b_start = countB;
+
     long dx_enc = distanceToCounts(dx);
     long dy_enc = distanceToCounts(dy);
 
-    long a_target = dx_enc + dy_enc;
-    long b_target = dx_enc - dy_enc;
-    long a_current = countA;
-    long b_current = countB;
+    long a_move_target = dx_enc + dy_enc + a_start;
+    long b_move_target = dx_enc - dy_enc + b_start;
+    long a_move_current = a_start;
+    long b_move_current = b_start;
 
     double theta = atan(abs(dy/dx));
 
@@ -120,21 +123,59 @@ void moveToPID(double dx, double dy, int speed)
     double a_speed_mm_s = x_speed_mm_s + y_speed_mm_s;
     double b_speed_mm_s = x_speed_mm_s - y_speed_mm_s;
 
-    long a_speed = distanceToCounts(a_speed_mm_s);
-    long b_speed = distanceToCounts(b_speed_mm_s);
+    long a_speed_target = distanceToCounts(a_speed_mm_s);
+    long b_speed_target = distanceToCounts(b_speed_mm_s);
 
-    const long tolerance = 10;
+    long tolerance = 10;
+    long period = 10; //milliseconds
 
-    while (abs(a_target - a_current) > tolerance ||
-           abs(b_target - b_current) > tolerance)
+    int8_t a_direction = 0;
+    int8_t b_direction = 0;
+
+    long prev_time = millis();
+
+    if (a_move_target > a_move_current)
+    {
+        a_direction = 1;
+    }
+    else if (a_move_target < a_move_current)
+    {
+        a_direction = -1;
+    }
+
+    if (b_move_target > b_move_current)
+    {
+        b_direction = 1;
+    }
+    else if (b_move_target < b_move_current)
+    {
+        b_direction = -1;
+    }
+ 
+    //introduce velocity gradient here to avoid sudden acceleration
+    while(){
+
+    }
+
+    while (abs(a_move_target - a_move_current) > tolerance ||
+           abs(b_move_target - b_move_current) > tolerance)
     {
         cli();
-        a_current = countA;
-        b_current = countB;
+        a_move_current = countA;
+        b_move_current = countB;
         sei();
-        setLeftMotor();
-        setRightMotor();
+
+        if(millis() - prev_time > period){
+            double time_elapsed = (millis() - prev_time) / 1000.0; //seconds
+            prev_time = millis();
+        }
+
+        setLeftMotor(a_direction, a_speed_target);
+        setRightMotor(b_direction, b_speed_target);
+
     }
+
+    //introduce velocity gradient here to avoid sudden deceleration
 }
 
 void setup()
