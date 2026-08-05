@@ -34,9 +34,11 @@ void tokenise(String line) {
     
     if (Gpos != -1 && Mpos != -1) {
         //error (command contains G AND M)
+        Serial.println("Invalid Gcode: Command contains G and M");    // error message
         return;
     } else if (Gpos == -1 && Mpos == -1) {
         //error (No G or M command)
+        Serial.println("Invalid Gcode: Command does not contain G nor M");    // error message
         return;
     } else if (Gpos == -1 && Mpos != -1) {
         // command is M999
@@ -107,7 +109,7 @@ void tokenise(String line) {
 
             if (!xToken && !yToken) {       // check that there is either an X or Y component
                 // error (G01 command with no X and no Y)       <------------------------ state change?
-                Serial.println("Error: G01 command called with no X or Y coordinates");    // error message
+                Serial.println("Error: G01 command called with no X nor Y coordinates");    // error message
                 return;
             }
 
