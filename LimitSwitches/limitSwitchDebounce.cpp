@@ -1,10 +1,10 @@
 #include "limitSwitchDebounce.h"
 #include <avr/interrupt.h>
 
-const int LEFT_LIMIT_PIN = 13;
-const int RIGHT_LIMIT_PIN = 12;
-const int TOP_LIMIT_PIN = 10;
-const int BOTTOM_LIMIT_PIN = 11;
+const int LEFT_LIMIT_PIN = 12;
+const int RIGHT_LIMIT_PIN = 13;
+const int TOP_LIMIT_PIN = 11;
+const int BOTTOM_LIMIT_PIN = 10;
 
 const unsigned long DEBOUNCE_TIME_MS = 10;
 

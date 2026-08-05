@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <avr/interrupt.h>
-#include "limitSwitch.h"
 
 #include "motion.h"
+#include "limitSwitchDebounce.h"
 
 // Motor A encoder pins
 const int L_ENCA = 18;   // INT3
@@ -10,12 +10,6 @@ const int L_ENCB = 19;   // INT2
 // Motor B encoder pins
 const int R_ENCA = 20;   // INT1
 const int R_ENCB = 21;   // INT0
-
-// Limit switch pins
-const int L_LIMIT = 13;
-const int R_LIMIT = 12;
-const int U_LIMIT = 10;
-const int D_LIMIT = 11;
 
 // Motors pins
 const int E1 = 5;
@@ -141,35 +135,21 @@ void moveTo(double dx, double dy) {
     runAxis(dx + dy, dx - dy);
 }
 
-void setup() {
-    Serial.begin(115200);
+void setupMotion() {
     pinMode(L_ENCA, INPUT_PULLUP);
     pinMode(L_ENCB, INPUT_PULLUP);
     pinMode(R_ENCA, INPUT_PULLUP);
     pinMode(R_ENCB, INPUT_PULLUP);
-
-    pinMode(L_LIMIT, INPUT_PULLUP);
-    pinMode(R_LIMIT, INPUT_PULLUP);
-    pinMode(U_LIMIT, INPUT_PULLUP);
-    pinMode(D_LIMIT, INPUT_PULLUP);
 
     pinMode(M1, OUTPUT);
     pinMode(M2, OUTPUT);
     pinMode(E1, OUTPUT);
     pinMode(E2, OUTPUT);
 
-    setupLimitSwitches(E1, E2);
-
     cli();
     EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3);
     EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
     sei();
-}
-
-void loop()
-{
-    moveTo(10,-20);
-    delay(2000);
 }
 
 ISR(INT0_vect) { updateB(); }

@@ -96,14 +96,26 @@ long distanceToCounts(double distance_mm) {
     return (long) round(COUNTS_PER_REV * distance_mm / (2.0 * PI * WHEEL_RADIUS_MM));
 }
 
-void moveToPID(double dx, double dy) {
+void moveToPID(double dx, double dy, int speed) {
     long dx_enc = distanceToCounts(dx);
     long dy_enc = distanceToCounts(dy);
 
-    a_target = dx_enc + dy_enc;
-    b_target = 
-    
-    
+    long a_target = dx_enc + dy_enc;
+    long b_target = dx_enc - dy_enc;
+    long a_current; 
+    long b_current;
+
+    long angle = atan2(dy, dx);
+
+    long a_speed = 0;
+    long b_speed = 0;
+
+    while(a_current != a_target || b_current != b_target) {
+        a_current = countA;
+        b_current = countB;
+        a
+
+    }
 }
 
 
