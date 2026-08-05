@@ -5,11 +5,11 @@
 #include "motion.h"
 
 // Motor A encoder pins
-const int L_ENCA = 18;   // INT3
-const int L_ENCB = 19;   // INT2
+const int L_ENCA = 18; // INT3
+const int L_ENCB = 19; // INT2
 // Motor B encoder pins
-const int R_ENCA = 20;   // INT1
-const int R_ENCB = 21;   // INT0
+const int R_ENCA = 20; // INT1
+const int R_ENCB = 21; // INT0
 
 // Limit switch pins
 const int L_LIMIT = 13;
@@ -38,14 +38,14 @@ int moveSpeed = 150;
 
 // Predetermined tables to see which way the motor is spinning
 const int8_t encTable[16] = {
-    0, -1, +1,  0,
-    +1,  0,  0, -1,
-    -1,  0,  0, +1,
-    0, +1, -1,  0
-};
+    0, -1, +1, 0,
+    +1, 0, 0, -1,
+    -1, 0, 0, +1,
+    0, +1, -1, 0};
 
 // Left encoder reading function
-void updateLeft() {
+void updateLeft()
+{
     // Read both values from the two left encoder channels
     uint8_t a = digitalRead(L_ENCA);
     uint8_t b = digitalRead(L_ENCB);
@@ -61,7 +61,8 @@ void updateLeft() {
 }
 
 // Right encoder reading function
-void updateRight() {
+void updateRight()
+{
     uint8_t a = digitalRead(R_ENCA);
     uint8_t b = digitalRead(R_ENCB);
 
@@ -72,9 +73,11 @@ void updateRight() {
 }
 
 // Left motor movement
-void setLeftMotor(int8_t dir, int pwm) {
-    // 
-    if (dir == 0) {
+void setLeftMotor(int8_t dir, int pwm)
+{
+    //
+    if (dir == 0)
+    {
         analogWrite(E1, 0);
         return;
     }
@@ -83,8 +86,10 @@ void setLeftMotor(int8_t dir, int pwm) {
 }
 
 // Right motor movement
-void setRightMotor(int8_t dir, int pwm) {
-    if (dir == 0) {
+void setRightMotor(int8_t dir, int pwm)
+{
+    if (dir == 0)
+    {
         analogWrite(E2, 0);
         return;
     }
@@ -92,34 +97,48 @@ void setRightMotor(int8_t dir, int pwm) {
     analogWrite(E2, pwm);
 }
 
-long distanceToCounts(double distance_mm) {
-    return (long) round(COUNTS_PER_REV * distance_mm / (2.0 * PI * WHEEL_RADIUS_MM));
+long distanceToCounts(double distance_mm)
+{
+    return (long)round(COUNTS_PER_REV * distance_mm / (2.0 * PI * WHEEL_RADIUS_MM));
 }
 
-void moveToPID(double dx, double dy, int speed) {
+void moveToPID(double dx, double dy, int speed)
+{
     long dx_enc = distanceToCounts(dx);
     long dy_enc = distanceToCounts(dy);
 
     long a_target = dx_enc + dy_enc;
     long b_target = dx_enc - dy_enc;
-    long a_current; 
-    long b_current;
+    long a_current = countA;
+    long b_current = countB;
 
-    long angle = atan2(dy, dx);
+    double theta = atan(abs(dy/dx));
 
-    long a_speed = 0;
-    long b_speed = 0;
+    double x_speed_mm_s = speed * cos(theta);
+    double y_speed_mm_s = speed * sin(theta);
 
-    while(a_current != a_target || b_current != b_target) {
+    double a_speed_mm_s = x_speed_mm_s + y_speed_mm_s;
+    double b_speed_mm_s = x_speed_mm_s - y_speed_mm_s;
+
+    long a_speed = distanceToCounts(a_speed_mm_s);
+    long b_speed = distanceToCounts(b_speed_mm_s);
+
+    const long tolerance = 10;
+
+    while (abs(a_target - a_current) > tolerance ||
+           abs(b_target - b_current) > tolerance)
+    {
+        cli();
         a_current = countA;
         b_current = countB;
-        a
-
+        sei();
+        setLeftMotor();
+        setRightMotor();
     }
 }
 
-
-void setup() {
+void setup()
+{
     Serial.begin(115200);
     pinMode(L_ENCA, INPUT_PULLUP);
     pinMode(L_ENCB, INPUT_PULLUP);
@@ -146,7 +165,6 @@ void setup() {
 
 void loop()
 {
- 
 }
 
 ISR(INT0_vect) { updateRight(); }
