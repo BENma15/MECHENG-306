@@ -33,9 +33,6 @@ volatile uint8_t stateB = 0;
 const double COUNTS_PER_REV = 8256.0;
 const double WHEEL_RADIUS_MM = 8.0;
 
-// Current movement speed (TO BE CHANGED)
-int moveSpeed = 150;
-
 // Predetermined tables to see which way the motor is spinning
 const int8_t encTable[16] = {
     0, -1, +1, 0,
@@ -104,12 +101,15 @@ long distanceToCounts(double distance_mm)
 
 void moveToPID(double dx, double dy, int speed)
 {
-    double kp = 0.02; // Proportional gain for PID controller
-    double ki = 0.001; // Integral gain for PID controller
+    double kp = 0.01; 
+    double ki = 0.001; 
+    double kd = 0.0001; 
 
-    long a_integral_error = 0;
-    long b_integral_error = 0;
+    double a_integral_error = 0;
+    double b_integral_error = 0;
 
+    double a_derivative_error = 0;
+    double b_derivative_error = 0;
 
     long dx_enc = distanceToCounts(dx);
     long dy_enc = distanceToCounts(dy);
@@ -133,6 +133,7 @@ void moveToPID(double dx, double dy, int speed)
     long a_speed_target = abs(distanceToCounts(a_speed_mm_s));
     double a_speed_current = 0.0;
     double a_speed_error = 0.0;
+    double a_speed_prev = 0.0;
     int a_pwm = 0;
 
     // Motor B variables
@@ -144,6 +145,7 @@ void moveToPID(double dx, double dy, int speed)
     long b_speed_target = abs(distanceToCounts(b_speed_mm_s));
     double b_speed_current = 0.0;
     double b_speed_error = 0.0;
+    double b_speed_prev = 0.0;
     int b_pwm = 0;
 
     long tolerance = 10;
@@ -166,32 +168,40 @@ void moveToPID(double dx, double dy, int speed)
 
         unsigned long current_time = millis();
         unsigned long elapsed_ms = current_time - prev_time;
-        
-        // velocity calculator
+
         if (elapsed_ms >= period)
         {
-            double time_elapsed = elapsed_ms / 1000.0; // seconds
+            double elapsed_seconds = elapsed_ms / 1000.0; // seconds
             prev_time = current_time;
+              
+            a_speed_prev = a_speed_current;
+            b_speed_prev = b_speed_current;
 
-            a_speed_current = fabs((a_move_current - a_move_prev) / time_elapsed);
-            b_speed_current = fabs((b_move_current - b_move_prev) / time_elapsed);
+            a_speed_current = fabs((a_move_current - a_move_prev) / elapsed_seconds);
+            b_speed_current = fabs((b_move_current - b_move_prev) / elapsed_seconds);
+
             a_move_prev = a_move_current;
             b_move_prev = b_move_current;
+
 
             a_speed_error = a_speed_target - a_speed_current;
             b_speed_error = b_speed_target - b_speed_current;
 
-            a_integral_error += a_speed_error * elapsed_ms;
-            b_integral_error += b_speed_error * elapsed_ms;
+            a_integral_error = a_integral_error + a_speed_error * elapsed_seconds;
+            b_integral_error = b_integral_error + b_speed_error * elapsed_seconds;
+
+            a_derivative_error = (a_speed_current - a_speed_prev) / elapsed_seconds;
+            b_derivative_error = (b_speed_current - b_speed_prev) / elapsed_seconds;
+
+            a_pwm = a_speed_error * kp + a_integral_error * ki - a_derivative_error * kd;
+            b_pwm = b_speed_error * kp + b_integral_error * ki - b_derivative_error * kd;
+
+            a_pwm = constrain((int)(a_pwm), 0, 255);
+            b_pwm = constrain((int)(b_pwm), 0, 255);
+
+            Serial.println(a_pwm);
+            Serial.println(b_pwm);
         }
-        
-        
-        a_pwm = a_speed_error * kp + a_integral_error * ki;
-        b_pwm = b_speed_error * kp + b_integral_error * ki;
-
-
-        a_pwm = constrain((int)(a_pwm), 0, 255);
-        b_pwm = constrain((int)(b_pwm), 0, 255);
 
         bool a_finished = false;
 
@@ -285,8 +295,10 @@ void setup()
 
 void loop()
 {
-    moveToPID(-10, -40, 20);
-    delay(10000);
+    delay(1000);
+    moveToPID(30, 0, 50);
+    delay(1000);
+    moveToPID(-30, 0, 50);
 }
 
 ISR(INT0_vect) { updateRight(); }
