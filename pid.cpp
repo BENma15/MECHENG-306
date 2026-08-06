@@ -104,6 +104,13 @@ long distanceToCounts(double distance_mm)
 
 void moveToPID(double dx, double dy, int speed)
 {
+    double kp = 0.02; // Proportional gain for PID controller
+    double ki = 0.001; // Integral gain for PID controller
+
+    long a_integral_error = 0;
+    long b_integral_error = 0;
+
+
     long dx_enc = distanceToCounts(dx);
     long dy_enc = distanceToCounts(dy);
 
@@ -163,7 +170,6 @@ void moveToPID(double dx, double dy, int speed)
         // velocity calculator
         if (elapsed_ms >= period)
         {
-
             double time_elapsed = elapsed_ms / 1000.0; // seconds
             prev_time = current_time;
 
@@ -174,10 +180,18 @@ void moveToPID(double dx, double dy, int speed)
 
             a_speed_error = a_speed_target - a_speed_current;
             b_speed_error = b_speed_target - b_speed_current;
-        }
 
-        a_pwm = constrain((int)(a_speed_error * 0.02), 0, 255);
-        b_pwm = constrain((int)(b_speed_error * 0.02), 0, 255);
+            a_integral_error += a_speed_error * elapsed_ms;
+            b_integral_error += b_speed_error * elapsed_ms;
+        }
+        
+        
+        a_pwm = a_speed_error * kp + a_integral_error * ki;
+        b_pwm = b_speed_error * kp + b_integral_error * ki;
+
+
+        a_pwm = constrain((int)(a_pwm), 0, 255);
+        b_pwm = constrain((int)(b_pwm), 0, 255);
 
         bool a_finished = false;
 
@@ -271,7 +285,8 @@ void setup()
 
 void loop()
 {
-    moveToPID(10, 20, 20);
+    moveToPID(-10, -40, 20);
+    delay(10000);
 }
 
 ISR(INT0_vect) { updateRight(); }
