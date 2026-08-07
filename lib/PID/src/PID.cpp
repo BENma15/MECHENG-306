@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <avr/interrupt.h>
-#include "limitSwitch.h"
+#include <LimitSwitch.h>
 
-#include "motion.h"
+#include <Motion.h>
 
 // Motor A encoder pins
 const int L_ENCA = 18; // INT3

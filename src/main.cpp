@@ -9,13 +9,12 @@
 /* #include <GcodeToken.h> should NOT be used in main.cpp so in not included. 
 (can be inlcuded in FSM.h or other modules that need to read/edit token) */
 
-
-/* Permanent header to be included */
-/* DO NOT REMOVE */
+/* vvvv DO NOT REMOVE vvvv */
 #include <FSM.h>
+/* ^^^^ DO NOT REMOVE ^^^^ */
 
 void setup() {
-
+    
 }
 
 void loop() {
