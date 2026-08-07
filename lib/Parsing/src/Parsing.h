@@ -2,7 +2,7 @@
 #define PARSE_H
 
 #include <Arduino.h>
-#include "GcodeToken.h"
+#include <GcodeToken.h>
 
 #define G 0
 #define M 0

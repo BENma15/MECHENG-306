@@ -1,8 +1,8 @@
 #include <Arduino.h>
 
-#include "homingDiagonalAttempt.h"
-#include "limitSwitchDebounce.h"
-#include "motion.h"
+#include "HomingDiagonal.h"
+#include <LimitSwitchDebounce.h>
+#include <Motion.h>
 
 const int E1 = 5;
 const int M1 = 4;

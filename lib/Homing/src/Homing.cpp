@@ -1,7 +1,4 @@
-#include <Arduino.h>
-
-#include "limitSwitchDebounce.h"
-#include "motion.h"
+#include "Homing.h"
 
 const int E1 = 5;
 const int M1 = 4;

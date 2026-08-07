@@ -1,9 +1,12 @@
 #ifndef HELPERFUNCTIONS_H
 #define HELPERFUNCTIONS_H
 
-#define PI 3.1415926535897932384626433832795
+#include <Arduino.h>
+
+extern const double COUNTS_PER_REV;;
+extern const double WHEEL_RADIUS_MM;
 
 long distanceToCounts(double distance_mm);
-double countsToDistance(long counts);
+// double countsToDistance(long counts);
 
 #endif
