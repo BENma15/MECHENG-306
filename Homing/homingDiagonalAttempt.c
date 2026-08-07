@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "homingDiagonalAttempt.h"
 #include "limitSwitchDebounce.h"
 #include "motion.h"
 
@@ -13,7 +14,7 @@ const int HOMING_PWM = 150;
 bool hasHomed = false;
 bool hasPulledOff = false;
 
-void setup() {
+void setupHoming() {
     Serial.begin(115200);
     setupMotion();
     setupLimitSwitches();
@@ -65,7 +66,7 @@ void driveUntilTopAndLeftLimits() {
     analogWrite(E2, 0);
 }
 
-void loop() {
+void homeMachine() {
     if (!hasHomed) {
         driveUntilTopAndLeftLimits();
         hasHomed = true;
