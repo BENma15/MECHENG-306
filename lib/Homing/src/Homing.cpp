@@ -12,8 +12,7 @@ bool hasBouncedDown = false;
 bool hasMovedLeft = false;
 bool hasBouncedRight = false;
 
-void setup() {
-    Serial.begin(115200);
+void homing_init() {
     setupMotion();
     setupLimitSwitches();
 }
