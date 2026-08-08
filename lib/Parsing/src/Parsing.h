@@ -19,7 +19,6 @@ extern GcodeToken TokenArray[MAX_TOKENS];  // index 0 = G/M, 1 = X, 2 = Y, 3 = F
 void initialiseTokenArray(void);    // to be called in setup() in .ino
 void readLine(void);
 void tokenise(String Line);
-void resetArray(void);
 String returnToken(String line, char Letter);
 String tidyString(String line);
 

@@ -135,7 +135,7 @@ void moveTo(double dx, double dy) {
     runAxis(dx + dy, dx - dy);
 }
 
-void setupMotion() {
+void MotionInit() {
     pinMode(L_ENCA, INPUT_PULLUP);
     pinMode(L_ENCB, INPUT_PULLUP);
     pinMode(R_ENCA, INPUT_PULLUP);

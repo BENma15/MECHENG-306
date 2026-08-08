@@ -1,4 +1,4 @@
-#include "motor_move.h"
+#include "MotorMove.h"
 
 namespace {
 MotorMoveConfig g_config = {4, 5, 6, 7, 50, 500};

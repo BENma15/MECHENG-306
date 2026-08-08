@@ -14,9 +14,8 @@ const int HOMING_PWM = 150;
 bool hasHomed = false;
 bool hasPulledOff = false;
 
-void setupHoming() {
-    Serial.begin(115200);
-    setupMotion();
+void homingDiagonalInit() {
+    MotionInit();
     setupLimitSwitches();
 }
 

@@ -267,7 +267,7 @@ void moveToPID(double dx, double dy, int speed)
     setRightMotor(0, 0);
 }
 
-void setup()
+void PID_Init()
 {
     Serial.begin(115200);
     pinMode(L_ENCA, INPUT_PULLUP);
@@ -293,7 +293,7 @@ void setup()
     sei();
 }
 
-void loop()
+void testlLoop()
 {
     delay(1000);
     moveToPID(30, 0, 50);

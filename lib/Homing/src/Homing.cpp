@@ -12,7 +12,7 @@ bool hasBouncedDown = false;
 bool hasMovedLeft = false;
 bool hasBouncedRight = false;
 
-void homing_init() {
+void homingInit() {
     setupMotion();
     setupLimitSwitches();
 }
@@ -53,7 +53,7 @@ void driveUntilLeftLimit() {
     }
 }
 
-void loop() {
+void testLoop() {
     if (!hasMovedUp) {
         driveUntilTopLimit();
         hasMovedUp = true;
