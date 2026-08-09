@@ -4,6 +4,11 @@
 #include <Arduino.h>
 #include <avr/interrupt.h>
 
+const long Y_MAX = 20000;   // Encoder counts from homed to Y top limit switch. ****************************** TO BE MEASURED
+const long Y_MIN = 0;
+const long X_MAX = 20000;   // Encoder counts from homed to X right limit Switch.
+const long X_MIN = 0;
+
 // Left Motor Encoder Pins
 extern const int L_ENCA; // INT3
 extern const int L_ENCB; // INT2

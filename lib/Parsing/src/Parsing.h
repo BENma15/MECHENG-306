@@ -10,20 +10,13 @@
 #define Y 2
 #define F 3
 
-/* global variables */
-extern String inputBuffer;
-extern GcodeToken TokenArray[MAX_TOKENS];  // index 0 = G/M, 1 = X, 2 = Y, 3 = F
-
-
 /* Functions */
 void initialiseTokenArray(void);    // to be called in setup() in .ino
-void readLine(void);
-void tokenise(String Line);
+int readLine(void); // returns 0 if function succesfully reads a valid token/s, returns 1 if not
+int tokenise(String Line);  // return 1 if token invalid. error messages printed by function.
 String returnToken(String line, char Letter);
 String tidyString(String line);
-
-
-
-
+GcodeToken Parsing_getToken(int index);
+void resetTokenArray();
 
 #endif
