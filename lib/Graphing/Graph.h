@@ -1,10 +1,14 @@
 #ifndef GRAPH_H
 #define GRAPH_H
-#include <vector>
 
-extern std::vector<long> data;
-extern std::vector<long> time;
+const int MAX_SAMPLES = 500;
 
-void addDataPoint(long dataPoint, long timePoint);
+extern long data[MAX_SAMPLES];
+extern unsigned int timeData[MAX_SAMPLES];
+extern int sampleIndex;
+
+void addDataPoint(long dataPoint, unsigned int timePoint);
+void exportData();
+void clearData();
 
 #endif
