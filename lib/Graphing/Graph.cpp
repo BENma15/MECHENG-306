@@ -1,4 +1,5 @@
 #include "Graph.h"
+#include <Arduino.h>
 
 const int MAX_SAMPLES = 500;
 
