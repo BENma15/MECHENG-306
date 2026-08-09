@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include <avr/interrupt.h>
 
-#include "motion.h"
-#include "limitSwitchDebounce.h"
+#include <Motion.h>
+#include <LimitSwitchDebounce.h>
 
 // Motor A encoder pins
 const int L_ENCA = 18;   // INT3
@@ -135,7 +135,7 @@ void moveTo(double dx, double dy) {
     runAxis(dx + dy, dx - dy);
 }
 
-void setupMotion() {
+void MotionInit() {
     pinMode(L_ENCA, INPUT_PULLUP);
     pinMode(L_ENCB, INPUT_PULLUP);
     pinMode(R_ENCA, INPUT_PULLUP);

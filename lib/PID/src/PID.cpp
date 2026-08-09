@@ -1,8 +1,10 @@
 #include <Arduino.h>
 #include <avr/interrupt.h>
-#include "limitSwitch.h"
+#include <LimitSwitch.h>
 
-#include "motion.h"
+#include <Motion.h>
+
+#include <Encoder.h>
 
 // Motor A encoder pins
 const int L_ENCA = 18; // INT3
@@ -267,13 +269,7 @@ void moveToPID(double dx, double dy, int speed)
     setRightMotor(0, 0);
 }
 
-void setup()
-{
-    Serial.begin(115200);
-    pinMode(L_ENCA, INPUT_PULLUP);
-    pinMode(L_ENCB, INPUT_PULLUP);
-    pinMode(R_ENCA, INPUT_PULLUP);
-    pinMode(R_ENCB, INPUT_PULLUP);
+void PID_Init() {
 
     pinMode(L_LIMIT, INPUT_PULLUP);
     pinMode(R_LIMIT, INPUT_PULLUP);
@@ -287,21 +283,12 @@ void setup()
 
     setupLimitSwitches(E1, E2);
 
-    cli();
-    EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3);
-    EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
-    sei();
 }
 
-void loop()
+void testlLoop()
 {
     delay(1000);
     moveToPID(30, 0, 50);
     delay(1000);
     moveToPID(-30, 0, 50);
 }
-
-ISR(INT0_vect) { updateRight(); }
-ISR(INT1_vect) { updateRight(); }
-ISR(INT2_vect) { updateLeft(); }
-ISR(INT3_vect) { updateLeft(); }

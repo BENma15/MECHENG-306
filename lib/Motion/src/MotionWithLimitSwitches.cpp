@@ -162,10 +162,8 @@ void moveTo(double dx, double dy)
     runAxis(dx + dy, dx - dy);
 }
 
-void setup()
-{
-    Serial.begin(115200);
-
+void MWLS_Init() {
+    
     pinMode(L_ENCA, INPUT_PULLUP);
     pinMode(L_ENCB, INPUT_PULLUP);
     pinMode(R_ENCA, INPUT_PULLUP);
@@ -196,8 +194,7 @@ void setup()
     sei();
 }
 
-void loop()
-{
+void testLoop() {
     uint8_t event = getLimitEvents();
 
     if (event & LIMIT_LEFT)

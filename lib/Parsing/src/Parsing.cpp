@@ -1,7 +1,8 @@
-#include "parse.h"
+#include "Parsing.h"
 
 String inputBuffer = "";
 GcodeToken TokenArray[MAX_TOKENS];
+
 
 /* inintialise tokenArray */
 void initialiseTokenArray(void) {
@@ -11,21 +12,30 @@ void initialiseTokenArray(void) {
     TokenArray[F].Set("F0");
 }
 
+
 /* reads line from arduino serial buffer into input buffer */
-void readLine(void) {
-    while(Serial.available()) {  // Serial.available() returns how many characters are waiting to be read in the arduinos serial buffer 
+int readLine(void) {
+
+    int flag = 1;   // set to 0 when tokensise gets called
+    int validCommand = 1;   // invalid by default
+
+    while(Serial.available() && flag) {  // Serial.available() returns how many characters are waiting to be read in the arduinos serial buffer 
+
         char c = Serial.read();  // pulls the first (character) from the buffer
+
         if (c == '\n' || c == ';') {
-            tokenise(inputBuffer); // when new line character is reahced send input buffer to parseGcode function
+            flag = 0;
+            validCommand = tokenise(inputBuffer); // when new line character is reahced send input buffer to parseGcode function
             inputBuffer = "";   // reset buffer
         } else {
             inputBuffer += c;
         }
     }
+    return validCommand;    // 0 if successful, 1 if not
 }
 
 
-void tokenise(String line) {
+int tokenise(String line) {
     line = tidyString(line);   // remove spaces and make uppercase
     bool xToken = true, yToken = true;  // assuming there is an X and Y token
 
@@ -35,11 +45,11 @@ void tokenise(String line) {
     if (Gpos != -1 && Mpos != -1) {
         //error (command contains G AND M)
         Serial.println("Invalid Gcode: Command contains G and M");    // error message
-        return;
+        return 1;
     } else if (Gpos == -1 && Mpos == -1) {
         //error (No G or M command)
         Serial.println("Invalid Gcode: Command does not contain G nor M");    // error message
-        return;
+        return 1;
     } else if (Gpos == -1 && Mpos != -1) {
         // command is M999
 
@@ -47,16 +57,15 @@ void tokenise(String line) {
         if (token == "ERROR") {
             // error (no value)
             Serial.println("Invalid Gcode: no digits after M");    // error message
-            return;
+            return 1;
         }
         if (token.substring(1).toInt() != 999) {
             // Error (not 999 command)
             Serial.println("Invalid Gcode: Incorrect digits following M");    // error message
-            return;
+            return 1;
         }
         TokenArray[M].Set(token);
-        // state change??                                   <---------------------- state change?
-        return;
+        return 0;   // Valid token
 
     } else if (Mpos == -1 && Gpos != -1) {
         // Command is either G01 or G28
@@ -65,19 +74,18 @@ void tokenise(String line) {
         if (token == "ERROR") {
             // error (no value)
             Serial.println("Invalid Gcode: no digits after G");    // error message
-            return;
+            return 1;
         }
         int check = token.substring(1).toInt();
 
         if (check != 1 && check != 28) {
             // Error (no 01 or 28 command)
             Serial.println("Invalid Gcode: Incorrect digits following G");    // error message
-            return;
+            return 1;
 
         } else if (check == 28) {
             TokenArray[G].Set(token);
-            // state change??                              <---------------------- state change?
-            return;
+            return 0;
         } else {    // check == 01
             TokenArray[G].Set(token);
 
@@ -85,7 +93,7 @@ void tokenise(String line) {
             if (token == "ERROR") {
                 // error (no value)
                 Serial.println("Invalid Gcode: no digits after X");    // error message
-                return;
+                return 1;
             } else if (token != "NoToken") {
                 TokenArray[X].Set(token);
                 xToken = true;
@@ -94,11 +102,11 @@ void tokenise(String line) {
             }
 
 
-            token = returnToken(line, 'Y');     // gets toke for Y
+            token = returnToken(line, 'Y');     // gets token for Y
             if (token == "ERROR") {
                 // error (no value)
                 Serial.println("Invalid Gcode: no digits after Y");    // error message
-                return;
+                return 1;
             } else if (token != "NoToken") {
                 TokenArray[Y].Set(token);
                 yToken = true;
@@ -108,22 +116,24 @@ void tokenise(String line) {
 
 
             if (!xToken && !yToken) {       // check that there is either an X or Y component
-                // error (G01 command with no X and no Y)       <------------------------ state change?
+                // error (G01 command with no X and no Y)
                 Serial.println("Error: G01 command called with no X nor Y coordinates");    // error message
-                return;
+                return 1;
             }
 
             token = returnToken(line, 'F');     // gets token for F
             if (token == "ERROR") {
                 // error (no value)
                 Serial.println("Invalid Gcode: no digits after F");    // error message
-                return;
+                return 1;
             } else if (token != "NoToken") {       // if no F is present remains unchanged
                 TokenArray[F].Set(token);
             }
+            return 0;
         }
     }
 }
+
 
 String returnToken(String line, char Letter) {
     int letterPos = line.indexOf(Letter); 
@@ -142,9 +152,23 @@ String returnToken(String line, char Letter) {
     return token;
 }
 
+
 String tidyString(String line) {
     line.trim();
     line.toUpperCase();  // any lowercase letters taken to upper
     line.replace(" ", "");  // removes spaces between tokens
     return line;
+}
+
+
+GcodeToken Parsing_getToken(int index) {
+    return TokenArray[index];
+}
+
+
+void resetTokenArray() {
+    TokenArray[G].Set("G0");
+    TokenArray[X].Set("X0");
+    TokenArray[Y].Set("Y0");
+    // F token remains as it was in the previous intruction.
 }

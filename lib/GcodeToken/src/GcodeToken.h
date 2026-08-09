@@ -15,18 +15,7 @@ class GcodeToken {
     void Set(String token);                     // Set the token
     char GetLetter() { return letter_; }        // Getter for letter
     int GetValue() { return value_; }           // Getter for value
-    bool CheckIfValid();                        // check token is valid i.e doesnt go out of bounds
+    //bool CheckIfValid();                        // check token is valid i.e doesnt go out of bounds
 
 };
-
-void GcodeToken::Set(String token) {
-    letter_ = token[0];                   // gets letter of instruction
-    value_ = token.substring(1).toInt();  // converts number after letter to integer
-}
-
-bool GcodeToken::CheckIfValid() {
-
-}
-
-
 #endif

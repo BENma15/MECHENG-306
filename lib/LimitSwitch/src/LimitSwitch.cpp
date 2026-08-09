@@ -1,4 +1,4 @@
-#include "limitSwitch.h"
+#include "LimitSwitch.h"
 #include <avr/interrupt.h>
 
 const uint8_t LEFT_LIMIT_PIN   = 10;  // PB4 / PCINT4

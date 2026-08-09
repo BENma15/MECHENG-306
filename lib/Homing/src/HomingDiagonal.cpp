@@ -1,8 +1,8 @@
 #include <Arduino.h>
 
-#include "homingDiagonalAttempt.h"
-#include "limitSwitchDebounce.h"
-#include "motion.h"
+#include "HomingDiagonal.h"
+#include <LimitSwitchDebounce.h>
+#include <Motion.h>
 
 const int E1 = 5;
 const int M1 = 4;
@@ -14,9 +14,8 @@ const int HOMING_PWM = 150;
 bool hasHomed = false;
 bool hasPulledOff = false;
 
-void setupHoming() {
-    Serial.begin(115200);
-    setupMotion();
+void homingDiagonalInit() {
+    MotionInit();
     setupLimitSwitches();
 }
 

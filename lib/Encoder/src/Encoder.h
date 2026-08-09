@@ -1,0 +1,30 @@
+#ifndef ENCODER_H
+#define ENCODER_H
+
+#include <Arduino.h>
+#include <avr/interrupt.h>
+
+const long Y_MAX = 20000;   // Encoder counts from homed to Y top limit switch. ****************************** TO BE MEASURED
+const long Y_MIN = 0;
+const long X_MAX = 20000;   // Encoder counts from homed to X right limit Switch.
+const long X_MIN = 0;
+
+// Left Motor Encoder Pins
+extern const int L_ENCA; // INT3
+extern const int L_ENCB; // INT2
+
+// Right Motor eEncoder Pins
+extern const int R_ENCA; // INT1
+extern const int R_ENCB; // INT0
+
+// Current Encoder Counts
+extern volatile long leftEncoderCount;
+extern volatile long rightEncoderCount;
+
+void Encoder_Init();
+void Encoder_updateLeft();
+void Encoder_updateRight();
+long Encoder_getLeftEncoderCount();
+long Encoder_getRightEncoderCount();
+
+#endif

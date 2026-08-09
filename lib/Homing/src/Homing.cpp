@@ -1,7 +1,4 @@
-#include <Arduino.h>
-
-#include "limitSwitchDebounce.h"
-#include "motion.h"
+#include "Homing.h"
 
 const int E1 = 5;
 const int M1 = 4;
@@ -15,8 +12,7 @@ bool hasBouncedDown = false;
 bool hasMovedLeft = false;
 bool hasBouncedRight = false;
 
-void setup() {
-    Serial.begin(115200);
+void homingInit() {
     setupMotion();
     setupLimitSwitches();
 }
@@ -57,7 +53,7 @@ void driveUntilLeftLimit() {
     }
 }
 
-void loop() {
+void testLoop() {
     if (!hasMovedUp) {
         driveUntilTopLimit();
         hasMovedUp = true;

@@ -1,4 +1,4 @@
-#include "limitSwitchDebounce.h"
+#include "LimitSwitchDebounce.h"
 #include <avr/interrupt.h>
 
 const int LEFT_LIMIT_PIN = 12;
