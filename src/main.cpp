@@ -3,6 +3,7 @@
 #include <HelperFunctions.h>
 #include <HomingDiagonal.h>
 #include <LimitSwitch.h>    
+#include <PID.cpp>
 // #include <LimitSwitchDebounce.h> should only be used by LimitSwitch.h so is not included
 #include <Motion.h>
 #include <Parsing.h>
@@ -19,7 +20,8 @@ void setup() {
     Serial.begin(115200);   // no other file should contain this line 
 
     /* insert initialisation functions below  */
-    
+    Encoder_Init();
+    PID_Init();
     
     // ^^^^^ (not to be kept in final version)
 
@@ -28,5 +30,5 @@ void setup() {
 
 
 void loop() {
-
+    testlLoop();
 }
