@@ -131,7 +131,32 @@ void setup() {
 }
 
 int velocityProfile () {
-
+    double V1 = 0.5 * J * T1 * T1;
+    double V2 = J * T1 * T2;
+ 
+    if (t < T1) {
+        return 0.5 * J * t * t;
+    } else if (t < T1 + T2) {
+        double tau = t - T1;
+        return V1 + (J * T1) * tau;
+    } else if (t < TA) {
+        double tau = t - (T1 + T2);
+        return V1 + V2 + (J * T1) * tau - 0.5 * J * tau * tau;
+    } else if (t < TA + t4) {
+        return Vf;
+    } else if (t < TA + t4 + T1) {
+        double tau = t - (TA + t4);
+        return Vf - 0.5 * J * tau * tau;
+    } else if (t < TA + t4 + T1 + T2) {
+        double tau = t - (TA + t4 + T1);
+        return Vf - V1 - (J * T1) * tau;
+    } else if (t < TA + t4 + TA) {
+        double tau = t - (TA + t4 + T1 + T2);
+        return Vf - V1 - V2 - (J * T1) * tau + 0.5 * J * tau * tau;
+    } else {
+        // move finished
+        return 0;
+    }
 }
 
 int plan () {
