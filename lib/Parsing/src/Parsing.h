@@ -8,7 +8,7 @@
 #define M 0
 #define X 1
 #define Y 2
-#define F 3
+#define F 3 //fix: #define F 3 collides with Arduino's F() macro used for storing strings
 
 /* Functions */
 void initialiseTokenArray(void);    // to be called in setup() in .ino

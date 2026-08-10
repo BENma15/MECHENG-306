@@ -13,7 +13,7 @@ bool hasMovedLeft = false;
 bool hasBouncedRight = false;
 
 void homingInit() {
-    setupMotion();
+    //setupMotion();
     setupLimitSwitches();
 }
 

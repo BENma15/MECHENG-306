@@ -202,7 +202,7 @@ void testLoop() {
         Serial.println("LEFT limit switch hit");
 
         // Allow the motors to move again during recovery
-        clearMotorLimitStops();
+        //clearMotorLimitStops();
 
         moveTo(+LIMIT_BACKOFF_MM, 0.0);
     }
@@ -210,7 +210,7 @@ void testLoop() {
     {
         Serial.println("RIGHT limit switch hit");
 
-        clearMotorLimitStops();
+        //clearMotorLimitStops();
 
         moveTo(-LIMIT_BACKOFF_MM, 0.0);
     }
@@ -218,7 +218,7 @@ void testLoop() {
     {
         Serial.println("BOTTOM limit switch hit");
 
-        clearMotorLimitStops();
+        //clearMotorLimitStops();
 
         moveTo(0.0, +LIMIT_BACKOFF_MM);
     }
@@ -226,7 +226,7 @@ void testLoop() {
     {
         Serial.println("TOP limit switch hit");
 
-        clearMotorLimitStops();
+        //clearMotorLimitStops();
 
         moveTo(0.0, -LIMIT_BACKOFF_MM);
     }
