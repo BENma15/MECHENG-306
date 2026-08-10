@@ -1,17 +1,10 @@
 #include <Arduino.h>
 #include <avr/interrupt.h>
-#include <LimitSwitch.h>
 
 #include <Motion.h>
 #include <HelperFunctions.h>
 #include <Encoder.h>
-
-// // Motor A encoder pins
-// const int L_ENCA = 18; // INT3
-// const int L_ENCB = 19; // INT2
-// // Motor B encoder pins
-// const int R_ENCA = 20; // INT1
-// const int R_ENCB = 21; // INT0
+#include <Graph.h>
 
 // Limit switch pins
 const int L_LIMIT = 13;
@@ -24,52 +17,6 @@ const int E1 = 5;
 const int M1 = 4;
 const int E2 = 6;
 const int M2 = 7;
-
-// // Encoder variables to keep track of encoder count and encoder reading
-// volatile long countA = 0;
-// volatile long countB = 0;
-// volatile uint8_t stateA = 0;
-// volatile uint8_t stateB = 0;
-
-// // Distance to encoder count equation variables
-// const double COUNTS_PER_REV = 8256.0;
-// const double WHEEL_RADIUS_MM = 8.0;
-
-// Predetermined tables to see which way the motor is spinning
-// const int8_t encTable[16] = {
-//     0, -1, +1, 0,
-//     +1, 0, 0, -1,
-//     -1, 0, 0, +1,
-//     0, +1, -1, 0};
-
-// // Left encoder reading function
-// void updateLeft()
-// {
-//     // Read both values from the two left encoder channels
-//     uint8_t a = digitalRead(L_ENCA);
-//     uint8_t b = digitalRead(L_ENCB);
-
-//     // Left shift a encoder value and insert b into LSB to store both
-//     uint8_t newState = (a << 1) | b;
-//     // Left shift the current state by 2 bits and insert new state in the 2 LSB's
-//     uint8_t index = (stateA << 2) | newState;
-//     // Looking at table to figure out which way the motor is spinning
-//     countA += encTable[index];
-//     // Set current state to previous state
-//     stateA = newState;
-// }
-
-// // Right encoder reading function
-// void updateRight()
-// {
-//     uint8_t a = digitalRead(R_ENCA);
-//     uint8_t b = digitalRead(R_ENCB);
-
-//     uint8_t newState = (a << 1) | b;
-//     uint8_t index = (stateB << 2) | newState;
-//     countB += encTable[index];
-//     stateB = newState;
-// }
 
 // Left motor movement
 void setLeftMotor(int8_t dir, int pwm)
@@ -201,8 +148,7 @@ void moveToPID(double dx, double dy, int speed)
             a_pwm = constrain((int)(a_pwm), 0, 255);
             b_pwm = constrain((int)(b_pwm), 0, 255);
 
-            Serial.println(a_pwm);
-            Serial.println(b_pwm);
+            addDataPoint(current_time, a_speed_current);
         }
 
         bool a_finished = false;
@@ -267,6 +213,8 @@ void moveToPID(double dx, double dy, int speed)
 
     setLeftMotor(0, 0);
     setRightMotor(0, 0);
+    exportData();
+    clearData();
 }
 
 void PID_Init() {
@@ -280,9 +228,6 @@ void PID_Init() {
     pinMode(M2, OUTPUT);
     pinMode(E1, OUTPUT);
     pinMode(E2, OUTPUT);
-
-    setupLimitSwitches(E1, E2);
-
 }
 
 void testlLoop()

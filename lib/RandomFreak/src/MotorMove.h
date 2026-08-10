@@ -19,5 +19,6 @@ void motorMoveRight();
 void motorMoveLeft();
 void motorMoveUp();
 void motorMoveDown();
+void motorMoveCheck();
 
 #endif

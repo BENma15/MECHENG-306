@@ -1,6 +1,6 @@
 import serial
 
-ser = serial.Serial("COM5", 115200)
+ser = serial.Serial("COM14", 115200)
 
 recording = False
 

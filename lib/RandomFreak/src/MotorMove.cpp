@@ -65,3 +65,38 @@ void motorMoveDown()
 {
     motorMoveForDuration(A_NEGATIVE, B_POSITIVE);
 }
+
+void motorMoveCheck(){
+       if (Serial.available() > 0)
+    {
+        String command = Serial.readStringUntil('\n');
+
+        command.trim();
+        command.toLowerCase();
+
+        if (command == "up")
+        {
+            Serial.println("Moving up for 0.5 seconds");
+            motorMoveUp();
+        }
+        else if (command == "down")
+        {
+            Serial.println("Moving down for 0.5 seconds");
+            motorMoveDown();
+        }
+        else if (command == "left")
+        {
+            Serial.println("Moving left for 0.5 seconds");
+            motorMoveLeft();
+        }
+        else if (command == "right")
+        {
+            Serial.println("Moving right for 0.5 seconds");
+            motorMoveRight();
+        }
+        else
+        {
+            Serial.println("Unknown command");
+        }
+    }
+}
