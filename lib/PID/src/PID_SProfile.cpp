@@ -109,7 +109,7 @@ long distanceToCounts(double distance_mm) {
     return (long)round(COUNTS_PER_REV * distance_mm / (2.0 * PI * WHEEL_RADIUS_MM));
 }
 
-void setup() {
+void SCruveInitialise() {
 
     pinMode(L_LIMIT, INPUT_PULLUP);
     pinMode(R_LIMIT, INPUT_PULLUP);
