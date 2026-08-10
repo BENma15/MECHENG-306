@@ -1,10 +1,9 @@
 #include "Graph.h"
 #include <Arduino.h>
 
-const int MAX_SAMPLES = 500;
+long data[MAX_SAMPLES] = {0};
 
-long data[MAX_SAMPLES];
-unsigned int timeData[MAX_SAMPLES];
+int timeData[MAX_SAMPLES] = {0};
 
 int sampleIndex = 0;
 

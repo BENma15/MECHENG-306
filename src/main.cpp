@@ -4,6 +4,7 @@
 #include <HomingDiagonal.h>
 #include <LimitSwitch.h>    
 #include <PID.cpp>
+#include <MotorMove.h>
 // #include <LimitSwitchDebounce.h> should only be used by LimitSwitch.h so is not included
 #include <Motion.h>
 #include <Parsing.h>
@@ -22,6 +23,11 @@ void setup() {
     /* insert initialisation functions below  */
     Encoder_Init();
     PID_Init();
+
+    MotorMoveConfig config = {4, 5, 6, 7, 255, 1000};
+    motorMoveBegin(config);
+
+    Serial.println("Enter: up, down, left, or right");
     
     // ^^^^^ (not to be kept in final version)
 
@@ -31,4 +37,6 @@ void setup() {
 
 void loop() {
     testlLoop();
+    delay(20000);
+    motorMoveCheck();
 }

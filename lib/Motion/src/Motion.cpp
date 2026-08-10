@@ -145,14 +145,5 @@ void MotionInit() {
     pinMode(M2, OUTPUT);
     pinMode(E1, OUTPUT);
     pinMode(E2, OUTPUT);
-
-    cli();
-    EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3);
-    EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
-    sei();
 }
 
-ISR(INT0_vect) { updateB(); }
-ISR(INT1_vect) { updateB(); }
-ISR(INT2_vect) { updateA(); }
-ISR(INT3_vect) { updateA(); }
