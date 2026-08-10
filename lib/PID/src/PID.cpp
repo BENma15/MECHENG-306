@@ -3,15 +3,15 @@
 #include <LimitSwitch.h>
 
 #include <Motion.h>
-
+#include <HelperFunctions.h>
 #include <Encoder.h>
 
-// Motor A encoder pins
-const int L_ENCA = 18; // INT3
-const int L_ENCB = 19; // INT2
-// Motor B encoder pins
-const int R_ENCA = 20; // INT1
-const int R_ENCB = 21; // INT0
+// // Motor A encoder pins
+// const int L_ENCA = 18; // INT3
+// const int L_ENCB = 19; // INT2
+// // Motor B encoder pins
+// const int R_ENCA = 20; // INT1
+// const int R_ENCB = 21; // INT0
 
 // Limit switch pins
 const int L_LIMIT = 13;
@@ -25,51 +25,51 @@ const int M1 = 4;
 const int E2 = 6;
 const int M2 = 7;
 
-// Encoder variables to keep track of encoder count and encoder reading
-volatile long countA = 0;
-volatile long countB = 0;
-volatile uint8_t stateA = 0;
-volatile uint8_t stateB = 0;
+// // Encoder variables to keep track of encoder count and encoder reading
+// volatile long countA = 0;
+// volatile long countB = 0;
+// volatile uint8_t stateA = 0;
+// volatile uint8_t stateB = 0;
 
-// Distance to encoder count equation variables
-const double COUNTS_PER_REV = 8256.0;
-const double WHEEL_RADIUS_MM = 8.0;
+// // Distance to encoder count equation variables
+// const double COUNTS_PER_REV = 8256.0;
+// const double WHEEL_RADIUS_MM = 8.0;
 
 // Predetermined tables to see which way the motor is spinning
-const int8_t encTable[16] = {
-    0, -1, +1, 0,
-    +1, 0, 0, -1,
-    -1, 0, 0, +1,
-    0, +1, -1, 0};
+// const int8_t encTable[16] = {
+//     0, -1, +1, 0,
+//     +1, 0, 0, -1,
+//     -1, 0, 0, +1,
+//     0, +1, -1, 0};
 
-// Left encoder reading function
-void updateLeft()
-{
-    // Read both values from the two left encoder channels
-    uint8_t a = digitalRead(L_ENCA);
-    uint8_t b = digitalRead(L_ENCB);
+// // Left encoder reading function
+// void updateLeft()
+// {
+//     // Read both values from the two left encoder channels
+//     uint8_t a = digitalRead(L_ENCA);
+//     uint8_t b = digitalRead(L_ENCB);
 
-    // Left shift a encoder value and insert b into LSB to store both
-    uint8_t newState = (a << 1) | b;
-    // Left shift the current state by 2 bits and insert new state in the 2 LSB's
-    uint8_t index = (stateA << 2) | newState;
-    // Looking at table to figure out which way the motor is spinning
-    countA += encTable[index];
-    // Set current state to previous state
-    stateA = newState;
-}
+//     // Left shift a encoder value and insert b into LSB to store both
+//     uint8_t newState = (a << 1) | b;
+//     // Left shift the current state by 2 bits and insert new state in the 2 LSB's
+//     uint8_t index = (stateA << 2) | newState;
+//     // Looking at table to figure out which way the motor is spinning
+//     countA += encTable[index];
+//     // Set current state to previous state
+//     stateA = newState;
+// }
 
-// Right encoder reading function
-void updateRight()
-{
-    uint8_t a = digitalRead(R_ENCA);
-    uint8_t b = digitalRead(R_ENCB);
+// // Right encoder reading function
+// void updateRight()
+// {
+//     uint8_t a = digitalRead(R_ENCA);
+//     uint8_t b = digitalRead(R_ENCB);
 
-    uint8_t newState = (a << 1) | b;
-    uint8_t index = (stateB << 2) | newState;
-    countB += encTable[index];
-    stateB = newState;
-}
+//     uint8_t newState = (a << 1) | b;
+//     uint8_t index = (stateB << 2) | newState;
+//     countB += encTable[index];
+//     stateB = newState;
+// }
 
 // Left motor movement
 void setLeftMotor(int8_t dir, int pwm)
@@ -96,16 +96,16 @@ void setRightMotor(int8_t dir, int pwm)
     analogWrite(E2, pwm);
 }
 
-long distanceToCounts(double distance_mm)
-{
-    return (long)round(COUNTS_PER_REV * distance_mm / (2.0 * PI * WHEEL_RADIUS_MM));
-}
+// long distanceToCounts(double distance_mm)
+// {
+//     return (long)round(COUNTS_PER_REV * distance_mm / (2.0 * PI * WHEEL_RADIUS_MM));
+// }
 
 void moveToPID(double dx, double dy, int speed)
 {
-    double kp = 0.01; 
-    double ki = 0.001; 
-    double kd = 0.0001; 
+    double kp = 0.1; 
+    double ki = 0.01; 
+    double kd = 0.005; 
 
     double a_integral_error = 0;
     double b_integral_error = 0;
@@ -122,8 +122,8 @@ void moveToPID(double dx, double dy, int speed)
     double y_speed_mm_s = speed * sin(theta);
 
     cli();
-    long a_start = countA;
-    long b_start = countB;
+    long a_start = Encoder_getLeftEncoderCount();
+    long b_start = Encoder_getRightEncoderCount();
     sei();
 
     // Motor A variables
@@ -164,8 +164,8 @@ void moveToPID(double dx, double dy, int speed)
            abs(b_move_target - b_move_current) > tolerance)
     {
         cli();
-        a_move_current = countA;
-        b_move_current = countB;
+        a_move_current = Encoder_getLeftEncoderCount();
+        b_move_current = Encoder_getRightEncoderCount();
         sei();
 
         unsigned long current_time = millis();
@@ -288,7 +288,7 @@ void PID_Init() {
 void testlLoop()
 {
     delay(1000);
-    moveToPID(30, 0, 50);
+    moveToPID(30, 0, 25);
     delay(1000);
-    moveToPID(-30, 0, 50);
+    moveToPID(-30, 0, 25);
 }
