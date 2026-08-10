@@ -36,7 +36,5 @@ void setup() {
 
 
 void loop() {
-    testlLoop();
-    delay(20000);
     motorMoveCheck();
 }
