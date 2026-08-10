@@ -54,6 +54,18 @@ double velocity_left = 0; // In mm/s
 double velocity_right = 0;
 double distance_per_encoder_tick = 0.006089;
 
+double T1 = 0.05;
+double T2 = 0.10;
+double TA = T1 + T2 + T1;
+ 
+double moveJ = 0;
+double moveVf = 0;
+double moveT4 = 0;
+double moveUnitX = 0;
+double moveUnitY = 0;
+double moveStartTime = 0;
+bool moveActive = false;
+
 // Left encoder reading function
 void updateLeft()
 {
@@ -130,7 +142,7 @@ void SCruveInitialise() {
     sei();
 }
 
-int velocityProfile () {
+int velocityProfile(double J, double Vf, double t4, double t) {
     double V1 = 0.5 * J * T1 * T1;
     double V2 = J * T1 * T2;
  
@@ -159,11 +171,28 @@ int velocityProfile () {
     }
 }
 
-int plan () {
-
+bool plan(double x, double y, double vf_target) {
+    double S = sqrt(x * x + y * y);
+    if (S <= 0.0) return false;
+ 
+    moveUnitX = x / S;
+    moveUnitY = y / S;
+    moveVf = vf_target;
+    moveJ = moveVf / (T1 * (T1 + T2));
+ 
+    double rampDistance = (4.0 / 6.0) * moveJ * T1 * T1 * T1 + moveJ * T1 * T2 * T2;
+    double t4 = (S - rampDistance) / moveVf;
+ 
+    if (t4 < 0) {
+        moveActive = false;
+        return false;
+    }
+ 
+    moveT4 = t4;
+    moveStartTime = millis() / 1000.0;
+    moveActive = true;
+    return true;
 }
-
-
 
 void loop() {
 
