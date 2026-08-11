@@ -48,7 +48,7 @@ uint8_t timer1_current_right = 0;
 uint8_t timer1_old_right = 0;
 uint8_t timer1_current_right_new = 0;
 
-uint8_t time_per_tick = 1/16000000;
+double time_per_tick = 1/16000000;
 
 double velocity_left = 0; // In mm/s
 double velocity_right = 0;
@@ -65,6 +65,10 @@ double moveUnitX = 0;
 double moveUnitY = 0;
 double moveStartTime = 0;
 bool moveActive = false;
+
+bool triangleProfile = false
+
+uint8_t overflow_counter = 0;
 
 // Left encoder reading function
 void updateLeft()
@@ -85,13 +89,14 @@ void updateLeft()
     timer1_old_left = timer1_current_left;
     timer1_current_left = TCNT1;
 
-    if (timer1_current_left < timer_old_left) {
-        timer1_current_left_new += 65535;
+    if (overflow_count > 0) {
+        timer1_current_left_new += overflow_count*65535;
     }
 
     timer1_current_left_new = timer1_current_left;
 
     velocity_left = distance_per_encoder_count/((timer1_current_left_new - timer1_old_left)*timer_per_tick);
+    overflow_count = 0;
 }
 
 // Right encoder reading function
@@ -108,13 +113,14 @@ void updateRight()
     timer1_old_right = timer1_current_right;
     timer1_current_right = TCNT1;
 
-    if (timer1_current_right < timer_old_right) {
-        timer1_current_right_new += 65535;
+    if (overflow_count > 0) {
+        timer1_current_right_new += overflow_count*65535;
     }
 
     timer1_current_right_new = timer1_current_right;
 
     velocity_right = distance_per_encoder_count/((timer1_current_right_new - timer1_old_right)*timer_per_tick);
+    overflow_count = 0;
 }
 
 long distanceToCounts(double distance_mm) {
@@ -136,7 +142,7 @@ void SCruveInitialise() {
     setupLimitSwitches(E1, E2);
 
     cli();
-    TCC1RB |= (1 << WGM12);
+    TCCR1B |= (1 << WGM12);
     OCR1A = 65535;
     TCNT1 = 0;
     sei();
@@ -171,7 +177,7 @@ int velocityProfile(double J, double Vf, double t4, double t) {
     }
 }
 
-bool plan(double x, double y, double vf_target) {
+void plan(double x, double y, double vf_target) {
     double S = sqrt(x * x + y * y);
     if (S <= 0.0) return false;
  
@@ -184,33 +190,39 @@ bool plan(double x, double y, double vf_target) {
     double t4 = (S - rampDistance) / moveVf;
  
     if (t4 < 0) {
-        moveActive = false;
-        return false;
+        triangleProfile = true;
+        loop();
+        return;
     }
  
     moveT4 = t4;
     moveStartTime = millis() / 1000.0;
-    moveActive = true;
-    return true;
+
+    loop();
+    return;
 }
 
 void loop() {
 
 }
 
+ISR(TIMER1_OVF_vect) {
+    overflow_counter += 1;
+}
+
 ISR(INT0_vect) {
-    updateB();
+    updateRIght();
 }
 
 ISR(INT1_vect) {
-    updateB();
+    updateRight();
 }
 
 ISR(INT2_vect) {
-    updateA();
+    updateLeft();
 }
 
 ISR(INT3_vect) {
-    updateA();
+    updateLeft();
 }
 
