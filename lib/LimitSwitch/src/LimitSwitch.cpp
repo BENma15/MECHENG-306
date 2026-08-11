@@ -1,5 +1,6 @@
 #include "LimitSwitch.h"
 #include <avr/interrupt.h>
+#include <Motor.h>
 
 const uint8_t LEFT_LIMIT_PIN   = 10;  // PB4 / PCINT4
 const uint8_t RIGHT_LIMIT_PIN  = 11;  // PB5 / PCINT5

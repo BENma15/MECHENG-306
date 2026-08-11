@@ -1,9 +1,6 @@
 #include "Homing.h"
 
-const int E1 = 5;
-const int M1 = 4;
-const int E2 = 6;
-const int M2 = 7;
+#include <Motor.h>
 
 const int HOMING_PWM = 150;
 
