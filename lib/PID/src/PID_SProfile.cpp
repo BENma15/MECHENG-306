@@ -70,6 +70,18 @@ bool triangleProfile = false
 
 uint8_t overflow_counter = 0;
 
+double kp_left = 0, ki_left = 0, kd_left = 0;
+double integral_left = 0, lastError_left = 0;
+
+double kp_right = 0, ki_right = 0, kd_right = 0;
+double integral_right = 0, lastError_right = 0;
+
+double kp_sync = 0, ki_sync = 0, kd_sync = 0;
+double integral_sync = 0, lastError_sync = 0;
+
+uint32_t lastControlLoopMicros = 0;
+const uint32_t CONTROL_LOOP_INTERVAL_US = 5000; // 200Hz
+
 // Left encoder reading function
 void updateLeft()
 {
@@ -191,6 +203,7 @@ void plan(double x, double y, double vf_target) {
  
     if (t4 < 0) {
         triangleProfile = true;
+        moveActive = true;
         loop();
         return;
     }
@@ -198,12 +211,77 @@ void plan(double x, double y, double vf_target) {
     moveT4 = t4;
     moveStartTime = millis() / 1000.0;
 
+    moveActive = true;
     loop();
     return;
 }
 
 void loop() {
+    uint32_t nowMicros = micros();
+    if (nowMicros - lastControlLoopMicros < CONTROL_LOOP_INTERVAL_US) {
+        return;
+    }
+    lastControlLoopMicros += CONTROL_LOOP_INTERVAL_US;
 
+    if (!moveActive) {
+        return;
+    }
+
+    double t = (millis() / 1000.0) - moveStartTime;
+    double V = velocityProfile(moveJ, moveVf, moveT4, t);
+
+    if (t >= TA + moveT4 + TA) {
+        moveActive = false;
+        V = 0;
+    }
+
+    double targetLeft  = V * (moveUnitX + moveUnitY);
+    double targetRight = V * (moveUnitX - moveUnitY);
+
+    // left velocity PID
+    double error_left = targetLeft - velocity_left;
+    integral_left += error_left;
+    double derivative_left = error_left - lastError_left;
+    double outputLeft = kp_left * error_left + ki_left * integral_left + kd_left * derivative_left;
+    lastError_left = error_left;
+
+    // right velocity PID
+    double error_right = targetRight - velocity_right;
+    integral_right += error_right;
+    double derivative_right = error_right - lastError_right;
+    double outputRight = kp_right * error_right + ki_right * integral_right + kd_right * derivative_right;
+    lastError_right = error_right;
+
+    // sync PID
+    double percentError = 0.0;
+    if (velocity_left != 0.0) {
+        percentError = (velocity_left - velocity_right) / velocity_left * 100.0;
+    }
+    integral_sync += percentError;
+    double derivative_sync = percentError - lastError_sync;
+    double syncCorrection = kp_sync * percentError + ki_sync * integral_sync + kd_sync * derivative_sync;
+    lastError_sync = percentError;
+
+    double finalOutputLeft  = outputLeft  - syncCorrection;
+    double finalOutputRight = outputRight + syncCorrection;
+
+    if (finalOutputLeft >= 0) {
+        digitalWrite(M1, HIGH);
+    } else {
+        digitalWrite(M1, LOW);
+        finalOutputLeft = -finalOutputLeft;
+    }
+    if (finalOutputLeft > 255) finalOutputLeft = 255;
+    analogWrite(E1, finalOutputLeft);
+
+    if (finalOutputRight >= 0) {
+        digitalWrite(M2, HIGH);
+    } else {
+        digitalWrite(M2, LOW);
+        finalOutputRight = -finalOutputRight;
+    }
+    if (finalOutputRight > 255) finalOutputRight = 255;
+    analogWrite(E2, finalOutputRight);
 }
 
 ISR(TIMER1_OVF_vect) {
