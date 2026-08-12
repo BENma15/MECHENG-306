@@ -21,5 +21,6 @@ enum MotionSubstate {
 
 void FSM_init();
 void FSM_update();
+SystemState FSM_getCurrentState();
 
 #endif

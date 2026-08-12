@@ -11,8 +11,8 @@ const int M1 = 4;
 const int E2 = 6;
 const int M2 = 7;
 
-void Motor_Init();
-void setLeftMotor(int8_t dir, int pwm);
-void setRightMotor(int8_t dir, int pwm);
+void Motor_Init();  // initialise pins for motor control
+String setLeftMotor(int8_t dir, int pwm);   // returns "FAULT" for fault or "SUCCESS" for success
+String setRightMotor(int8_t dir, int pwm);  // returns "FAULT" for fault or "SUCCESS" for success
 
 #endif

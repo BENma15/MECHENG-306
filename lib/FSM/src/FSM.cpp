@@ -91,3 +91,7 @@ void FSM_update() {
     Serial.println(currentState);
 
 }
+
+SystemState FSM_getCurrentState() {
+    return currentState;
+}
