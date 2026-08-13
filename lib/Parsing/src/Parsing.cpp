@@ -9,7 +9,7 @@ void initialiseTokenArray(void) {
     TokenArray[G].Set("G0");
     TokenArray[X].Set("X0");
     TokenArray[Y].Set("Y0");
-    TokenArray[F].Set("F0");
+    TokenArray[F_token].Set("F0");
 }
 
 
@@ -127,7 +127,7 @@ int tokenise(String line) {
                 Serial.println("Invalid Gcode: no digits after F");    // error message
                 return 1;
             } else if (token != "NoToken") {       // if no F is present remains unchanged
-                TokenArray[F].Set(token);
+                TokenArray[F_token].Set(token);
             }
             return 0;
         }
@@ -141,7 +141,7 @@ String returnToken(String line, char Letter) {
     if (letterPos == -1) {
         return "NoToken";   // returns no token
     }
-    while (tokenEnd+1 < line.length() && isDigit(line[tokenEnd+1])) {
+    while (tokenEnd+1 < (int)line.length() && isDigit(line[tokenEnd+1])) {
         tokenEnd++;
     }
     if (tokenEnd == letterPos) {

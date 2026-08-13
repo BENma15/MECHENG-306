@@ -12,12 +12,12 @@ enum SystemState {
     STATE_FAULT
 };
 
-enum MotionSubstate {
-    MOTION_ACCEL,
-    MOTION_CRUISE,
-    MOTION_DECEL,
-    MOTION_COMPLETE
-};
+// enum MotionSubstate {
+//     MOTION_ACCEL,
+//     MOTION_CRUISE,
+//     MOTION_DECEL,
+//     MOTION_COMPLETE
+// };
 
 void FSM_init();
 void FSM_update();

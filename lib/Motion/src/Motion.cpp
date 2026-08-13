@@ -66,7 +66,7 @@ void updateB() {
 }
 
 // Left motor movement
-void setLeftMotor(int8_t dir, int pwm) {
+void motionsetLeftMotor(int8_t dir, int pwm) {
     // 
     if (dir == 0) {
         analogWrite(E1, 0);
@@ -77,7 +77,7 @@ void setLeftMotor(int8_t dir, int pwm) {
 }
 
 // Right motor movement
-void setRightMotor(int8_t dir, int pwm) {
+void motionsetRightMotor(int8_t dir, int pwm) {
     if (dir == 0) {
         analogWrite(E2, 0);
         return;
@@ -114,18 +114,18 @@ void runAxis(double deltaA_mm, double deltaB_mm) {
         pwmB = (int) round(moveSpeed * ((double) absTargetB / largerTarget));
     }
 
-    if (!doneA) setLeftMotor(dirA, pwmA);
-    if (!doneB) setRightMotor(dirB, pwmB);
+    if (!doneA) motionsetLeftMotor(dirA, pwmA);
+    if (!doneB) motionsetRightMotor(dirB, pwmB);
 
     while (!doneA || !doneB) {
 
         if (!doneA && labs(countA - startA) >= absTargetA) {
-            setLeftMotor(0, 0);
+            motionsetLeftMotor(0, 0);
             doneA = true;
         }
 
         if (!doneB && labs(countB - startB) >= absTargetB) {
-            setRightMotor(0, 0);
+            motionsetRightMotor(0, 0);
             doneB = true;
         }
     }

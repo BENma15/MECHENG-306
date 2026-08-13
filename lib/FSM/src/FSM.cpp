@@ -7,7 +7,7 @@
 #include <LimitSwitchDebounce.h>
 
 static SystemState currentState = STATE_IDLE;   // System begins in IDLE state
-static MotionSubstate motionState = MOTION_ACCEL;   // Motion_state begins in Acceloration
+// static MotionSubstate motionState = MOTION_ACCEL;   // Motion_state begins in Acceloration
 
 
 void FSM_init() {
@@ -96,13 +96,13 @@ static void handleFault() {
 void FSM_update() {
 
     switch(currentState) {
-        case STATE_IDLE:     handleIdle();     break;
-        case STATE_PARSING:  handleParsing();  break;
-        case STATE_MOTION:   handleMotion();   break;
-        case STATE_HOMING:   handleHoming();   break;
-        case STATE_FAULT:    handleFault();    break;
+        case STATE_IDLE:     handleIdle();         Serial.println("IDLE");           break;
+        case STATE_PARSING:  handleParsing();      Serial.println("PARSING");        break;
+        case STATE_MOTION:   handleMotion();       Serial.println("MOTION");         break;
+        case STATE_HOMING:   handleHoming();       Serial.println("HOMING");         break;
+        case STATE_FAULT:    handleFault();        Serial.println("FAULT");          break;
     }
-    Serial.println(currentState);
+
 
 }
 
