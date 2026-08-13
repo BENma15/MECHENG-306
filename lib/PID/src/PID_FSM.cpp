@@ -3,7 +3,6 @@
 #include <LimitSwitch.h>
 
 #include <Encoder.h>
-#include <Arduino.h>
 #include "PID_FSM.h"
 #include <Motor.h>
 #include <HelperFunctions.h>
@@ -95,16 +94,28 @@ void plan_FSM(double x, double y, double vf_target) {
 }
 
 void move_FSM(int x, int y, int vf) {
-    if (!moveStarted) {
-        moveStarted = true;
-        plan_FSM(x, y, vf);
-    }
+if (!moveStarted) {
+    moveStarted = true;
+
+    integral_left = 0;
+    lastError_left = 0;
+
+    integral_right = 0;
+    lastError_right = 0;
+
+    integral_sync = 0;
+    lastError_sync = 0;
+
+    plan_FSM(x, y, vf);
+
+    lastControlLoopMicros = micros();
+}
 
     uint32_t nowMicros = micros();
     if (nowMicros - lastControlLoopMicros < CONTROL_LOOP_INTERVAL_US) {
         return;
     }
-    lastControlLoopMicros += CONTROL_LOOP_INTERVAL_US;
+    lastControlLoopMicros = nowMicros;
 
     if (!moveActive) {
         return;
@@ -113,10 +124,15 @@ void move_FSM(int x, int y, int vf) {
     double t = (millis() / 1000.0) - moveStartTime;
     double V = velocityProfile_FSM(moveJ, moveVf, moveT4, t);
 
-    if (t >= TA + moveT4 + TA) {
-        moveActive = false;
-        V = 0;
-    }
+   if (t >= TA + moveT4 + TA) {
+    moveActive = false;
+    moveStarted = false;
+
+    setLeftMotor(0, 0);
+    setRightMotor(0, 0);
+
+    return;
+}
 
     double targetLeft  = V * (moveUnitX + moveUnitY);
     double targetRight = V * (moveUnitX - moveUnitY);
