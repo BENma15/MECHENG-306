@@ -97,7 +97,7 @@ bool LimitSwitch_bottomPressed() {
 ISR(PCINT0_vect)
 {
     checkLimit(LEFT_LIMIT_PIN,   leftLastTriggerTime, leftPressed);
-    checkLimit(RIGHT_LIMIT_PIN,  rightLastTriggerTimer, rightPressed);
+    checkLimit(RIGHT_LIMIT_PIN,  rightLastTriggerTime, rightPressed);
     checkLimit(TOP_LIMIT_PIN,    topLastTriggerTime, topPressed);
     checkLimit(BOTTOM_LIMIT_PIN, bottomLastTriggerTime, bottomPressed);
 }

@@ -115,7 +115,7 @@ void move(int x, int y, int vf) {
 
     uint32_t nowMicros = micros();
     if (nowMicros - lastControlLoopMicros < CONTROL_LOOP_INTERVAL_US) {
-        continue;
+        return;
     }
     lastControlLoopMicros += CONTROL_LOOP_INTERVAL_US;
 

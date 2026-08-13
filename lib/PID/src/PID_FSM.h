@@ -4,9 +4,9 @@
 #include <Arduino.h>
 
 // Motion profile helpers
-double velocityProfile(double J, double Vf, double t4, double t);
-void plan(double x, double y, double vf_target);
-void move(int x, int y, int vf);
+double velocityProfile_FSM(double J, double Vf, double t4, double t);
+void plan_FSM(double x, double y, double vf_target);
+void move_FSM(int x, int y, int vf);
 
 // Shared motion state used by the control loop
 extern double velocity_left;

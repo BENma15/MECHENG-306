@@ -5,11 +5,11 @@
 #include <Encoder.h>
 #include <Arduino.h>
 #include "PID_FSM.h"
+#include <Motor.h>
+#include <HelperFunctions.h>
 
 
 // Distance to encoder count equation variables
-const double COUNTS_PER_REV = 8256.0;
-const double WHEEL_RADIUS_MM = 8.0;
 
 double T1 = 0.05;
 double T2 = 0.10;
@@ -182,6 +182,6 @@ if (rightPWM > 255) {
     rightPWM = 255;
 }
 
-setLeftMotor(leftDir, leftPWM);
-setRightMotor(rightDir, rightPWM);
+String leftSuccess = setLeftMotor(leftDir, leftPWM);
+String rightSuccess = setRightMotor(rightDir, rightPWM);
 }
