@@ -218,10 +218,6 @@ void plan(double x, double y, double vf_target) {
     return;
 }
 
-void setup() {
-    SCruveInitialise();
-}
-
 void loop() {
     if (!moveStarted) {
         moveStarted = true;
