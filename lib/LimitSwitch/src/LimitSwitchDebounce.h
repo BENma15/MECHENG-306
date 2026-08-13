@@ -5,4 +5,9 @@
 
 void setupLimitSwitches();
 
+bool LimitSwitch_leftPressed();
+bool LimitSwitch_rightPressed();
+bool LimitSwitch_topPressed();
+bool LimitSwitch_bottomPressed();
+
 #endif
