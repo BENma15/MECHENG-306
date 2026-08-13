@@ -5,42 +5,38 @@
 #include <HelperFunctions.h>
 #include <Encoder.h>
 #include <Graph.h>
-
-// Limit switch pins
-const int L_LIMIT = 13;
-const int R_LIMIT = 12;
-const int U_LIMIT = 10;
-const int D_LIMIT = 11;
-
-// Motors pins
-const int E1 = 5;
-const int M1 = 4;
-const int E2 = 6;
-const int M2 = 7;
+#include <Motor.h>
 
 // Left motor movement
 void setLeftMotor(int8_t dir, int pwm)
 {
-    //
-    if (dir == 0)
-    {
+    if(FSM_getCurrentState() == STATE_FAULT) {
+        return "FAULT";
+    } else if (dir == 0) {
         analogWrite(E1, 0);
         return;
     }
+
     digitalWrite(M1, dir > 0 ? HIGH : LOW);
     analogWrite(E1, pwm);
+
+    return "SUCCESS";
 }
 
 // Right motor movement
 void setRightMotor(int8_t dir, int pwm)
 {
-    if (dir == 0)
-    {
+    if(FSM_getCurrentState() == STATE_FAULT) {
+        return "FAULT";
+    } else if (dir == 0) {
         analogWrite(E2, 0);
-        return;
+        return "";
     }
+    
     digitalWrite(M2, dir > 0 ? HIGH : LOW);
     analogWrite(E2, pwm);
+
+    return "SUCCESS";
 }
 
 // long distanceToCounts(double distance_mm)
