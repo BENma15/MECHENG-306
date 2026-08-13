@@ -9,6 +9,7 @@
 #include <Motor.h>
 #include <Parsing.h>
 #include <Encoder.h>
+#include <PID_FSM.h>
 /* #include <GcodeToken.h> should NOT be used in main.cpp so in not included. 
 (can be inlcuded in FSM.h or other modules that need to read/edit token) */
 #include <Arduino.h>

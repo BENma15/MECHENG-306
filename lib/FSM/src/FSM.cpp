@@ -67,7 +67,16 @@ static void handleParsing() {
 
 
 static void handleMotion() {
+    long x = Parsing_getToken(X).GetValue();
+    long y = Parsing_getToken(Y).GetValue();
+    long vf = Parsing_getToken(F).GetValue();
 
+    move_FSM(x, y, vf);
+
+    if(moveActive == false) {
+        currentState = STATE_IDLE;
+        return;
+    }
 }
 
 

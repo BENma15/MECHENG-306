@@ -27,6 +27,10 @@ const int8_t encTable[16] = {
     0, +1, -1, 0
 };
 
+double velocity_left = 0; // In mm/s
+double velocity_right = 0;
+double distance_per_encoder_tick = 0.006089;
+
 // Timer variables
 uint8_t timer1_current_left = 0;
 uint8_t timer1_old_left = 0;

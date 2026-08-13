@@ -3,26 +3,13 @@
 #include <LimitSwitch.h>
 
 #include <Encoder.h>
+#include <Arduino.h>
+#include "PID_FSM.h"
 
-// Limit switch pins
-const int L_LIMIT = 13;
-const int R_LIMIT = 12;
-const int U_LIMIT = 10;
-const int D_LIMIT = 11;
-
-// Motors pins
-const int E1 = 5;
-const int M1 = 4;
-const int E2 = 6;
-const int M2 = 7;
 
 // Distance to encoder count equation variables
 const double COUNTS_PER_REV = 8256.0;
 const double WHEEL_RADIUS_MM = 8.0;
-
-double velocity_left = 0; // In mm/s
-double velocity_right = 0;
-double distance_per_encoder_tick = 0.006089;
 
 double T1 = 0.05;
 double T2 = 0.10;
@@ -53,7 +40,7 @@ const double dt = CONTROL_LOOP_INTERVAL_US / 1000000.0; // seconds per control l
 
 bool moveStarted = false;
 
-double velocityProfile(double J, double Vf, double t4, double t) {
+double velocityProfile_FSM(double J, double Vf, double t4, double t) {
     double V1 = 0.5 * J * T1 * T1;
     double V2 = J * T1 * T2;
 
@@ -82,7 +69,7 @@ double velocityProfile(double J, double Vf, double t4, double t) {
     }
 }
 
-void plan(double x, double y, double vf_target) {
+void plan_FSM(double x, double y, double vf_target) {
     double S = sqrt(x * x + y * y);
     if (S <= 0.0) return;
 
@@ -107,10 +94,10 @@ void plan(double x, double y, double vf_target) {
     return;
 }
 
-void move(int x, int y, int vf) {
+void move_FSM(int x, int y, int vf) {
     if (!moveStarted) {
         moveStarted = true;
-        plan(x, y, vf);
+        plan_FSM(x, y, vf);
     }
 
     uint32_t nowMicros = micros();
@@ -124,7 +111,7 @@ void move(int x, int y, int vf) {
     }
 
     double t = (millis() / 1000.0) - moveStartTime;
-    double V = velocityProfile(moveJ, moveVf, moveT4, t);
+    double V = velocityProfile_FSM(moveJ, moveVf, moveT4, t);
 
     if (t >= TA + moveT4 + TA) {
         moveActive = false;
@@ -158,24 +145,43 @@ void move(int x, int y, int vf) {
     double syncCorrection = kp_sync * percentError + ki_sync * integral_sync + kd_sync * derivative_sync;
     lastError_sync = percentError;
 
-    double finalOutputLeft  = outputLeft  - syncCorrection;
-    double finalOutputRight = outputRight + syncCorrection;
+    double finalOutputLeft  = outputLeft - syncCorrection;
+double finalOutputRight = outputRight + syncCorrection;
 
-    if (finalOutputLeft >= 0) {
-        digitalWrite(M1, HIGH);
-    } else {
-        digitalWrite(M1, LOW);
-        finalOutputLeft = -finalOutputLeft;
-    }
-    if (finalOutputLeft > 255) finalOutputLeft = 255;
-    analogWrite(E1, finalOutputLeft);
+int8_t leftDir;
+int8_t rightDir;
 
-    if (finalOutputRight >= 0) {
-        digitalWrite(M2, HIGH);
-    } else {
-        digitalWrite(M2, LOW);
-        finalOutputRight = -finalOutputRight;
-    }
-    if (finalOutputRight > 255) finalOutputRight = 255;
-    analogWrite(E2, finalOutputRight);
+if (finalOutputLeft > 0) {
+    leftDir = 1;
+}
+else if (finalOutputLeft < 0) {
+    leftDir = -1;
+}
+else {
+    leftDir = 0;
+}
+
+if (finalOutputRight > 0) {
+    rightDir = 1;
+}
+else if (finalOutputRight < 0) {
+    rightDir = -1;
+}
+else {
+    rightDir = 0;
+}
+
+int leftPWM = abs((int)finalOutputLeft);
+int rightPWM = abs((int)finalOutputRight);
+
+if (leftPWM > 255) {
+    leftPWM = 255;
+}
+
+if (rightPWM > 255) {
+    rightPWM = 255;
+}
+
+setLeftMotor(leftDir, leftPWM);
+setRightMotor(rightDir, rightPWM);
 }
