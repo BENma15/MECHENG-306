@@ -23,4 +23,6 @@ void FSM_init();
 void FSM_update();
 SystemState FSM_getCurrentState();
 
+void FSM_triggerFault();
+
 #endif

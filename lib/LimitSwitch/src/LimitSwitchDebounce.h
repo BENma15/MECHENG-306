@@ -4,13 +4,5 @@
 #include <Arduino.h>
 
 void setupLimitSwitches();
-void updateLimitSwitches();
-
-bool isLeftLimitPressed();
-bool isRightLimitPressed();
-bool isTopLimitPressed();
-bool isBottomLimitPressed();
-
-bool isAnyLimitPressed();
 
 #endif

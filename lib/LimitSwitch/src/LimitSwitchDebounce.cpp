@@ -1,156 +1,82 @@
 #include "LimitSwitchDebounce.h"
+#include <FSM.h>
 #include <avr/interrupt.h>
 
-const int LEFT_LIMIT_PIN = 12;
-const int RIGHT_LIMIT_PIN = 13;
-const int TOP_LIMIT_PIN = 11;
-const int BOTTOM_LIMIT_PIN = 10;
+static const int LEFT_LIMIT_PIN = 12;
+static const int RIGHT_LIMIT_PIN = 13;
+static const int TOP_LIMIT_PIN = 11;
+static const int BOTTOM_LIMIT_PIN = 10;
 
-const unsigned long DEBOUNCE_TIME_MS = 10;
+static const unsigned long DEBOUNCE_TIME_MS = 10;
 
-volatile bool leftLimitInterruptOccurred = false;
-volatile bool rightLimitInterruptOccurred = false;
-volatile bool topLimitInterruptOccurred = false;
-volatile bool bottomLimitInterruptOccurred = false;
+static volatile bool leftLimitInterruptOccurred = false;
+static volatile bool rightLimitInterruptOccurred = false;
+static volatile bool topLimitInterruptOccurred = false;
+static volatile bool bottomLimitInterruptOccurred = false;
 
-bool leftRawState = LOW;
-bool rightRawState = LOW;
-bool topRawState = LOW;
-bool bottomRawState = LOW;
+static bool leftRawState = LOW;
+static bool rightRawState = LOW;
+static bool topRawState = LOW;
+static bool bottomRawState = LOW;
 
-bool leftDebouncedState = LOW;
-bool rightDebouncedState = LOW;
-bool topDebouncedState = LOW;
-bool bottomDebouncedState = LOW;
+static bool leftDebouncedState = LOW;
+static bool rightDebouncedState = LOW;
+static bool topDebouncedState = LOW;
+static bool bottomDebouncedState = LOW;
 
-bool leftDebounceActive = false;
-bool rightDebounceActive = false;
-bool topDebounceActive = false;
-bool bottomDebounceActive = false;
+static bool leftDebounceActive = false;
+static bool rightDebounceActive = false;
+static bool topDebounceActive = false;
+static bool bottomDebounceActive = false;
 
-unsigned long leftLastChangeTime = 0;
-unsigned long rightLastChangeTime = 0;
-unsigned long topLastChangeTime = 0;
-unsigned long bottomLastChangeTime = 0;
+static unsigned long leftLastChangeTime = 0;
+static unsigned long rightLastChangeTime = 0;
+static unsigned long topLastChangeTime = 0;
+static unsigned long bottomLastChangeTime = 0;
 
-void updateLeftLimit()
+
+static void updateLimit(int pin, volatile bool &interruptOccurred, bool &rawState, bool &debouncedState, bool &debounceActive, unsigned long &lastChangeTime)
 {
     unsigned long currentTime = millis();
 
-    if (leftLimitInterruptOccurred)
+    if (interruptOccurred)
     {
-        leftLimitInterruptOccurred = false;
-        leftDebounceActive = true;
+        interruptOccurred = false;
+        debounceActive = true;
     }
 
-    if (!leftDebounceActive)
+    if (!debounceActive)
     {
         return;
     }
 
-    bool currentRawState = digitalRead(LEFT_LIMIT_PIN);
+    bool currentRawState = digitalRead(pin);
 
-    if (currentRawState != leftRawState)
+    if (currentRawState != rawState)
     {
-        leftRawState = currentRawState;
-        leftLastChangeTime = currentTime;
+        rawState = currentRawState;
+        lastChangeTime = currentTime;
     }
 
-    if ((currentTime - leftLastChangeTime) >= DEBOUNCE_TIME_MS)
+    if ((currentTime - lastChangeTime) >= DEBOUNCE_TIME_MS)
     {
-        leftDebouncedState = leftRawState;
-        leftDebounceActive = false;
+        bool previousDebouncedState = debouncedState;
+        debouncedState = rawState;
+        debounceActive = false;
+
+        if (debouncedState == HIGH && previousDebouncedState != HIGH)
+        {
+            FSM_triggerFault();
+        }
     }
 }
 
-void updateRightLimit()
+static void updateLimitSwitches()
 {
-    unsigned long currentTime = millis();
-
-    if (rightLimitInterruptOccurred)
-    {
-        rightLimitInterruptOccurred = false;
-        rightDebounceActive = true;
-    }
-
-    if (!rightDebounceActive)
-    {
-        return;
-    }
-
-    bool currentRawState = digitalRead(RIGHT_LIMIT_PIN);
-
-    if (currentRawState != rightRawState)
-    {
-        rightRawState = currentRawState;
-        rightLastChangeTime = currentTime;
-    }
-
-    if ((currentTime - rightLastChangeTime) >= DEBOUNCE_TIME_MS)
-    {
-        rightDebouncedState = rightRawState;
-        rightDebounceActive = false;
-    }
-}
-
-void updateTopLimit()
-{
-    unsigned long currentTime = millis();
-
-    if (topLimitInterruptOccurred)
-    {
-        topLimitInterruptOccurred = false;
-        topDebounceActive = true;
-    }
-
-    if (!topDebounceActive)
-    {
-        return;
-    }
-
-    bool currentRawState = digitalRead(TOP_LIMIT_PIN);
-
-    if (currentRawState != topRawState)
-    {
-        topRawState = currentRawState;
-        topLastChangeTime = currentTime;
-    }
-
-    if ((currentTime - topLastChangeTime) >= DEBOUNCE_TIME_MS)
-    {
-        topDebouncedState = topRawState;
-        topDebounceActive = false;
-    }
-}
-
-void updateBottomLimit()
-{
-    unsigned long currentTime = millis();
-
-    if (bottomLimitInterruptOccurred)
-    {
-        bottomLimitInterruptOccurred = false;
-        bottomDebounceActive = true;
-    }
-
-    if (!bottomDebounceActive)
-    {
-        return;
-    }
-
-    bool currentRawState = digitalRead(BOTTOM_LIMIT_PIN);
-
-    if (currentRawState != bottomRawState)
-    {
-        bottomRawState = currentRawState;
-        bottomLastChangeTime = currentTime;
-    }
-
-    if ((currentTime - bottomLastChangeTime) >= DEBOUNCE_TIME_MS)
-    {
-        bottomDebouncedState = bottomRawState;
-        bottomDebounceActive = false;
-    }
+    updateLimit(LEFT_LIMIT_PIN, leftLimitInterruptOccurred, leftRawState, leftDebouncedState, leftDebounceActive, leftLastChangeTime);
+    updateLimit(RIGHT_LIMIT_PIN, rightLimitInterruptOccurred, rightRawState, rightDebouncedState, rightDebounceActive, rightLastChangeTime);
+    updateLimit(TOP_LIMIT_PIN, topLimitInterruptOccurred, topRawState, topDebouncedState, topDebounceActive, topLastChangeTime);
+    updateLimit(BOTTOM_LIMIT_PIN, bottomLimitInterruptOccurred, bottomRawState, bottomDebouncedState, bottomDebounceActive, bottomLastChangeTime);
 }
 
 void setupLimitSwitches()
@@ -171,7 +97,6 @@ void setupLimitSwitches()
     bottomDebouncedState = bottomRawState;
 
     unsigned long currentTime = millis();
-
     leftLastChangeTime = currentTime;
     rightLastChangeTime = currentTime;
     topLastChangeTime = currentTime;
@@ -179,51 +104,21 @@ void setupLimitSwitches()
 
     cli();
 
+    // Pin-change interrupts: wake the debounce state machine on any edge
     PCMSK0 |= (1 << PCINT4);
     PCMSK0 |= (1 << PCINT5);
     PCMSK0 |= (1 << PCINT6);
     PCMSK0 |= (1 << PCINT7);
+    PCIFR  |= (1 << PCIF0);
+    PCICR  |= (1 << PCIE0);
 
-    PCIFR |= (1 << PCIF0);
-    PCICR |= (1 << PCIE0);
+    // Timer1 CTC, 1kHz: drives updateLimitSwitches() without needing loop()
+    TCCR1A = 0;
+    TCCR1B = (1 << WGM12) | (1 << CS11) | (1 << CS10); // CTC, prescaler 64
+    OCR1A  = 249;
+    TIMSK1 = (1 << OCIE1A);
 
     sei();
-}
-
-void updateLimitSwitches()
-{
-    updateLeftLimit();
-    updateRightLimit();
-    updateTopLimit();
-    updateBottomLimit();
-}
-
-bool isLeftLimitPressed()
-{
-    return leftDebouncedState == HIGH;
-}
-
-bool isRightLimitPressed()
-{
-    return rightDebouncedState == HIGH;
-}
-
-bool isTopLimitPressed()
-{
-    return topDebouncedState == HIGH;
-}
-
-bool isBottomLimitPressed()
-{
-    return bottomDebouncedState == HIGH;
-}
-
-bool isAnyLimitPressed()
-{
-    return isLeftLimitPressed() ||
-           isRightLimitPressed() ||
-           isTopLimitPressed() ||
-           isBottomLimitPressed();
 }
 
 ISR(PCINT0_vect)
@@ -232,4 +127,9 @@ ISR(PCINT0_vect)
     rightLimitInterruptOccurred = true;
     topLimitInterruptOccurred = true;
     bottomLimitInterruptOccurred = true;
+}
+
+ISR(TIMER1_COMPA_vect)
+{
+    updateLimitSwitches();
 }

@@ -4,6 +4,7 @@
 #include <Homing.h>
 #include <Parsing.h>
 #include <GcodeToken.h>
+#include <LimitSwitchDebounce.h>
 
 static SystemState currentState = STATE_IDLE;   // System begins in IDLE state
 static MotionSubstate motionState = MOTION_ACCEL;   // Motion_state begins in Acceloration
@@ -75,7 +76,20 @@ static void handleHoming() {
 
 
 static void handleFault() {
+    
+    if (Serial.available() > 0) {
 
+        int err = readLine();
+
+        if (err) {
+            return;
+        }
+
+        GcodeToken token = Parsing_getToken(M);
+        if (token.GetLetter() == 'M' && token.GetValue() == 999) {
+            currentState = STATE_IDLE;
+        }
+    }
 }
 
 
@@ -94,4 +108,8 @@ void FSM_update() {
 
 SystemState FSM_getCurrentState() {
     return currentState;
+}
+
+void FSM_triggerFault() {
+    currentState = STATE_FAULT;
 }
