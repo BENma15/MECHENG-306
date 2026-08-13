@@ -40,6 +40,7 @@ static void handleParsing() {
 
     if (value == 28) {
         currentState = STATE_HOMING;
+        homingStart();
         return;
     }
 
@@ -71,7 +72,19 @@ static void handleMotion() {
 
 
 static void handleHoming() {
+    HomingResult result = homingUpdate();
 
+    if (result == HOMING_FAULT)
+    {
+        currentState = STATE_FAULT;
+        return;
+    }
+
+    if (result == HOMING_COMPLETE)
+    {
+        currentState = STATE_IDLE;
+        return;
+    }
 }
 
 
