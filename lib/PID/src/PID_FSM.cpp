@@ -27,11 +27,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 0.1, ki_left = 0.1, kd_left = 0.1;
+double kp_left = 2, ki_left = 0, kd_left = 0;
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 0.1, ki_right = 0.1, kd_right = 0.1;
+double kp_right = 2, ki_right = 0, kd_right = 0;
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
@@ -82,7 +82,11 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t) {
 void plan_FSM(double x, double y, double vf_target) {
     // Find hypotenuse
     double S = sqrt(x * x + y * y);
-    if (S <= 0.0) return;
+    if (S <= 0.0) {
+    moveActive = false;
+    moveStarted = false;
+    return;
+}
 
     // Both the movement vectors
     moveUnitX = x / S;

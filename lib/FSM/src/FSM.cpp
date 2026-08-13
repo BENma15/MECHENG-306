@@ -74,6 +74,11 @@ static void handleMotion() {
 
     move_FSM(x, y, vf);
 
+    if(moveActive == true) {
+        currentState = STATE_MOTION;
+        return;
+    }
+
     if(moveActive == false) {
         currentState = STATE_IDLE;
         return;
@@ -93,6 +98,8 @@ static void handleHoming() {
     if (result == HOMING_COMPLETE)
     {
         currentState = STATE_IDLE;
+        moveActive = false;  // Reset moveActive to false after homing is complete
+        moveStarted = false; // Reset moveStarted to false after homing is complete
         return;
     }
 }

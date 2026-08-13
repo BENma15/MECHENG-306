@@ -11,7 +11,7 @@ void initialiseTokenArray(void) {
     TokenArray[Y].Set("Y0");
     TokenArray[F_token].Set("F0");
 }
-
+//bug rn is that you can only ever send 1 command and then never again
 
 /* reads line from arduino serial buffer into input buffer */
 int readLine(void) {

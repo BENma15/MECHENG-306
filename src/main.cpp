@@ -39,5 +39,8 @@ void setup() {
 
 
 void loop() {
-    FSM_update();
+    analogWrite(E1, 150);
+    digitalWrite(M1, HIGH);
 }
+
+//1 is ccw, 0 is stop, -1 is cw

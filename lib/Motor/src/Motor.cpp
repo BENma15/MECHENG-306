@@ -17,10 +17,10 @@ String setLeftMotor(int8_t dir, int pwm) {
         return "FAULT";
     } else if (dir == 0) {
         analogWrite(E1, 0);
-        return;
+        return "STOP";
     }
 
-    digitalWrite(M1, dir > 0 ? HIGH : LOW);
+    digitalWrite(M1, dir > 0 ? LOW : HIGH);
     analogWrite(E1, pwm);
 
     return "SUCCESS";
@@ -33,10 +33,10 @@ String setRightMotor(int8_t dir, int pwm) {
         return "FAULT";
     } else if (dir == 0) {
         analogWrite(E2, 0);
-        return "";
+        return "STOP";
     }
     
-    digitalWrite(M2, dir > 0 ? HIGH : LOW);
+    digitalWrite(M2, dir > 0 ? LOW : HIGH);
     analogWrite(E2, pwm);
 
     return "SUCCESS";
