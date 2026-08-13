@@ -76,11 +76,13 @@ static void handleMotion() {
 
     if(moveActive == true) {
         currentState = STATE_MOTION;
+        resetTokenArray();
         return;
     }
 
     if(moveActive == false) {
         currentState = STATE_IDLE;
+        resetTokenArray();
         return;
     }
 }

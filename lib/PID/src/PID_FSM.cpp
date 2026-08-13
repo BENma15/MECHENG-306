@@ -27,11 +27,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 2, ki_left = 0, kd_left = 0;
+double kp_left = 0.5, ki_left = 0.5, kd_left = 0;
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 2, ki_right = 0, kd_right = 0;
+double kp_right = 0.5, ki_right = 0.5, kd_right = 0;
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
@@ -152,7 +152,7 @@ void move_FSM(int x, int y, int vf) {
 
         // This currently stops the motors once the time is finsihed, I think we should change this
         // to when the distance is met and not time.
-        if (t >= TA + moveT4 + TA) {
+        /*if (t >= TA + moveT4 + TA) {
             moveActive = false;
             moveStarted = false;
 
@@ -160,7 +160,7 @@ void move_FSM(int x, int y, int vf) {
             setRightMotor(0, 0);
 
             return;
-        }
+        }*/
 
         // Splits target velocity into left and right motor target velocities using unit vectors
         double targetLeft  = V * (moveUnitX + moveUnitY);
