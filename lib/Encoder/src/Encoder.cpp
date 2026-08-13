@@ -12,10 +12,11 @@ const int R_ENCB = 21; // INT0
 volatile long leftEncoderCount = 0;
 volatile long rightEncoderCount = 0;
 
-
 // Current Encoder States (dont need to be in header)
-volatile uint8_t leftState = 0;
-volatile uint8_t rightState = 0;
+volatile long countA = 0;
+volatile long countB = 0;
+volatile uint8_t stateA = 0;
+volatile uint8_t stateB = 0;
 
 // Predetermined tables to see which way the motor is spinning 
 // (doesnt need to be in header)
@@ -26,6 +27,18 @@ const int8_t encTable[16] = {
     0, +1, -1, 0
 };
 
+// Timer variables
+uint8_t timer1_current_left = 0;
+uint8_t timer1_old_left = 0;
+uint8_t timer1_current_left_new = 0;
+uint8_t timer1_current_right = 0;
+uint8_t timer1_old_right = 0;
+uint8_t timer1_current_right_new = 0;
+
+double time_per_tick = 1/16000000;
+
+uint8_t overflow_counter = 0;
+
 void Encoder_Init() {
     pinMode(L_ENCA, INPUT_PULLUP);
     pinMode(L_ENCB, INPUT_PULLUP);
@@ -35,11 +48,17 @@ void Encoder_Init() {
     cli();
     EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3);
     EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
+
+    TCCR1B |= (1 << WGM12) | (1 << CS10);
+    TIMSK1 |= (1 << TOIE1);
+    OCR1A = 65535;
+    TCNT1 = 0;
     sei();
 }
 
-// Left Encoder Reading Function
-void Encoder_updateLeft() {
+// Left encoder reading function
+void updateLeft()
+{
     // Read both values from the two left encoder channels
     uint8_t a = digitalRead(L_ENCA);
     uint8_t b = digitalRead(L_ENCB);
@@ -47,22 +66,47 @@ void Encoder_updateLeft() {
     // Left shift a encoder value and insert b into LSB to store both
     uint8_t newState = (a << 1) | b;
     // Left shift the current state by 2 bits and insert new state in the 2 LSB's
-    uint8_t index = (leftState << 2) | newState;
+    uint8_t index = (stateA << 2) | newState;
     // Looking at table to figure out which way the motor is spinning
-    leftEncoderCount += encTable[index];
+    countA += encTable[index];
     // Set current state to previous state
-    leftState = newState;
+    stateA = newState;
+
+    timer1_old_left = timer1_current_left;
+    timer1_current_left = TCNT1;
+
+    if (overflow_counter > 0) {
+        timer1_current_left_new += overflow_counter * 65535;
+    }
+
+    timer1_current_left_new = timer1_current_left;
+
+    velocity_left = distance_per_encoder_tick / ((timer1_current_left_new - timer1_old_left) * time_per_tick);
+    overflow_counter = 0;
 }
 
-// Right Encoder Reading Function
-void Encoder_updateRight() {
+// Right encoder reading function
+void updateRight()
+{
     uint8_t a = digitalRead(R_ENCA);
     uint8_t b = digitalRead(R_ENCB);
 
     uint8_t newState = (a << 1) | b;
-    uint8_t index = (rightState << 2) | newState;
-    rightEncoderCount += encTable[index];
-    rightState = newState;
+    uint8_t index = (stateB << 2) | newState;
+    countB += encTable[index];
+    stateB = newState;
+
+    timer1_old_right = timer1_current_right;
+    timer1_current_right = TCNT1;
+
+    if (overflow_counter > 0) {
+        timer1_current_right_new += overflow_counter * 65535;
+    }
+
+    timer1_current_right_new = timer1_current_right;
+
+    velocity_right = distance_per_encoder_tick / ((timer1_current_right_new - timer1_old_right) * time_per_tick);
+    overflow_counter = 0;
 }
 
 long Encoder_getLeftEncoderCount() {
@@ -81,7 +125,22 @@ long Encoder_getRightEncoderCount() {
     return count;
 }
 
-ISR(INT0_vect) { Encoder_updateRight(); }
-ISR(INT1_vect) { Encoder_updateRight(); }
-ISR(INT2_vect) { Encoder_updateLeft(); }
-ISR(INT3_vect) { Encoder_updateLeft(); }
+ISR(TIMER1_OVF_vect) {
+    overflow_counter += 1;
+}
+
+ISR(INT0_vect) {
+    updateRight();
+}
+
+ISR(INT1_vect) {
+    updateRight();
+}
+
+ISR(INT2_vect) {
+    updateLeft();
+}
+
+ISR(INT3_vect) {
+    updateLeft();
+}
