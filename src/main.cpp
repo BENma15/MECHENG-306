@@ -26,6 +26,7 @@ void setup() {
     Encoder_Init();
     FSM_init();
     setupLimitSwitches();
+    Motor_Init();
     
 
     // MotorMoveConfig config = {4, 5, 6, 7, 255, 1000};

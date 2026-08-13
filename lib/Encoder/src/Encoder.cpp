@@ -32,20 +32,20 @@ double velocity_right = 0;
 double distance_per_encoder_tick = 0.006089;
 
 // Timer variables
-uint8_t timer1_current_left = 0;
-uint8_t timer1_old_left = 0;
-uint8_t timer1_current_left_new = 0;
-uint8_t timer1_current_right = 0;
-uint8_t timer1_old_right = 0;
-uint8_t timer1_current_right_new = 0;
+uint32_t timer1_current_left = 0;
+uint32_t timer1_old_left = 0;
+uint32_t timer1_current_left_new = 0;
+uint32_t timer1_current_right = 0;
+uint32_t timer1_old_right = 0;
+uint32_t timer1_current_right_new = 0;
 
-double time_per_tick = 1/16000000;
+double time_per_tick = 1.0 / 16000000.0;
 
-uint8_t overflow_counter = 0;
+uint16_t overflow_counter = 0;
 
 void Encoder_Init() {
     pinMode(L_ENCA, INPUT_PULLUP);
-    pinMode(L_ENCB, INPUT_PULLUP);
+    pinMode(L_ENCB, INPUT_PULLUP);  
     pinMode(R_ENCA, INPUT_PULLUP);
     pinMode(R_ENCB, INPUT_PULLUP);
 
@@ -80,7 +80,9 @@ void updateLeft()
     timer1_current_left = TCNT1;
 
     if (overflow_counter > 0) {
-        timer1_current_left_new += overflow_counter * 65535;
+        timer1_current_left_new =
+    (uint32_t)overflow_counter * 65536UL
+    + timer1_current_left;
     }
 
     timer1_current_left_new = timer1_current_left;
@@ -104,7 +106,9 @@ void updateRight()
     timer1_current_right = TCNT1;
 
     if (overflow_counter > 0) {
-        timer1_current_right_new += overflow_counter * 65535;
+timer1_current_right_new =
+    (uint32_t)overflow_counter * 65536UL
+    + timer1_current_right;
     }
 
     timer1_current_right_new = timer1_current_right;
@@ -114,17 +118,17 @@ void updateRight()
 }
 
 long Encoder_getLeftEncoderCount() {
-    long count; 
-    cli();  // disable interupts so data is not changed suring copying of long.
-    count = leftEncoderCount;
+    long count;
+    cli();
+    count = countA;
     sei();
     return count;
 }
 
 long Encoder_getRightEncoderCount() {
-    long count; 
+    long count;
     cli();
-    count = rightEncoderCount;
+    count = countB;
     sei();
     return count;
 }
