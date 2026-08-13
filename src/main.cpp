@@ -23,7 +23,10 @@ void setup() {
 
     /* insert initialisation functions below  */
     Encoder_Init();
+    Motor_Init();
     FSM_init();
+    setupLimitSwitches();
+    
 
     // MotorMoveConfig config = {4, 5, 6, 7, 255, 1000};
     // motorMoveBegin(config);
@@ -36,4 +39,6 @@ void setup() {
 
 void loop() {
     FSM_update();
+    setLeftMotor(30, 75);
+    setRightMotor(30, 75);
 }
