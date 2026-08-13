@@ -117,15 +117,28 @@ static void handleFault() {
 
 
 void FSM_update() {
-
+    // Call the handler for the current state (non-blocking)
     switch(currentState) {
-        case STATE_IDLE:     handleIdle();         Serial.println("IDLE");           break;
-        case STATE_PARSING:  handleParsing();      Serial.println("PARSING");        break;
-        case STATE_MOTION:   handleMotion();       Serial.println("MOTION");         break;
-        case STATE_HOMING:   handleHoming();       Serial.println("HOMING");         break;
-        case STATE_FAULT:    handleFault();        Serial.println("FAULT");          break;
+        case STATE_IDLE:     handleIdle();         break;
+        case STATE_PARSING:  handleParsing();      break;
+        case STATE_MOTION:   handleMotion();       break;
+        case STATE_HOMING:   handleHoming();       break;
+        case STATE_FAULT:    handleFault();        break;
     }
 
+    // Print the current state at most once per second (non-blocking)
+    static unsigned long lastStatePrintMillis = 0;
+    unsigned long now = millis();
+    if ((unsigned long)(now - lastStatePrintMillis) >= 500) {
+        lastStatePrintMillis = now;
+        switch(currentState) {
+            case STATE_IDLE:     Serial.println("IDLE");   break;
+            case STATE_PARSING:  Serial.println("PARSING"); break;
+            case STATE_MOTION:   Serial.println("MOTION");  break;
+            case STATE_HOMING:   Serial.println("HOMING");  break;
+            case STATE_FAULT:    Serial.println("FAULT");   break;
+        }
+    }
 
 }
 
