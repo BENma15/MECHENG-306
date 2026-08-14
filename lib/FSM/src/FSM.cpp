@@ -74,12 +74,6 @@ static void handleMotion() {
 
     move_FSM(x, y, vf);
 
-    if(moveActive == true) {
-        currentState = STATE_MOTION;
-        resetTokenArray();
-        return;
-    }
-
     if(moveActive == false) {
         currentState = STATE_IDLE;
         resetTokenArray();
