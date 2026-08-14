@@ -177,9 +177,8 @@ void move_FSM(int x, int y, int vf) {
         // Stop once the planned distance has actually been covered, not just once time is up.
         // Time check kept as a failsafe in case encoder counts stall/jam.
         bool distanceReached = distanceTraveled >= (moveDistance - DISTANCE_TOLERANCE_MM);
-        bool timeFailsafe = t >= 2.0 * (TA + moveT4 + TA);
 
-        if (distanceReached || timeFailsafe) {
+        if (distanceReached) {
             moveActive = false;
             moveStarted = false;
 
