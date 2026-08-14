@@ -47,7 +47,7 @@ const double SYNC_TARGET_MIN = 5.0; // below this target velocity, sync correcti
 
 // Time Control Variables
 uint32_t lastControlLoopMicros = 0;
-const uint32_t CONTROL_LOOP_INTERVAL_US = 2500;            // 400Hz
+const uint32_t CONTROL_LOOP_INTERVAL_US = 20000;            // 50Hz
 const double dt = CONTROL_LOOP_INTERVAL_US / 1000000.0;     // Seconds per control loop tick
 
 // Motor Direction Variables
@@ -175,7 +175,6 @@ void move_FSM(int x, int y, int vf) {
         double distanceTraveled = sqrt(traveledX * traveledX + traveledY * traveledY);
 
         // Stop once the planned distance has actually been covered, not just once time is up.
-        // Time check kept as a failsafe in case encoder counts stall/jam.
         bool distanceReached = distanceTraveled >= (moveDistance - DISTANCE_TOLERANCE_MM);
 
         if (distanceReached) {
