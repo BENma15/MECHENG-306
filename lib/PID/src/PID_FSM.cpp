@@ -20,6 +20,12 @@ double moveT4 = 0;
 double moveUnitX = 0;
 double moveUnitY = 0;
 double moveStartTime = 0;
+double moveDistance = 0;
+
+// Distance-tracking variables (for stopping on distance instead of time)
+long moveStartCountA = 0;
+long moveStartCountB = 0;
+const double DISTANCE_TOLERANCE_MM = 0.5;
 
 bool moveActive = false;
 bool moveStarted = false;
@@ -37,6 +43,7 @@ double integral_right = 0, lastError_right = 0;
 // Sync PID Variables
 double kp_sync = 10, ki_sync = 1, kd_sync = 1;
 double integral_sync = 0, lastError_sync = 0;
+const double SYNC_TARGET_MIN = 5.0; // below this target velocity, sync correction is skipped
 
 // Time Control Variables
 uint32_t lastControlLoopMicros = 0;
@@ -113,7 +120,14 @@ void plan_FSM(double x, double y, double vf_target) {
 
     // Start move time timer
     moveT4 = t4;
+    moveDistance = S;
     moveStartTime = millis() / 1000.0;
+
+    // TODO: replace getCountA()/getCountB() with whatever your Encoder.h actually exposes
+    // for raw encoder counts on the A and B CoreXY axes.
+    moveStartCountA = getCountA();
+    moveStartCountB = getCountB();
+
     moveActive = true;
     return;
 }
@@ -153,7 +167,7 @@ void move_FSM(int x, int y, int vf) {
 
         // This currently stops the motors once the time is finsihed, I think we should change this
         // to when the distance is met and not time.
-        if (t >= TA + moveT4 + TA) {
+        /*if (t >= TA + moveT4 + TA) {
             moveActive = false;
             moveStarted = false;
 
@@ -183,10 +197,14 @@ void move_FSM(int x, int y, int vf) {
         double outputRight = kp_right * error_right + ki_right * integral_right + kd_right * derivative_right;
         lastError_right = error_right;
 
-        // sync PID
-        double ratioLeft = (targetLeft != 0.0) ? (velocity_left / targetLeft)  : 1.0;
-        double ratioRight = (targetRight != 0.0) ? (velocity_right / targetRight) : 1.0;
-        double percentError = (ratioLeft - ratioRight) * 100.0;
+        // sync PID - only correct when both targets are large enough that the velocity ratio is meaningful.
+        // Near zero target velocity (start/end of move) the ratio blows up and causes spiking/stuttering.
+        double percentError = 0.0;
+        if (fabs(targetLeft) > SYNC_TARGET_MIN && fabs(targetRight) > SYNC_TARGET_MIN) {
+            double ratioLeft = velocity_left / targetLeft;
+            double ratioRight = velocity_right / targetRight;
+            percentError = (ratioLeft - ratioRight) * 100.0;
+        }
         integral_sync += percentError * dt;
         double derivative_sync = (percentError - lastError_sync) / dt;
         double syncCorrection = kp_sync * percentError + ki_sync * integral_sync + kd_sync * derivative_sync;
