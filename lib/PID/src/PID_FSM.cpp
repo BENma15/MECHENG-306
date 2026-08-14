@@ -13,6 +13,8 @@ double T1 = 0.05;
 double T2 = 0.10;
 double TA = T1 + T2 + T1;
 
+double mmPerCount = 0.006089;
+
 // Movement Variables
 double moveJ = 0;
 double moveVf = 0;
@@ -33,11 +35,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 0.5, ki_left = 0.5, kd_left = 0;
+double kp_left = 5, ki_left = 0.5, kd_left = 0;
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 0.5, ki_right = 0.5, kd_right = 0;
+double kp_right = 5, ki_right = 0.5, kd_right = 0;
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
@@ -47,7 +49,7 @@ const double SYNC_TARGET_MIN = 5.0; // below this target velocity, sync correcti
 
 // Time Control Variables
 uint32_t lastControlLoopMicros = 0;
-const uint32_t CONTROL_LOOP_INTERVAL_US = 20000;            // 50Hz
+const uint32_t CONTROL_LOOP_INTERVAL_US = 2500;            // 50Hz
 const double dt = CONTROL_LOOP_INTERVAL_US / 1000000.0;     // Seconds per control loop tick
 
 // Motor Direction Variables
@@ -125,8 +127,8 @@ void plan_FSM(double x, double y, double vf_target) {
 
     // TODO: replace getCountA()/getCountB() with whatever your Encoder.h actually exposes
     // for raw encoder counts on the A and B CoreXY axes.
-    moveStartCountA = getCountA();
-    moveStartCountB = getCountB();
+    moveStartCountA = Encoder_getLeftEncoderCount();
+    moveStartCountB = Encoder_getRightEncoderCount();
 
     moveActive = true;
     return;
@@ -166,8 +168,8 @@ void move_FSM(int x, int y, int vf) {
 
         // Distance actually travelled so far, computed from encoder counts via CoreXY inverse kinematics.
         // TODO: replace getCountA()/getCountB() and mmPerCount with your actual encoder API / conversion.
-        long countA = getCountA();
-        long countB = getCountB();
+        long countA = Encoder_getLeftEncoderCount();
+        long countB = Encoder_getRightEncoderCount();
         double dA = (countA - moveStartCountA) * mmPerCount;
         double dB = (countB - moveStartCountB) * mmPerCount;
         double traveledX = (dA + dB) / 2.0;

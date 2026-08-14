@@ -1,5 +1,5 @@
-#ifndef LIMIT_SWITCH_DEBOUNCE_H
-#define LIMIT_SWITCH_DEBOUNCE_H
+#ifndef LIMIT_SWITCH_H
+#define LIMIT_SWITCH_H
 
 #include <Arduino.h>
 

@@ -4,7 +4,7 @@
 #include <Homing.h>
 #include <Parsing.h>
 #include <GcodeToken.h>
-#include <LimitSwitchDebounce.h>
+#include <LimitSwitch.h>
 #include <PID_FSM.h>
 
 static SystemState currentState = STATE_IDLE;   // System begins in IDLE state

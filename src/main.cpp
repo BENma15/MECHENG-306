@@ -5,7 +5,7 @@
 // #include <LimitSwitch.h>    
 // #include <PID.cpp>
 // #include <MotorMove.h>
-#include <LimitSwitchDebounce.h>
+#include <LimitSwitch.h>
 #include <Motor.h>
 #include <Parsing.h>
 #include <Encoder.h>

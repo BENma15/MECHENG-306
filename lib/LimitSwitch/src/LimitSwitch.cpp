@@ -1,4 +1,4 @@
-#include "LimitSwitchDebounce.h"
+#include "LimitSwitch.h"
 #include <FSM.h>
 #include <avr/interrupt.h>
 
