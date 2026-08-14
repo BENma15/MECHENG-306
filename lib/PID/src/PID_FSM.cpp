@@ -47,7 +47,7 @@ const double SYNC_TARGET_MIN = 5.0; // below this target velocity, sync correcti
 
 // Time Control Variables
 uint32_t lastControlLoopMicros = 0;
-const uint32_t CONTROL_LOOP_INTERVAL_US = 2500;            // 400Hz
+const uint32_t CONTROL_LOOP_INTERVAL_US = 20000;            // 50Hz
 const double dt = CONTROL_LOOP_INTERVAL_US / 1000000.0;     // Seconds per control loop tick
 
 // Motor Direction Variables
@@ -168,6 +168,20 @@ void move_FSM(int x, int y, int vf) {
         // This currently stops the motors once the time is finsihed, I think we should change this
         // to when the distance is met and not time.
         /*if (t >= TA + moveT4 + TA) {
+        // Distance actually travelled so far, computed from encoder counts via CoreXY inverse kinematics.
+        // TODO: replace getCountA()/getCountB() and mmPerCount with your actual encoder API / conversion.
+        long countA = getCountA();
+        long countB = getCountB();
+        double dA = (countA - moveStartCountA) * mmPerCount;
+        double dB = (countB - moveStartCountB) * mmPerCount;
+        double traveledX = (dA + dB) / 2.0;
+        double traveledY = (dA - dB) / 2.0;
+        double distanceTraveled = sqrt(traveledX * traveledX + traveledY * traveledY);
+
+        // Stop once the planned distance has actually been covered, not just once time is up.
+        bool distanceReached = distanceTraveled >= (moveDistance - DISTANCE_TOLERANCE_MM);
+
+        if (distanceReached) {
             moveActive = false;
             moveStarted = false;
 
