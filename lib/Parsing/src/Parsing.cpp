@@ -17,7 +17,7 @@ void initialiseTokenArray(void) {
 int readLine(void) {
 
     int flag = 1;   // set to 0 when tokensise gets called
-    int validCommand = 1;   // invalid by default
+    int validCommand = 2;   // 2 = incomplete command, 1 = invalid command, 0 = successful command
 
     while(Serial.available() && flag) {  // Serial.available() returns how many characters are waiting to be read in the arduinos serial buffer 
 
@@ -31,7 +31,7 @@ int readLine(void) {
             inputBuffer += c;
         }
     }
-    return validCommand;    // 0 if successful, 1 if not
+    return (!validCommand && !flag) ;    // will be 1 (error) if command reads complete line and command invalid
 }
 
 
@@ -161,7 +161,7 @@ String returnToken(String line, char Letter) {
     if ((Letter == 'M' || Letter == 'G' || Letter == 'F') && token.substring(1).toDouble() < 0) {
         return "ERROR";
     }
-    
+
     return token;
 
 }

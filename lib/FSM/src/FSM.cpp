@@ -32,9 +32,13 @@ static void handleIdle() {  // Idle --> Parsing. Event: Serial buffer recieves i
 static void handleParsing() {
 
     int err = readLine();
+    if (err == 2) {
+        // stay in Parsing
+        return;
+    }
 
     // check if command was invalid
-    if (err) {
+    if (err == 1) {
         currentState = STATE_IDLE;
         return;
     }
