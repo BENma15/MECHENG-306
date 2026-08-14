@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <avr/interrupt.h>
-#include <LimitSwitch.h>
 
 #include <Encoder.h>
 

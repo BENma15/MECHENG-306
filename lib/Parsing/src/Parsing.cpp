@@ -23,7 +23,7 @@ int readLine(void) {
 
         char c = Serial.read();  // pulls the first (character) from the buffer
 
-        if (c == '\n' || c == ';') {
+        if (c == '\n') {
             flag = 0;
             validCommand = tokenise(inputBuffer); // when new line character is reahced send input buffer to parseGcode function
             inputBuffer = "";   // reset buffer
@@ -36,7 +36,9 @@ int readLine(void) {
 
 
 int tokenise(String line) {
-    line = tidyString(line);   // remove spaces and make uppercase
+
+    line = tidyString(line);   // remove spaces, make uppercase, and remove comment
+
     bool xToken = true, yToken = true;  // assuming there is an X and Y token
 
     int Gpos = line.indexOf('G');   // gets position of G in command
@@ -136,38 +138,60 @@ int tokenise(String line) {
 
 
 String returnToken(String line, char Letter) {
+
     int letterPos = line.indexOf(Letter); 
     int tokenEnd = letterPos;
+
     if (letterPos == -1) {
         return "NoToken";   // returns no token
     }
-    while (tokenEnd+1 < (int)line.length() && isDigit(line[tokenEnd+1])) {
+
+    while (tokenEnd+1 < (int)line.length() && (isDigit(line[tokenEnd+1]) || (line[tokenEnd+1] == '-')) ) {  // runs while next char is a digit or -ve sign
         tokenEnd++;
     }
+
     if (tokenEnd == letterPos) {
         // Error (No value after letter)
         return "ERROR";
     }
+
+
     String token = line.substring(letterPos, (tokenEnd + 1));   // substring excludes end, hence (tokenEnd + 1)
+
+    if ((Letter == 'M' || Letter == 'G' || Letter == 'F') && token.substring(1).toDouble() < 0) {
+        return "ERROR";
+    }
+    
     return token;
+
 }
 
 
 String tidyString(String line) {
+
+    int commaPos = line.indexOf(";");
+
+    if (commaPos != -1) {
+        line = line.substring(0, commaPos); // removes the comment from the line
+    }
+
     line.trim();
     line.toUpperCase();  // any lowercase letters taken to upper
     line.replace(" ", "");  // removes spaces between tokens
     return line;
+
 }
 
 
 GcodeToken Parsing_getToken(int index) {
+
     return TokenArray[index];
+
 }
 
 
 void resetTokenArray() {
-    TokenArray[G].Set("G0");
+    TokenArray[M].Set("M0");
     TokenArray[X].Set("X0");
     TokenArray[Y].Set("Y0");
     // F token remains as it was in the previous intruction.
