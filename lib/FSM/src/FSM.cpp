@@ -10,6 +10,8 @@
 static SystemState currentState = STATE_IDLE;   // System begins in IDLE state
 // static MotionSubstate motionState = MOTION_ACCEL;   // Motion_state begins in Acceloration
 
+static SystemState lastPrintedState = (SystemState)-1;
+
 
 void FSM_init() {
 
@@ -118,6 +120,40 @@ static void handleFault() {
     }
 }
 
+static void printStateIfChanged()
+{
+    if (currentState == lastPrintedState)
+    {
+        return;
+    }
+
+
+    lastPrintedState = currentState;
+
+
+    switch (currentState)
+    {
+        case STATE_IDLE:
+            Serial.println("IDLE");
+            break;
+
+        case STATE_PARSING:
+            Serial.println("PARSING");
+            break;
+
+        case STATE_MOTION:
+            Serial.println("MOTION");
+            break;
+
+        case STATE_HOMING:
+            Serial.println("HOMING");
+            break;
+
+        case STATE_FAULT:
+            Serial.println("FAULT");
+            break;
+    }
+}
 
 void FSM_update() {
     // Call the handler for the current state (non-blocking)
@@ -129,19 +165,7 @@ void FSM_update() {
         case STATE_FAULT:    handleFault();        break;
     }
 
-    // Print the current state at most once per second (non-blocking)
-    static unsigned long lastStatePrintMillis = 0;
-    unsigned long now = millis();
-    if ((unsigned long)(now - lastStatePrintMillis) >= 500) {
-        lastStatePrintMillis = now;
-        switch(currentState) {
-            case STATE_IDLE:     Serial.println("IDLE");   break;
-            case STATE_PARSING:  Serial.println("PARSING"); break;
-            case STATE_MOTION:   Serial.println("MOTION");  break;
-            case STATE_HOMING:   Serial.println("HOMING");  break;
-            case STATE_FAULT:    Serial.println("FAULT");   break;
-        }
-    }
+    printStateIfChanged();
 
 }
 
