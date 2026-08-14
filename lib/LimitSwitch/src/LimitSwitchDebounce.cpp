@@ -9,37 +9,40 @@ static const int BOTTOM_LIMIT_PIN = 10;
 
 static const unsigned long DEBOUNCE_TIME_MS = 10;
 
-static volatile bool leftPressed = false;
-static volatile bool rightPressed = false;
-static volatile bool topPressed = false;
-static volatile bool bottomPressed = false;
+static volatile bool leftState   = LOW;
+static volatile bool rightState  = LOW;
+static volatile bool topState    = LOW;
+static volatile bool bottomState = LOW;
 
-static volatile unsigned long leftLastTriggerTime   = 0;
-static volatile unsigned long rightLastTriggerTime  = 0;
-static volatile unsigned long topLastTriggerTime    = 0;
-static volatile unsigned long bottomLastTriggerTime = 0;
+static volatile unsigned long leftLastEdgeTime   = 0;
+static volatile unsigned long rightLastEdgeTime  = 0;
+static volatile unsigned long topLastEdgeTime    = 0;
+static volatile unsigned long bottomLastEdgeTime = 0;
 
-static void checkLimit(int pin, volatile unsigned long &lastTriggerTime, volatile bool &pressedState)
-{
-    bool rawState = digitalRead(pin);
-
-    if (rawState == LOW) {
-        pressedState = false;
-        return;
-    }
-    
+static void checkLimit(int pin, volatile bool &switchState, volatile unsigned long &lastEdgeTime) {
     unsigned long now = millis();
 
-    if ((now - lastTriggerTime) >= DEBOUNCE_TIME_MS)
+    if ((now - lastEdgeTime) < DEBOUNCE_TIME_MS)
     {
         return;
     }
 
-    lastTriggerTime = now;
-    FSM_triggerFault();
+    bool newState = digitalRead(pin);
 
-    if (FSM_getCurrentState() != STATE_HOMING) {
-        FSM_triggerFault();
+    if (newState == switchState)
+    {
+        return;
+    }
+
+    switchState = newState;
+    lastEdgeTime = now;
+
+    if (switchState == HIGH)
+    {
+        if (FSM_getCurrentState() != STATE_HOMING)
+        {
+            FSM_triggerFault();
+        }
     }
 }
 
@@ -50,17 +53,17 @@ void setupLimitSwitches()
     pinMode(TOP_LIMIT_PIN, INPUT);
     pinMode(BOTTOM_LIMIT_PIN, INPUT);
 
-    leftPressed = digitalRead(LEFT_LIMIT_PIN);
-    rightPressed = digitalRead(RIGHT_LIMIT_PIN);
-    topPressed = digitalRead(TOP_LIMIT_PIN);
-    bottomPressed = digitalRead(BOTTOM_LIMIT_PIN);
+    leftState   = digitalRead(LEFT_LIMIT_PIN);
+    rightState  = digitalRead(RIGHT_LIMIT_PIN);
+    topState    = digitalRead(TOP_LIMIT_PIN);
+    bottomState = digitalRead(BOTTOM_LIMIT_PIN);
 
-    unsigned long currentTime = millis();
+    unsigned long now = millis();
 
-    leftLastTriggerTime   = currentTime - DEBOUNCE_TIME_MS;
-    rightLastTriggerTime  = currentTime - DEBOUNCE_TIME_MS;
-    topLastTriggerTime    = currentTime - DEBOUNCE_TIME_MS;
-    bottomLastTriggerTime = currentTime - DEBOUNCE_TIME_MS;
+    leftLastEdgeTime   = now - DEBOUNCE_TIME_MS;
+    rightLastEdgeTime  = now - DEBOUNCE_TIME_MS;
+    topLastEdgeTime    = now - DEBOUNCE_TIME_MS;
+    bottomLastEdgeTime = now - DEBOUNCE_TIME_MS;
 
     cli();
 
@@ -69,7 +72,7 @@ void setupLimitSwitches()
     PCMSK0 |= (1 << PCINT6);
     PCMSK0 |= (1 << PCINT7);
 
-    // Clear any pending pin change interrupt.
+    // Clear any pending interrupt.
     PCIFR |= (1 << PCIF0);
 
     // Enable the PCINT0 interrupt group.
@@ -78,26 +81,55 @@ void setupLimitSwitches()
     sei();
 }
 
-bool LimitSwitch_leftPressed() {
-    return leftPressed;
+bool LimitSwitch_leftPressed()
+{
+    return leftState;
 }
 
-bool LimitSwitch_rightPressed() {
-    return rightPressed;
+
+bool LimitSwitch_rightPressed()
+{
+    return rightState;
 }
 
-bool LimitSwitch_topPressed() {
-    return topPressed;
+
+bool LimitSwitch_topPressed()
+{
+    return topState;
 }
 
-bool LimitSwitch_bottomPressed() {
-    return bottomPressed;
+
+bool LimitSwitch_bottomPressed()
+{
+    return bottomState;
 }
 
 ISR(PCINT0_vect)
 {
-    checkLimit(LEFT_LIMIT_PIN,   leftLastTriggerTime, leftPressed);
-    checkLimit(RIGHT_LIMIT_PIN,  rightLastTriggerTime, rightPressed);
-    checkLimit(TOP_LIMIT_PIN,    topLastTriggerTime, topPressed);
-    checkLimit(BOTTOM_LIMIT_PIN, bottomLastTriggerTime, bottomPressed);
+    checkLimit(
+        LEFT_LIMIT_PIN,
+        leftState,
+        leftLastEdgeTime
+    );
+
+
+    checkLimit(
+        RIGHT_LIMIT_PIN,
+        rightState,
+        rightLastEdgeTime
+    );
+
+
+    checkLimit(
+        TOP_LIMIT_PIN,
+        topState,
+        topLastEdgeTime
+    );
+
+
+    checkLimit(
+        BOTTOM_LIMIT_PIN,
+        bottomState,
+        bottomLastEdgeTime
+    );
 }
