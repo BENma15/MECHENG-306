@@ -83,11 +83,15 @@ void updateLeft()
         timer1_current_left_new =
     (uint32_t)overflow_counter * 65536UL
     + timer1_current_left;
+    } else {
+        timer1_current_left_new = timer1_current_left;
     }
 
-    timer1_current_left_new = timer1_current_left;
+    // Guard against divide-by-zero (and against a huge implausible spike) on the very first
+    // tick, before timer1_old_left has ever been set to a real prior value.
+    uint32_t deltaTicksLeft = timer1_current_left_new - timer1_old_left;
+    velocity_left = (deltaTicksLeft > 0) ? distance_per_encoder_tick / (deltaTicksLeft * time_per_tick) : 0.0;
 
-    velocity_left = distance_per_encoder_tick / ((timer1_current_left_new - timer1_old_left) * time_per_tick);
     overflow_counter = 0;
 }
 
@@ -106,14 +110,18 @@ void updateRight()
     timer1_current_right = TCNT1;
 
     if (overflow_counter > 0) {
-timer1_current_right_new =
+        timer1_current_right_new =
     (uint32_t)overflow_counter * 65536UL
     + timer1_current_right;
+    } else {
+        timer1_current_right_new = timer1_current_right;
     }
 
-    timer1_current_right_new = timer1_current_right;
+    // Guard against divide-by-zero (and against a huge implausible spike) on the very first
+    // tick, before timer1_old_right has ever been set to a real prior value.
+    uint32_t deltaTicksRight = timer1_current_right_new - timer1_old_right;
+    velocity_right = (deltaTicksRight > 0) ? distance_per_encoder_tick / (deltaTicksRight * time_per_tick) : 0.0;
 
-    velocity_right = distance_per_encoder_tick / ((timer1_current_right_new - timer1_old_right) * time_per_tick);
     overflow_counter = 0;
 }
 
