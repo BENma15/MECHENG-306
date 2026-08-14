@@ -1,11 +1,9 @@
 #include "Homing.h"
-
 #include <Motor.h>
-#include <LimitSwitch.h>
-
+#include <LimitSwitchDebounce.h>
 
 static const int HOMING_PWM = 150;
-
+static const unsigned long HOMING_STATE_DELAY_MS = 20;
 
 enum HomingState
 {
@@ -18,6 +16,8 @@ enum HomingState
 
 static HomingState homingState = HOMING_UP;
 
+static bool waiting = false;
+static unsigned long waitStart = 0;
 
 static void stopMotors()
 {
@@ -25,8 +25,6 @@ static void stopMotors()
     analogWrite(E2, 0);
 }
 
-
-// Up
 static void driveUp()
 {
     digitalWrite(M1, HIGH);
@@ -36,8 +34,6 @@ static void driveUp()
     analogWrite(E2, HOMING_PWM);
 }
 
-
-// Down
 static void driveDown()
 {
     digitalWrite(M1, LOW);
@@ -47,8 +43,6 @@ static void driveDown()
     analogWrite(E2, HOMING_PWM);
 }
 
-
-// Left
 static void driveLeft()
 {
     digitalWrite(M1, LOW);
@@ -58,8 +52,6 @@ static void driveLeft()
     analogWrite(E2, HOMING_PWM);
 }
 
-
-// Right
 static void driveRight()
 {
     digitalWrite(M1, HIGH);
@@ -69,21 +61,47 @@ static void driveRight()
     analogWrite(E2, HOMING_PWM);
 }
 
+static void startWait()
+{
+    stopMotors();
+
+    waiting = true;
+    waitStart = millis();
+}
+
+static bool waitFinished()
+{
+    return (millis() - waitStart) >= HOMING_STATE_DELAY_MS;
+}
 
 void homingStart()
 {
     stopMotors();
 
     homingState = HOMING_UP;
-}
 
+    waiting = false;
+    waitStart = 0;
+}
 
 HomingResult homingUpdate()
 {
     switch (homingState)
     {
-        // Home up
         case HOMING_UP:
+        {
+            if (waiting)
+            {
+                stopMotors();
+
+                if (!waitFinished())
+                {
+                    return HOMING_RUNNING;
+                }
+                waiting = false;
+                homingState = HOMING_BACKOFF_DOWN;
+                return HOMING_RUNNING;
+            }
 
             if (LimitSwitch_leftPressed() ||
                 LimitSwitch_rightPressed() ||
@@ -95,16 +113,28 @@ HomingResult homingUpdate()
 
             if (LimitSwitch_topPressed())
             {
-                stopMotors();
-                homingState = HOMING_BACKOFF_DOWN;
+                startWait();
                 return HOMING_RUNNING;
             }
-
             driveUp();
             return HOMING_RUNNING;
-
-        // Back off down
+        }
+        
         case HOMING_BACKOFF_DOWN:
+        {
+            if (waiting)
+            {
+                stopMotors();
+                
+                if (!waitFinished())
+                {
+                    return HOMING_RUNNING;
+                }
+
+                waiting = false;
+                homingState = HOMING_LEFT;
+                return HOMING_RUNNING;
+            }
 
             if (LimitSwitch_leftPressed() ||
                 LimitSwitch_rightPressed() ||
@@ -116,16 +146,27 @@ HomingResult homingUpdate()
 
             if (!LimitSwitch_topPressed())
             {
-                stopMotors();
-                homingState = HOMING_LEFT;
+                startWait();
                 return HOMING_RUNNING;
             }
-
             driveDown();
             return HOMING_RUNNING;
+        }
 
-        // Home left
         case HOMING_LEFT:
+        {
+            if (waiting)
+            {
+                stopMotors();
+                
+                if (!waitFinished())
+                {
+                    return HOMING_RUNNING;
+                }
+                waiting = false;
+                homingState = HOMING_BACKOFF_RIGHT;
+                return HOMING_RUNNING;
+            }
 
             if (LimitSwitch_topPressed() ||
                 LimitSwitch_rightPressed() ||
@@ -137,16 +178,27 @@ HomingResult homingUpdate()
 
             if (LimitSwitch_leftPressed())
             {
-                stopMotors();
-                homingState = HOMING_BACKOFF_RIGHT;
+                startWait();
                 return HOMING_RUNNING;
             }
-
             driveLeft();
             return HOMING_RUNNING;
+        }
 
-        // Back off right
         case HOMING_BACKOFF_RIGHT:
+        {
+            if (waiting)
+            {
+                stopMotors();
+                
+                if (!waitFinished())
+                {
+                    return HOMING_RUNNING;
+                }
+                waiting = false;
+                homingState = HOMING_DONE;
+                return HOMING_COMPLETE;
+            }
 
             if (LimitSwitch_topPressed() ||
                 LimitSwitch_rightPressed() ||
@@ -158,20 +210,19 @@ HomingResult homingUpdate()
 
             if (!LimitSwitch_leftPressed())
             {
-                stopMotors();
-                homingState = HOMING_DONE;
-                return HOMING_COMPLETE;
+                startWait();
+                return HOMING_RUNNING;
             }
-
             driveRight();
             return HOMING_RUNNING;
+        }
 
         case HOMING_DONE:
-
+        {
             stopMotors();
             return HOMING_COMPLETE;
+        }
     }
-
     stopMotors();
     return HOMING_FAULT;
 }
