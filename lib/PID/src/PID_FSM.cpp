@@ -47,7 +47,7 @@ const double SYNC_TARGET_MIN = 5.0; // below this target velocity, sync correcti
 
 // Time Control Variables
 uint32_t lastControlLoopMicros = 0;
-const uint32_t CONTROL_LOOP_INTERVAL_US = 20000;            // 50Hz
+const uint32_t CONTROL_LOOP_INTERVAL_US = 2500;            // 400Hz
 const double dt = CONTROL_LOOP_INTERVAL_US / 1000000.0;     // Seconds per control loop tick
 
 // Motor Direction Variables
