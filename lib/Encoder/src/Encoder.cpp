@@ -25,6 +25,9 @@ const int8_t encTable[16] = {
 // Distance represented by one encoder tick (mm)
 double distance_per_encoder_tick = 0.006089;
 
+static long prevLeftCount = 0;
+static long prevRightCount = 0;
+
 void Encoder_Init() {
     pinMode(L_ENCA, INPUT_PULLUP);
     pinMode(L_ENCB, INPUT_PULLUP);
@@ -74,6 +77,20 @@ long Encoder_getRightEncoderCount() {
     count = countB;
     sei();
     return count;
+}
+
+double Encoder_getLeftVelocity(double dt) {
+    long current = Encoder_getLeftEncoderCount();
+    double velocity = (current - prevLeftCount) * distance_per_encoder_tick / dt;
+    prevLeftCount = current;
+    return velocity; // mm/s
+}
+
+double Encoder_getRightVelocity(double dt) {
+    long current = Encoder_getRightEncoderCount();
+    double velocity = (current - prevRightCount) * distance_per_encoder_tick / dt;
+    prevRightCount = current;
+    return velocity; // mm/s
 }
 
 ISR(INT2_vect) { updateRight(); } // pin 21 = R_ENCB
