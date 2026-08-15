@@ -1,6 +1,6 @@
 #include "Homing.h"
 #include <Motor.h>
-#include <LimitSwitchDebounce.h>
+#include <LimitSwitch.h>
 
 static const int HOMING_PWM = 150;
 static const unsigned long HOMING_STATE_DELAY_MS = 20;

@@ -21,6 +21,8 @@ extern const int R_ENCB; // INT0
 extern volatile long leftEncoderCount;
 extern volatile long rightEncoderCount;
 
+extern double distance_per_encoder_tick;
+
 void Encoder_Init();
 void Encoder_updateLeft();
 void Encoder_updateRight();
