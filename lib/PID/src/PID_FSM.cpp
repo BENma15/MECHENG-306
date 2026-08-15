@@ -27,11 +27,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 0.1, ki_left = 0.1, kd_left = 0.1;
+double kp_left = 10, ki_left = 0, kd_left = 0;
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 0.1, ki_right = 0.1, kd_right = 0.1;
+double kp_right = 10, ki_right = 0, kd_right = 0;
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
@@ -40,7 +40,7 @@ double integral_sync = 0, lastError_sync = 0;
 
 // Time Control Variables
 uint32_t lastControlLoopMicros = 0;
-const uint32_t CONTROL_LOOP_INTERVAL_US = 20000;            // 50Hz
+const uint32_t CONTROL_LOOP_INTERVAL_US = 2500;            // 50Hz
 const double dt = CONTROL_LOOP_INTERVAL_US / 1000000.0;     // Seconds per control loop tick
 
 // Motor Direction Variables
@@ -227,5 +227,8 @@ void move_FSM(int x, int y, int vf) {
         // Motor movement
         String leftSuccess = setLeftMotor(leftDir, leftPWM);
         String rightSuccess = setRightMotor(rightDir, rightPWM);
+        Serial.println(leftPWM);
+        Serial.println(rightPWM);
+
     } while (moveActive);
 }
