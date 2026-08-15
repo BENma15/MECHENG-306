@@ -76,18 +76,7 @@ long Encoder_getRightEncoderCount() {
     return count;
 }
 
-ISR(INT0_vect) {
-    updateRight();
-}
-
-ISR(INT1_vect) {
-    updateRight();
-}
-
-ISR(INT2_vect) {
-    updateLeft();
-}
-
-ISR(INT3_vect) {
-    updateLeft();
-}
+ISR(INT2_vect) { updateRight(); } // pin 21 = R_ENCB
+ISR(INT3_vect) { updateRight(); } // pin 20 = R_ENCA
+ISR(INT4_vect) { updateLeft();  } // pin 19 = L_ENCB
+ISR(INT5_vect) { updateLeft();  } // pin 18 = L_ENCA
