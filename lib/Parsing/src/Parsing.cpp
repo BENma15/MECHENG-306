@@ -31,7 +31,7 @@ int readLine(void) {
             inputBuffer += c;
         }
     }
-    return (!validCommand && !flag) ;    // will be 1 (error) if command reads complete line and command invalid
+    return (validCommand) ;    // will be 1 (error) if command reads complete line and command invalid
 }
 
 
