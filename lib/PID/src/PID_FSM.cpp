@@ -13,8 +13,6 @@ double T1 = 0.05;
 double T2 = 0.10;
 double TA = T1 + T2 + T1;
 
-double mmPerCount = 0.006089;
-
 // Movement Variables
 double moveJ = 0;
 double moveVf = 0;
@@ -22,12 +20,6 @@ double moveT4 = 0;
 double moveUnitX = 0;
 double moveUnitY = 0;
 double moveStartTime = 0;
-double moveDistance = 0;
-
-// Distance-tracking variables (for stopping on distance instead of time)
-long moveStartCountA = 0;
-long moveStartCountB = 0;
-const double DISTANCE_TOLERANCE_MM = 0.5;
 
 bool moveActive = false;
 bool moveStarted = false;
@@ -35,21 +27,20 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 5, ki_left = 0.5, kd_left = 0;
+double kp_left = 0.1, ki_left = 0.1, kd_left = 0.1;
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 5, ki_right = 0.5, kd_right = 0;
+double kp_right = 0.1, ki_right = 0.1, kd_right = 0.1;
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
 double kp_sync = 0, ki_sync = 0, kd_sync = 0;
 double integral_sync = 0, lastError_sync = 0;
-const double SYNC_TARGET_MIN = 5.0; // below this target velocity, sync correction is skipped
 
 // Time Control Variables
 uint32_t lastControlLoopMicros = 0;
-const uint32_t CONTROL_LOOP_INTERVAL_US = 2500;            // 50Hz
+const uint32_t CONTROL_LOOP_INTERVAL_US = 20000;            // 50Hz
 const double dt = CONTROL_LOOP_INTERVAL_US / 1000000.0;     // Seconds per control loop tick
 
 // Motor Direction Variables
@@ -91,11 +82,7 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t) {
 void plan_FSM(double x, double y, double vf_target) {
     // Find hypotenuse
     double S = sqrt(x * x + y * y);
-    if (S <= 0.0) {
-    moveActive = false;
-    moveStarted = false;
-    return;
-}
+    if (S <= 0.0) return;
 
     // Both the movement vectors
     moveUnitX = x / S;
@@ -122,20 +109,14 @@ void plan_FSM(double x, double y, double vf_target) {
 
     // Start move time timer
     moveT4 = t4;
-    moveDistance = S;
     moveStartTime = millis() / 1000.0;
-
-    // TODO: replace getCountA()/getCountB() with whatever your Encoder.h actually exposes
-    // for raw encoder counts on the A and B CoreXY axes.
-    moveStartCountA = Encoder_getLeftEncoderCount();
-    moveStartCountB = Encoder_getRightEncoderCount();
-
     moveActive = true;
     return;
 }
 
 // Main PID loop.
 void move_FSM(int x, int y, int vf) {
+    do {
         // If movement has not started then set all the errors to 0 and call the movement plan
         if (!moveStarted) {
             moveStarted = true;
@@ -158,7 +139,7 @@ void move_FSM(int x, int y, int vf) {
         // call the motors too frequently.
         uint32_t nowMicros = micros();
         if (nowMicros - lastControlLoopMicros < CONTROL_LOOP_INTERVAL_US) {
-            return;
+            continue;
         }
         lastControlLoopMicros = nowMicros;
 
@@ -166,20 +147,9 @@ void move_FSM(int x, int y, int vf) {
         double t = (millis() / 1000.0) - moveStartTime;
         double V = velocityProfile_FSM(moveJ, moveVf, moveT4, t);
 
-        // Distance actually travelled so far, computed from encoder counts via CoreXY inverse kinematics.
-        // TODO: replace getCountA()/getCountB() and mmPerCount with your actual encoder API / conversion.
-        long countA = Encoder_getLeftEncoderCount();
-        long countB = Encoder_getRightEncoderCount();
-        double dA = (countA - moveStartCountA) * mmPerCount;
-        double dB = (countB - moveStartCountB) * mmPerCount;
-        double traveledX = (dA + dB) / 2.0;
-        double traveledY = (dA - dB) / 2.0;
-        double distanceTraveled = sqrt(traveledX * traveledX + traveledY * traveledY);
-
-        // Stop once the planned distance has actually been covered, not just once time is up.
-        bool distanceReached = distanceTraveled >= (moveDistance - DISTANCE_TOLERANCE_MM);
-
-        if (distanceReached) {
+        // This currently stops the motors once the time is finsihed, I think we should change this
+        // to when the distance is met and not time.
+        if (t >= TA + moveT4 + TA) {
             moveActive = false;
             moveStarted = false;
 
@@ -209,14 +179,10 @@ void move_FSM(int x, int y, int vf) {
         double outputRight = kp_right * error_right + ki_right * integral_right + kd_right * derivative_right;
         lastError_right = error_right;
 
-        // sync PID - only correct when both targets are large enough that the velocity ratio is meaningful.
-        // Near zero target velocity (start/end of move) the ratio blows up and causes spiking/stuttering.
-        double percentError = 0.0;
-        if (fabs(targetLeft) > SYNC_TARGET_MIN && fabs(targetRight) > SYNC_TARGET_MIN) {
-            double ratioLeft = velocity_left / targetLeft;
-            double ratioRight = velocity_right / targetRight;
-            percentError = (ratioLeft - ratioRight) * 100.0;
-        }
+        // sync PID
+        double ratioLeft = (targetLeft != 0.0) ? (velocity_left / targetLeft)  : 1.0;
+        double ratioRight = (targetRight != 0.0) ? (velocity_right / targetRight) : 1.0;
+        double percentError = (ratioLeft - ratioRight) * 100.0;
         integral_sync += percentError * dt;
         double derivative_sync = (percentError - lastError_sync) / dt;
         double syncCorrection = kp_sync * percentError + ki_sync * integral_sync + kd_sync * derivative_sync;
@@ -261,4 +227,5 @@ void move_FSM(int x, int y, int vf) {
         // Motor movement
         String leftSuccess = setLeftMotor(leftDir, leftPWM);
         String rightSuccess = setRightMotor(rightDir, rightPWM);
+    } while (moveActive);
 }

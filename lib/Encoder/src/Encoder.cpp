@@ -27,7 +27,7 @@ const int8_t encTable[16] = {
     0, +1, -1, 0
 };
 
-double velocity_left = 0; // In mm/s, signed: positive = forward, negative = reverse
+double velocity_left = 0; // In mm/s
 double velocity_right = 0;
 double distance_per_encoder_tick = 0.006089;
 
@@ -72,8 +72,7 @@ void updateLeft()
     // Left shift the current state by 2 bits and insert new state in the 2 LSB's
     uint8_t index = (stateA << 2) | newState;
     // Looking at table to figure out which way the motor is spinning
-    int8_t stepDir = encTable[index];
-    countA += stepDir;
+    countA += encTable[index];
     // Set current state to previous state
     stateA = newState;
 
@@ -84,21 +83,11 @@ void updateLeft()
         timer1_current_left_new =
     (uint32_t)overflow_counter * 65536UL
     + timer1_current_left;
-    } else {
-        timer1_current_left_new = timer1_current_left;
     }
 
-    // Guard against divide-by-zero on the very first tick, and apply the direction from
-    // encTable so velocity is signed (positive = forward, negative = reverse) instead of
-    // always reporting a positive magnitude regardless of which way the motor is turning.
-    uint32_t deltaTicksLeft = timer1_current_left_new - timer1_old_left;
-    if (deltaTicksLeft > 0 && stepDir != 0) {
-        double magnitude = distance_per_encoder_tick / (deltaTicksLeft * time_per_tick);
-        velocity_left = (stepDir > 0) ? magnitude : -magnitude;
-    } else {
-        velocity_left = 0.0;
-    }
+    timer1_current_left_new = timer1_current_left;
 
+    velocity_left = distance_per_encoder_tick / ((timer1_current_left_new - timer1_old_left) * time_per_tick);
     overflow_counter = 0;
 }
 
@@ -110,32 +99,21 @@ void updateRight()
 
     uint8_t newState = (a << 1) | b;
     uint8_t index = (stateB << 2) | newState;
-    int8_t stepDir = encTable[index];
-    countB += stepDir;
+    countB += encTable[index];
     stateB = newState;
 
     timer1_old_right = timer1_current_right;
     timer1_current_right = TCNT1;
 
     if (overflow_counter > 0) {
-        timer1_current_right_new =
+timer1_current_right_new =
     (uint32_t)overflow_counter * 65536UL
     + timer1_current_right;
-    } else {
-        timer1_current_right_new = timer1_current_right;
     }
 
-    // Guard against divide-by-zero on the very first tick, and apply the direction from
-    // encTable so velocity is signed (positive = forward, negative = reverse) instead of
-    // always reporting a positive magnitude regardless of which way the motor is turning.
-    uint32_t deltaTicksRight = timer1_current_right_new - timer1_old_right;
-    if (deltaTicksRight > 0 && stepDir != 0) {
-        double magnitude = distance_per_encoder_tick / (deltaTicksRight * time_per_tick);
-        velocity_right = (stepDir > 0) ? magnitude : -magnitude;
-    } else {
-        velocity_right = 0.0;
-    }
+    timer1_current_right_new = timer1_current_right;
 
+    velocity_right = distance_per_encoder_tick / ((timer1_current_right_new - timer1_old_right) * time_per_tick);
     overflow_counter = 0;
 }
 
