@@ -58,6 +58,10 @@ void setupLimitSwitches()
     topState    = digitalRead(TOP_LIMIT_PIN);
     bottomState = digitalRead(BOTTOM_LIMIT_PIN);
 
+    if (leftState || rightState || topState || bottomState) {
+        FSM_triggerFault();
+    }
+
     unsigned long now = millis();
 
     leftLastEdgeTime   = now - DEBOUNCE_TIME_MS;
@@ -72,10 +76,7 @@ void setupLimitSwitches()
     PCMSK0 |= (1 << PCINT6);
     PCMSK0 |= (1 << PCINT7);
 
-    // Clear any pending interrupt.
     PCIFR |= (1 << PCIF0);
-
-    // Enable the PCINT0 interrupt group.
     PCICR |= (1 << PCIE0);
 
     sei();
