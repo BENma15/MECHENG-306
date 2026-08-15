@@ -152,6 +152,7 @@ String returnToken(String line, char Letter) {
 
     if (tokenEnd == letterPos) {
         // Error (No value after letter)
+        Serial.println("Error 1");
         return "ERROR";
     }
 
@@ -159,9 +160,10 @@ String returnToken(String line, char Letter) {
     String token = line.substring(letterPos, (tokenEnd + 1));   // substring excludes end, hence (tokenEnd + 1)
 
     if ((Letter == 'M' || Letter == 'G' || Letter == 'F') && token.substring(1).toDouble() < 0) {
+        Serial.println("Error 2");
         return "ERROR";
     }
-
+    Serial.print(token);
     return token;
 
 }

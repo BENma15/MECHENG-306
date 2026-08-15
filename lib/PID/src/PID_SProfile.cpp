@@ -37,10 +37,10 @@ bool moveActive = false;
 
 bool triangleProfile = false;
 
-double kp_left = 1, ki_left = 0, kd_left = 0;
+double kp_left = 30, ki_left = 0, kd_left = 0;
 double integral_left = 0, lastError_left = 0;
 
-double kp_right = 1, ki_right = 0, kd_right = 0;
+double kp_right = 30, ki_right = 0, kd_right = 0;
 double integral_right = 0, lastError_right = 0;
 
 double kp_sync = 0, ki_sync = 0, kd_sync = 0;

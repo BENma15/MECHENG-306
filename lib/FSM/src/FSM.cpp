@@ -61,14 +61,16 @@ static void handleParsing() {
     Xpos += distanceToCounts(Parsing_getToken(X).GetValue());
     Ypos += distanceToCounts(Parsing_getToken(Y).GetValue());
 
-    if (Xpos >= X_MAX || Xpos <= X_MIN || Ypos >= Y_MAX || Ypos <= Y_MIN) {
-        resetTokenArray();
-        currentState = STATE_IDLE;  // command would take 
-        return;
-    } else {
-        currentState = STATE_MOTION;
-        return;
-    }
+    // if (Xpos >= X_MAX || Xpos <= X_MIN || Ypos >= Y_MAX || Ypos <= Y_MIN) {
+    //     resetTokenArray();
+    //     currentState = STATE_IDLE;  // command would take 
+    //     return;
+    // } else {
+    //     currentState = STATE_MOTION;
+    //     return;
+    // }
+    currentState = STATE_MOTION;
+    return;
 
 }
 
