@@ -164,6 +164,7 @@ void move_FSM(int x, int y, int vf) {
         double targetRight = V * (moveUnitX - moveUnitY);
 
         // NEED TO ADD ANTI-WINDUP FOR ALL OF THEM
+        // Also need to implement triangular profile
 
         // left velocity PID
         double error_left = targetLeft - velocity_left;
