@@ -192,6 +192,11 @@ void move_FSM(int x, int y, int vf) {
         double finalOutputLeft = outputLeft - syncCorrection;
         double finalOutputRight = outputRight + syncCorrection;
 
+        Serial.print("Right Integral: ")
+        Serial.println(integral_right)
+        Serial.print("Left Integral: ")
+        Serial.println(integral_left)
+
         // Finds the direction of the motors
         if (finalOutputLeft > 0) {
             leftDir = 1;
