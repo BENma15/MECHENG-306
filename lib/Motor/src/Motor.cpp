@@ -20,7 +20,7 @@ String setLeftMotor(int8_t dir, int pwm) {
         return "STOP";
     }
 
-    digitalWrite(M1, dir > 0 ? LOW : HIGH);
+    digitalWrite(M1, dir > 0 ? HIGH : LOW);
     analogWrite(E1, pwm);
 
     return "SUCCESS";
@@ -36,7 +36,7 @@ String setRightMotor(int8_t dir, int pwm) {
         return "STOP";
     }
     
-    digitalWrite(M2, dir > 0 ? LOW : HIGH);
+    digitalWrite(M2, dir > 0 ? HIGH : LOW);
     analogWrite(E2, pwm);
 
     return "SUCCESS";

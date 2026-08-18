@@ -163,7 +163,7 @@ String returnToken(String line, char Letter) {
         Serial.println("Error 2");
         return "ERROR";
     }
-    Serial.print(token);
+    //Serial.print(token);
     return token;
 
 }

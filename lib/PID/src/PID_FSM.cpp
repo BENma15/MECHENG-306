@@ -113,7 +113,6 @@ void plan_FSM(double x, double y, double vf_target) {
 
 // Main PID loop.
 void move_FSM(int x, int y, int vf) {
-    do {
         // If movement has not started then set all the errors to 0 and call the movement plan
         if (!moveStarted) {
             moveStarted = true;
@@ -136,7 +135,7 @@ void move_FSM(int x, int y, int vf) {
         // call the motors too frequently.
         uint32_t nowMicros = micros();
         if (nowMicros - lastControlLoopMicros < CONTROL_LOOP_INTERVAL_US) {
-            continue;
+            return;
         }
         lastControlLoopMicros = nowMicros;
 
@@ -192,10 +191,10 @@ void move_FSM(int x, int y, int vf) {
         double finalOutputLeft = outputLeft - syncCorrection;
         double finalOutputRight = outputRight + syncCorrection;
 
-        Serial.print("Right Integral: ")
-        Serial.println(integral_right)
-        Serial.print("Left Integral: ")
-        Serial.println(integral_left)
+        //Serial.print("Right Integral: ")
+        //Serial.println(integral_right)
+        //Serial.print("Left Integral: ")
+        //Serial.println(integral_left)
 
         // Finds the direction of the motors
         if (finalOutputLeft > 0) {
@@ -233,8 +232,8 @@ void move_FSM(int x, int y, int vf) {
         // Motor movement
         String leftSuccess = setLeftMotor(leftDir, leftPWM);
         String rightSuccess = setRightMotor(rightDir, rightPWM);
-        Serial.println(leftPWM);
-        Serial.println(rightPWM);
+        //Serial.println(leftPWM);
+        //Serial.println(rightPWM);
 
-    } while (moveActive);
+    
 }

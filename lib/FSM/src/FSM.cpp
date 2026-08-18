@@ -6,7 +6,7 @@
 #include <GcodeToken.h>
 #include <LimitSwitch.h>
 #include <PID_FSM.h>
-
+#include <Motor.h>
 static SystemState currentState = STATE_IDLE;   // System begins in IDLE state
 // static MotionSubstate motionState = MOTION_ACCEL;   // Motion_state begins in Acceloration
 
@@ -110,6 +110,8 @@ static void handleHoming() {
 
 
 static void handleFault() {
+    setLeftMotor(0,0);
+    setRightMotor(0,0);
     
     if (Serial.available() > 0) {
 
