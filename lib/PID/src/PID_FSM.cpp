@@ -26,12 +26,12 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 12, ki_left = 0.1, kd_left = 0;
-double integral_left = 0, lastError_left = 0;
+double kp_left = 12, ki_left = 0.1, kd_left = 0, kff_left = 6; //all some variation of mm/s
+double integral_left = 0, lastError_left = 0; //kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 12, ki_right = 0.1, kd_right = 0;
-double integral_right = 0, lastError_right = 0;
+double kp_right = 12, ki_right = 0.1, kd_right = 0, kff_right = 6; //all some variation of mm/s (ie really small)
+double integral_right = 0, lastError_right = 0; //kff is k_feedforward
 
 // Sync PID Variables
 double kp_sync = 0, ki_sync = 0, kd_sync = 0;
@@ -267,11 +267,16 @@ void move_FSM(int x, int y, int vf)
     else if (targetRight < 0)
         rightTargetDir = -1;
 
+    double feedforwardLeft = targetLeft * kff_left;
+    double feedforwardRight = targetRight * kff_right;
+
     double finalOutputLeft =
-        outputLeft - syncCorrection * leftTargetDir;
+        outputLeft - syncCorrection * leftTargetDir + feedforwardLeft; //<--- feedforward
 
     double finalOutputRight =
-        outputRight + syncCorrection * rightTargetDir;
+        outputRight + syncCorrection * rightTargetDir + feedforwardRight; //<--- feedforward 
+    //to get feedforward the target is being added to the output, and the pid will work to correct the error of the target
+    //1mm/s = kff pwm so if kff was 6 and the motor is told to go at "1mm/s" motors will recieve +6 pwm
 
     // Finds the direction of the motors
     if (finalOutputLeft > 0)
