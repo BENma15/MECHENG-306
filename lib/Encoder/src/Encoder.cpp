@@ -8,11 +8,13 @@ const int L_ENCB = 19; // INT2
 const int R_ENCA = 20; // INT1
 const int R_ENCB = 21; // INT0
 
-// Current Encoder States (dont need to be in header)
-volatile long countA = 0;
-volatile long countB = 0;
+// Current Encoder States 
 volatile uint8_t stateA = 0;
 volatile uint8_t stateB = 0;
+
+// encoder counters (single definition)
+volatile long countA = 0;
+volatile long countB = 0;
 
 // Predetermined table to see which way the motor is spinning
 const int8_t encTable[16] = {
