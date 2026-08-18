@@ -27,6 +27,7 @@ void setup() {
     FSM_init();
     setupLimitSwitches();
     Motor_Init();
+    initialiseTokenArray();
     
 
     // MotorMoveConfig config = {4, 5, 6, 7, 255, 1000};

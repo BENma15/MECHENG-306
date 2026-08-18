@@ -105,9 +105,12 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t)
 void plan_FSM(double x, double y, double vf_target)
 {
     double S = sqrt(x * x + y * y);
-    if (S <= 0.0)
-        return;
 
+    if (S <= 0.0){
+        moveActive = false;
+        moveStarted = false;
+        return;
+    }
     moveUnitX = x / S;
     moveUnitY = y / S;
 

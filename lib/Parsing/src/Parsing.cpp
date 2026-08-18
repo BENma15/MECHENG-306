@@ -4,6 +4,7 @@ String inputBuffer = "";
 GcodeToken TokenArray[MAX_TOKENS];
 
 //bugs: g01 x----25 y----25 f25 is a valid input
+//sending improper gcode command as the first command locks the state into motion
 //a speed of 0 can be submitted, this shouldnt be possible
 //sending m999 in idle state sends the state to motion
 
