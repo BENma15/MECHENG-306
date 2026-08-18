@@ -38,6 +38,7 @@ static void handleParsing() {
 
     // check if command was invalid
     if (err == 1) {
+        resetTokenArray();
         currentState = STATE_IDLE;
         return;
     }
@@ -103,6 +104,7 @@ static void handleHoming() {
         currentState = STATE_IDLE;
         moveActive = false;  // Reset moveActive to false after homing is complete
         moveStarted = false; // Reset moveStarted to false after homing is complete
+        resetTokenArray();
         return;
     }
 }
@@ -122,7 +124,9 @@ static void handleFault() {
 
         GcodeToken token = Parsing_getToken(M);
         if (token.GetLetter() == 'M' && token.GetValue() == 999) {
+            resetTokenArray();
             currentState = STATE_IDLE;
+            return;
         }
     }
 }

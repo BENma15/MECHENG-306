@@ -3,13 +3,15 @@
 String inputBuffer = "";
 GcodeToken TokenArray[MAX_TOKENS];
 
+//bugs: g01 x----25 y----25 f25 is a valid input
+
 
 /* inintialise tokenArray */
 void initialiseTokenArray(void) {
     TokenArray[G].Set("G0");
     TokenArray[X].Set("X0");
     TokenArray[Y].Set("Y0");
-    TokenArray[F_token].Set("F0");
+    TokenArray[F_token].Set("F25");
     TokenArray[M].Set("M0");
 }
 
