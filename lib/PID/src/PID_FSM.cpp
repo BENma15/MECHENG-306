@@ -26,12 +26,12 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 12, ki_left = 0.1, kd_left = 0, kff_left = 6; //all some variation of mm/s
-double integral_left = 0, lastError_left = 0; //kff is k_feedforward
+double kp_left = 0, ki_left = 0, kd_left = 0, kff_left = 4; // all some variation of mm/s
+double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 12, ki_right = 0.1, kd_right = 0, kff_right = 6; //all some variation of mm/s (ie really small)
-double integral_right = 0, lastError_right = 0; //kff is k_feedforward
+double kp_right = 0, ki_right = 0, kd_right = 0, kff_right = 4; // all some variation of mm/s 
+double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
 double kp_sync = 0, ki_sync = 0, kd_sync = 0;
@@ -106,7 +106,8 @@ void plan_FSM(double x, double y, double vf_target)
 {
     double S = sqrt(x * x + y * y);
 
-    if (S <= 0.0){
+    if (S <= 0.0)
+    {
         moveActive = false;
         moveStarted = false;
         return;
@@ -146,7 +147,7 @@ void plan_FSM(double x, double y, double vf_target)
 void move_FSM(int x, int y, int vf)
 {
     // If movement has not started then set all the errors to 0 and call the movement plan
-    if (!moveStarted)
+    if (moveStarted == false)
     {
         moveStarted = true;
 
@@ -160,6 +161,10 @@ void move_FSM(int x, int y, int vf)
         lastError_sync = 0;
 
         plan_FSM(x, y, vf);
+        if (!moveActive)
+        {
+            return;
+        }
 
         lastControlLoopMicros = micros();
 
@@ -215,15 +220,16 @@ void move_FSM(int x, int y, int vf)
         return;
     }
 
-     if (t >= TA + moveT4 + TA + 5) {
-            moveActive = false;
-            moveStarted = false;
+    if (t >= TA + moveT4 + TA + 5)
+    {
+        moveActive = false;
+        moveStarted = false;
 
-            setLeftMotor(0, 0);
-            setRightMotor(0, 0);
-            Serial.println("Move timed out, stopping motors.");
-            return;
-        }
+        setLeftMotor(0, 0);
+        setRightMotor(0, 0);
+        Serial.println("Move timed out, stopping motors.");
+        return;
+    }
 
     // Splits target velocity into left and right motor target velocities using unit vectors
     double targetLeft;
@@ -277,9 +283,9 @@ void move_FSM(int x, int y, int vf)
         outputLeft - syncCorrection * leftTargetDir + feedforwardLeft; //<--- feedforward
 
     double finalOutputRight =
-        outputRight + syncCorrection * rightTargetDir + feedforwardRight; //<--- feedforward 
-    //to get feedforward the target is being added to the output, and the pid will work to correct the error of the target
-    //1mm/s = kff pwm so if kff was 6 and the motor is told to go at "1mm/s" motors will recieve +6 pwm
+        outputRight + syncCorrection * rightTargetDir + feedforwardRight; //<--- feedforward
+    // to get feedforward the target is being added to the output, and the pid will work to correct the error of the target
+    // 1mm/s = kff pwm so if kff was 6 and the motor is told to go at "1mm/s" motors will recieve +6 pwm
 
     // Finds the direction of the motors
     if (finalOutputLeft > 0)
@@ -326,8 +332,12 @@ void move_FSM(int x, int y, int vf)
     String leftSuccess = setLeftMotor(leftDir, leftPWM);
     String rightSuccess = setRightMotor(rightDir, rightPWM);
 
-    //Serial.println(leftPositionError);
-    //Serial.println(rightPositionError);
+    // Serial.println(leftPositionError);
+    // Serial.println(rightPositionError);
+    // Serial.println(moveStarted);
+
+    Serial.println(error_left);
+    Serial.println(error_right);
 
     // Serial.println(leftPWM);
     // Serial.println(rightPWM);

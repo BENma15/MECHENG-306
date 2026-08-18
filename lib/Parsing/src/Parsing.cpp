@@ -4,7 +4,6 @@ String inputBuffer = "";
 GcodeToken TokenArray[MAX_TOKENS];
 
 //bugs: g01 x----25 y----25 f25 is a valid input
-//sending improper gcode command as the first command locks the state into motion
 //a speed of 0 can be submitted, this shouldnt be possible
 //sending m999 in idle state sends the state to motion
 
@@ -164,7 +163,7 @@ String returnToken(String line, char Letter) {
 
     String token = line.substring(letterPos, (tokenEnd + 1));   // substring excludes end, hence (tokenEnd + 1)
 
-    if ((Letter == 'M' || Letter == 'G' || Letter == 'F') && token.substring(1).toDouble() < 0) {
+    if ((Letter == 'M' || Letter == 'G' || Letter == 'F') && token.substring(1).toDouble() <= 0) { //this one doesn't have a proper error code for 0 f
         Serial.println("Error 2");
         return "ERROR";
     }
