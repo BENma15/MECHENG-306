@@ -26,11 +26,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 7, ki_left = 0.01, kd_left = 0.001;
+double kp_left = 12, ki_left = 0.1, kd_left = 0;
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 7, ki_right = 0.01, kd_right = 0.001;
+double kp_right = 12, ki_right = 0.1, kd_right = 0;
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
@@ -53,7 +53,7 @@ long moveCurrentRightCount = 0;
 long moveTargetLeftCount = 0;
 long moveTargetRightCount = 0;
 
-const long tolerance = 20;
+const long tolerance = 100;
 
 // Returns the target velocity at different stages in the movement, using an s-curve profile.
 double velocityProfile_FSM(double J, double Vf, double t4, double t)
@@ -160,21 +160,21 @@ void move_FSM(int x, int y, int vf)
 
         lastControlLoopMicros = micros();
 
-        moveCurrentLeftCount = countA;
-        moveCurrentRightCount = countB;
-
-        long targetLeftCountChange = x + y;
-        long targetRightCountChange = x - y;
+        cli();
+        moveCurrentLeftCount = Encoder_getLeftEncoderCount();
+        moveCurrentRightCount = Encoder_getRightEncoderCount();
+        sei();
 
         moveTargetLeftCount =
-            moveCurrentLeftCount + targetLeftCountChange;
+            moveCurrentLeftCount + distanceToCounts(x) + distanceToCounts(y);
 
         moveTargetRightCount =
-            moveCurrentRightCount + targetRightCountChange;
+            moveCurrentRightCount + distanceToCounts(x) - distanceToCounts(y);
     }
-
+    cli();
     moveCurrentLeftCount = countA;
     moveCurrentRightCount = countB;
+    sei();
 
     // Ensures there is a constant frequency of 50Hz which we are using for the PID loop as to not
     // call the motors too frequently.
@@ -212,9 +212,22 @@ void move_FSM(int x, int y, int vf)
         return;
     }
 
+     if (t >= TA + moveT4 + TA + 5) {
+            moveActive = false;
+            moveStarted = false;
+
+            setLeftMotor(0, 0);
+            setRightMotor(0, 0);
+            Serial.println("Move timed out, stopping motors.");
+            return;
+        }
+
     // Splits target velocity into left and right motor target velocities using unit vectors
-    double targetLeft = V * (moveUnitX + moveUnitY);
-    double targetRight = V * (moveUnitX - moveUnitY);
+    double targetLeft;
+    double targetRight;
+
+    targetLeft = V * (moveUnitX + moveUnitY);
+    targetRight = V * (moveUnitX - moveUnitY);
 
     // NEED TO ADD ANTI-WINDUP FOR ALL OF THEM
 
@@ -241,8 +254,24 @@ void move_FSM(int x, int y, int vf)
     double syncCorrection = kp_sync * percentError + ki_sync * integral_sync + kd_sync * derivative_sync;
     lastError_sync = percentError;
 
-    double finalOutputLeft = outputLeft - syncCorrection;
-    double finalOutputRight = outputRight + syncCorrection;
+    int leftTargetDir = 0;
+    int rightTargetDir = 0;
+
+    if (targetLeft > 0)
+        leftTargetDir = 1;
+    else if (targetLeft < 0)
+        leftTargetDir = -1;
+
+    if (targetRight > 0)
+        rightTargetDir = 1;
+    else if (targetRight < 0)
+        rightTargetDir = -1;
+
+    double finalOutputLeft =
+        outputLeft - syncCorrection * leftTargetDir;
+
+    double finalOutputRight =
+        outputRight + syncCorrection * rightTargetDir;
 
     // Finds the direction of the motors
     if (finalOutputLeft > 0)
@@ -288,6 +317,10 @@ void move_FSM(int x, int y, int vf)
     // Motor movement
     String leftSuccess = setLeftMotor(leftDir, leftPWM);
     String rightSuccess = setRightMotor(rightDir, rightPWM);
+
+    //Serial.println(leftPositionError);
+    //Serial.println(rightPositionError);
+
     // Serial.println(leftPWM);
     // Serial.println(rightPWM);
 }

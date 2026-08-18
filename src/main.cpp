@@ -39,7 +39,7 @@ void setup() {
 
 
 void loop() {
-   FSM_update(); 
+    FSM_update();
 }
 
 //1 is cw, 0 is stop, -1 is ccw
