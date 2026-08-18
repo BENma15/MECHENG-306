@@ -10,8 +10,8 @@ void initialiseTokenArray(void) {
     TokenArray[X].Set("X0");
     TokenArray[Y].Set("Y0");
     TokenArray[F_token].Set("F0");
+    TokenArray[M].Set("M0");
 }
-//bug rn is that you can only ever send 1 command and then never again
 
 /* reads line from arduino serial buffer into input buffer */
 int readLine(void) {
@@ -193,6 +193,7 @@ GcodeToken Parsing_getToken(int index) {
 
 
 void resetTokenArray() {
+    TokenArray[G].Set("G0");
     TokenArray[M].Set("M0");
     TokenArray[X].Set("X0");
     TokenArray[Y].Set("Y0");

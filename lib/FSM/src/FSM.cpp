@@ -30,7 +30,6 @@ static void handleIdle() {  // Idle --> Parsing. Event: Serial buffer recieves i
 
 
 static void handleParsing() {
-
     int err = readLine();
     if (err == 2) {
         // stay in Parsing
