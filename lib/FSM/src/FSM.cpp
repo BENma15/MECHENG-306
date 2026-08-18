@@ -51,6 +51,8 @@ static void handleParsing() {
         return;
     }
 
+    //bounds checking needs to be implemented after homing and pid are finished
+
     // check if G01 command will hit a limit switch
     /* ASSUMING WE CHANGE 0,0 TO BOTTOM LEFT!!! */ // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<**************
     long left = Encoder_getLeftEncoderCount() ;
