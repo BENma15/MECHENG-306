@@ -25,7 +25,7 @@ const int8_t encTable[16] = {
 };
 
 // Distance represented by one encoder tick (mm)
-double distance_per_encoder_tick = 0.006089;
+double distance_per_encoder_tick = 0.0045197;
 
 static long prevLeftCount = 0;
 static long prevRightCount = 0;
@@ -37,11 +37,9 @@ void Encoder_Init() {
     pinMode(R_ENCB, INPUT_PULLUP);
 
     cli();
-    EIMSK |= (1 << INT2) | (1 << INT3) | (1 << INT4) | (1 << INT5);
+    EIMSK |= (1 << INT0) | (1 << INT1) | (1 << INT2) | (1 << INT3);
 
-    // "Any logical change" mode: ISCn0 = 1, ISCn1 = 0
-    EICRA |= (1 << ISC20) | (1 << ISC30); // INT2, INT3 live in EICRA
-    EICRB |= (1 << ISC40) | (1 << ISC50);
+    EICRA |= (1 << ISC00) | (1 << ISC10) | (1 << ISC20) | (1 << ISC30);
     sei();
 }
 
@@ -95,7 +93,22 @@ double Encoder_getRightVelocity(double dt) {
     return velocity; // mm/s
 }
 
-ISR(INT2_vect) { updateRight(); } // pin 21 = R_ENCB
-ISR(INT3_vect) { updateRight(); } // pin 20 = R_ENCA
-ISR(INT4_vect) { updateLeft();  } // pin 19 = L_ENCB
-ISR(INT5_vect) { updateLeft();  } // pin 18 = L_ENCA
+void Encoder_setLeftEncoderCountZero() {
+    
+    cli();
+    countA = 0;
+    prevLeftCount = 0;
+    sei();
+}
+
+void Encoder_setRightEncoderCountZero() {
+    cli();
+    countB = 0;
+    prevRightCount = 0;
+    sei();
+}
+
+ISR(INT0_vect) { updateRight(); } // pin 21 = R_ENCB
+ISR(INT1_vect) { updateRight(); } // pin 20 = R_ENCA
+ISR(INT2_vect) { updateLeft();  } // pin 19 = L_ENCB
+ISR(INT3_vect) { updateLeft();  } // pin 18 = L_ENCA

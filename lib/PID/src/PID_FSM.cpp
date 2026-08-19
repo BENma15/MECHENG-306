@@ -26,11 +26,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 0, ki_left = 0, kd_left = 0, kff_left = 4; // all some variation of mm/s
+double kp_left = 20, ki_left = 2, kd_left = 0, kff_left = 7; // all some variation of mm/s
 double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 0, ki_right = 0, kd_right = 0, kff_right = 4; // all some variation of mm/s 
+double kp_right = 20, ki_right = 2, kd_right = 0, kff_right = 7; // all some variation of mm/s 
 double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
@@ -105,6 +105,9 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t)
 void plan_FSM(double x, double y, double vf_target)
 {
     double S = sqrt(x * x + y * y);
+
+    Encoder_setLeftEncoderCountZero();
+    Encoder_setRightEncoderCountZero();
 
     if (S <= 0.0)
     {
@@ -220,7 +223,7 @@ void move_FSM(int x, int y, int vf)
         return;
     }
 
-    if (t >= TA + moveT4 + TA + 5)
+    if (t >= TA + moveT4 + TA)
     {
         moveActive = false;
         moveStarted = false;
@@ -332,13 +335,13 @@ void move_FSM(int x, int y, int vf)
     String leftSuccess = setLeftMotor(leftDir, leftPWM);
     String rightSuccess = setRightMotor(rightDir, rightPWM);
 
-    // Serial.println(leftPositionError);
-    // Serial.println(rightPositionError);
-    // Serial.println(moveStarted);
+    Serial.println("Left Position Error: " + String(leftPositionError));
+    Serial.println("Right Position Error: " + String(rightPositionError));
 
-    Serial.println(error_left);
-    Serial.println(error_right);
+    Serial.println("Left Velocity Error: " + String(error_left));
+    Serial.println("Right Velocity Error: " + String(error_right));
 
-    // Serial.println(leftPWM);
-    // Serial.println(rightPWM);
+    Serial.println("Left PWM: " + String(leftPWM));
+    Serial.println("Right PWM: " + String(rightPWM));
+    //Serial.println(moveCurrentLeftCount);
 }
