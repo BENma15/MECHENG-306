@@ -9,8 +9,10 @@
 #include <Graph.h>
 
 // Time Constant Variables
-double T1 = 0.05;
-double T2 = 0.10;
+
+//test increase of t1 and t2 from 0.05 and 0.10 to 0.1 and 0.2 
+double T1 = 0.2;
+double T2 = 0.4;
 double TA = T1 + T2 + T1;
 
 // Movement Variables
@@ -27,11 +29,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 30, ki_left = 4, kd_left = 0, kff_left = 0; // all some variation of mm/s
+double kp_left = 30, ki_left = 4, kd_left = 0, kff_left = 7; // all some variation of mm/s
 double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 30, ki_right = 4, kd_right = 0, kff_right = 0; // all some variation of mm/s
+double kp_right = 30, ki_right = 4, kd_right = 0, kff_right = 7; // all some variation of mm/s
 double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
