@@ -1,4 +1,5 @@
 #include "Parsing.h"
+#include "FSM.h"
 
 String inputBuffer = "";
 GcodeToken TokenArray[MAX_TOKENS];
@@ -76,6 +77,12 @@ int tokenise(String line) {
     } else if (Mpos == -1 && Gpos != -1) {
         // Command is either G01 or G28
 
+        if (Mpos == -1 && Gpos != -1) {
+            if (FSM_getCurrentState() == STATE_FAULT) {
+                return 0;
+            }
+        }
+        
         String token = returnToken(line, 'G');
         if (token == "ERROR") {
             // error (no value)
