@@ -26,11 +26,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 20, ki_left = 2, kd_left = 0, kff_left = 7; // all some variation of mm/s
+double kp_left = 30, ki_left = 4, kd_left = 0, kff_left = 7; // all some variation of mm/s
 double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 20, ki_right = 2, kd_right = 0, kff_right = 7; // all some variation of mm/s 
+double kp_right = 30, ki_right = 4, kd_right = 0, kff_right = 7; // all some variation of mm/s 
 double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
@@ -53,7 +53,7 @@ long moveCurrentRightCount = 0;
 long moveTargetLeftCount = 0;
 long moveTargetRightCount = 0;
 
-const long tolerance = 100;
+const long tolerance = 200;
 
 // Returns the target velocity at different stages in the movement, using an s-curve profile.
 double velocityProfile_FSM(double J, double Vf, double t4, double t)
@@ -77,7 +77,7 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t)
     }
     else if (t < TA + t4)
     { // Stage 4
-        return Vf;
+        return Vf; 
     }
     else if (t < TA + t4 + T1)
     { // Stage 5
@@ -97,7 +97,9 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t)
     else
     {
         // Move finished
-        return 0.0;
+        integral_left = 0;
+        integral_right = 0;
+        return 0;
     }
 }
 
@@ -222,8 +224,9 @@ void move_FSM(int x, int y, int vf)
 
         return;
     }
-
-    if (t >= TA + moveT4 + TA)
+    
+    //timeout function (always happening right now due to velocity profile going to 0 too soon)
+    if (t >= TA + moveT4 + TA + 3)
     {
         moveActive = false;
         moveStarted = false;
@@ -335,13 +338,13 @@ void move_FSM(int x, int y, int vf)
     String leftSuccess = setLeftMotor(leftDir, leftPWM);
     String rightSuccess = setRightMotor(rightDir, rightPWM);
 
-    Serial.println("Left Position Error: " + String(leftPositionError));
-    Serial.println("Right Position Error: " + String(rightPositionError));
+    //Serial.println("Left Position Error: " + String(leftPositionError));
+    //Serial.println("Right Position Error: " + String(rightPositionError));
 
-    Serial.println("Left Velocity Error: " + String(error_left));
-    Serial.println("Right Velocity Error: " + String(error_right));
+    //Serial.println("Left Velocity Error: " + String(error_left));
+    //Serial.println("Right Velocity Error: " + String(error_right));
 
-    Serial.println("Left PWM: " + String(leftPWM));
-    Serial.println("Right PWM: " + String(rightPWM));
+    //Serial.println("Left PWM: " + String(leftPWM));
+    //Serial.println("Right PWM: " + String(rightPWM));
     //Serial.println(moveCurrentLeftCount);
 }
