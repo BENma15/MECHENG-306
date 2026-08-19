@@ -7,6 +7,7 @@
 #include <LimitSwitch.h>
 #include <PID_FSM.h>
 #include <Motor.h>
+#include <Graph.h>
 static SystemState currentState = STATE_IDLE;   // System begins in IDLE state
 // static MotionSubstate motionState = MOTION_ACCEL;   // Motion_state begins in Acceloration
 
@@ -87,6 +88,8 @@ static void handleMotion() {
     if(moveActive == false) {
         currentState = STATE_IDLE;
         moveStarted = false;
+        exportData();
+        clearData();
         resetTokenArray();
         return;
     }

@@ -6,6 +6,7 @@
 #include "PID_FSM.h"
 #include <Motor.h>
 #include <HelperFunctions.h>
+#include <Graph.h>
 
 // Time Constant Variables
 double T1 = 0.05;
@@ -26,11 +27,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 30, ki_left = 4, kd_left = 0, kff_left = 7; // all some variation of mm/s
+double kp_left = 30, ki_left = 4, kd_left = 0, kff_left = 0; // all some variation of mm/s
 double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 30, ki_right = 4, kd_right = 0, kff_right = 7; // all some variation of mm/s 
+double kp_right = 30, ki_right = 4, kd_right = 0, kff_right = 0; // all some variation of mm/s
 double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
@@ -54,6 +55,7 @@ long moveTargetLeftCount = 0;
 long moveTargetRightCount = 0;
 
 const long tolerance = 200;
+unsigned long elapsed_from_move_start = 0; // Variable to track elapsed time from the start of the movement
 
 // Returns the target velocity at different stages in the movement, using an s-curve profile.
 double velocityProfile_FSM(double J, double Vf, double t4, double t)
@@ -77,7 +79,7 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t)
     }
     else if (t < TA + t4)
     { // Stage 4
-        return Vf; 
+        return Vf;
     }
     else if (t < TA + t4 + T1)
     { // Stage 5
@@ -154,6 +156,7 @@ void move_FSM(int x, int y, int vf)
     // If movement has not started then set all the errors to 0 and call the movement plan
     if (moveStarted == false)
     {
+        elapsed_from_move_start = millis(); // Reset the elapsed time from the start of the movement
         moveStarted = true;
 
         integral_left = 0;
@@ -224,8 +227,8 @@ void move_FSM(int x, int y, int vf)
 
         return;
     }
-    
-    //timeout function (always happening right now due to velocity profile going to 0 too soon)
+
+    // timeout function (always happening right now due to velocity profile going to 0 too soon)
     if (t >= TA + moveT4 + TA + 3)
     {
         moveActive = false;
@@ -338,13 +341,27 @@ void move_FSM(int x, int y, int vf)
     String leftSuccess = setLeftMotor(leftDir, leftPWM);
     String rightSuccess = setRightMotor(rightDir, rightPWM);
 
-    //Serial.println("Left Position Error: " + String(leftPositionError));
-    //Serial.println("Right Position Error: " + String(rightPositionError));
+    static unsigned long previous_time = 0;
 
-    //Serial.println("Left Velocity Error: " + String(error_left));
-    //Serial.println("Right Velocity Error: " + String(error_right));
+    unsigned long current_time = millis();
+    unsigned long elapsed_ms = current_time - previous_time;
 
-    //Serial.println("Left PWM: " + String(leftPWM));
-    //Serial.println("Right PWM: " + String(rightPWM));
-    //Serial.println(moveCurrentLeftCount);
+    unsigned long timeSinceStart = current_time - elapsed_from_move_start;
+
+
+    if (elapsed_ms >= 10)
+    {
+        previous_time = current_time;
+        addDataPoint(abs(leftPositionError), abs(rightPositionError), timeSinceStart);
+    }
+
+    // Serial.println("Left Position Error: " + String(leftPositionError));
+    // Serial.println("Right Position Error: " + String(rightPositionError));
+
+    // Serial.println("Left Velocity Error: " + String(error_left));
+    // Serial.println("Right Velocity Error: " + String(error_right));
+
+    // Serial.println("Left PWM: " + String(leftPWM));
+    // Serial.println("Right PWM: " + String(rightPWM));
+    // Serial.println(moveCurrentLeftCount);
 }

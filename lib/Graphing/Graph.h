@@ -3,10 +3,11 @@
 
 #define MAX_SAMPLES 500
 // Global buffers (defined in Graph.cpp)
-extern long data[MAX_SAMPLES];
+extern long dataA[MAX_SAMPLES];
+extern long dataB[MAX_SAMPLES];
 extern int timeData[MAX_SAMPLES];
 
-void addDataPoint(long dataPoint, unsigned int timePoint);
+void addDataPoint(long dataPointA, long dataPointB, unsigned int timePoint);
 void exportData();
 void clearData();
 

@@ -1,17 +1,19 @@
 #include "Graph.h"
 #include <Arduino.h>
 
-long data[MAX_SAMPLES] = {0};
+long dataA[MAX_SAMPLES] = {0};
+long dataB[MAX_SAMPLES] = {0};
 
 int timeData[MAX_SAMPLES] = {0};
 
 int sampleIndex = 0;
 
-void addDataPoint(long dataPoint, unsigned int timePoint)
+void addDataPoint(long dataPointA, long dataPointB, unsigned int timePoint)
 {
     if (sampleIndex < MAX_SAMPLES)
     {
-        data[sampleIndex] = dataPoint;
+        dataA[sampleIndex] = dataPointA;
+        dataB[sampleIndex] = dataPointB;
         timeData[sampleIndex] = timePoint;
         sampleIndex++;
     }
@@ -20,13 +22,16 @@ void addDataPoint(long dataPoint, unsigned int timePoint)
 void exportData()
 {
     Serial.println("START_DATA");
-    Serial.println("Time,Data");
+    Serial.println("Time,DataA,DataB");
 
     for (int i = 0; i < sampleIndex; i++)
     {
         Serial.print(timeData[i]);
         Serial.print(",");
-        Serial.println(data[i]);
+        Serial.print(dataA[i]);
+        Serial.print(",");
+        Serial.print(dataB[i]);
+        Serial.println();
     }
 
     Serial.println("END_DATA");

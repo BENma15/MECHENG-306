@@ -28,6 +28,8 @@ void setup() {
     setupLimitSwitches();
     Motor_Init();
     initialiseTokenArray();
+    Serial.println(countA);
+    Serial.println(countB);
     
 
     // MotorMoveConfig config = {4, 5, 6, 7, 255, 1000};
