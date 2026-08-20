@@ -30,11 +30,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 30, ki_left = 4, kd_left = 0, kff_left = 7; // all some variation of mm/s
+double kp_left = 11, ki_left = 0,/*10*/ kd_left = 0, kff_left = 7;/*11*/ // all some variation of mm/s
 double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 30, ki_right = 4, kd_right = 0, kff_right = 7; // all some variation of mm/s
+double kp_right = 1, ki_right = 0,/*10*/ kd_right = 0, kff_right = 7;/*11*/ // all some variation of mm/s
 double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
@@ -104,7 +104,7 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t)
         // Move finished
         integral_left = 0;
         integral_right = 0;
-        return 5;
+        return 0;
     }
 }
 
