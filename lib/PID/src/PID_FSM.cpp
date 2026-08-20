@@ -8,9 +8,10 @@
 #include <HelperFunctions.h>
 #include <Graph.h>
 
+#include <FSM.h>
 // Time Constant Variables
 
-//test increase of t1 and t2 from 0.05 and 0.10 to 0.1 and 0.2 
+// test increase of t1 and t2 from 0.05 and 0.10 to 0.1 and 0.2
 double T1 = 0.2;
 double T2 = 0.4;
 double TA = T1 + T2 + T1;
@@ -56,7 +57,7 @@ long moveCurrentRightCount = 0;
 long moveTargetLeftCount = 0;
 long moveTargetRightCount = 0;
 
-const long tolerance = 200;
+const double tolerance_mm = 0.5;
 unsigned long elapsed_from_move_start = 0; // Variable to track elapsed time from the start of the movement
 
 // Returns the target velocity at different stages in the movement, using an s-curve profile.
@@ -194,6 +195,14 @@ void move_FSM(int x, int y, int vf)
     moveCurrentRightCount = countB;
     sei();
 
+    SystemState state = FSM_getCurrentState();
+
+    if(state == STATE_FAULT){
+        setLeftMotor(0,0);
+        setRightMotor(0,0);
+        return;
+    }
+
     // Ensures there is a constant frequency of 50Hz which we are using for the PID loop as to not
     // call the motors too frequently.
     uint32_t nowMicros = micros();
@@ -212,14 +221,18 @@ void move_FSM(int x, int y, int vf)
 
     // This currently stops the motors once the time is finsihed, I think we should change this
     // to when the distance is met and not time.
-    long leftPositionError =
-        moveTargetLeftCount - moveCurrentLeftCount;
 
-    long rightPositionError =
-        moveTargetRightCount - moveCurrentRightCount;
+    double currentLeftMM = countsToDistance(moveCurrentLeftCount);
+    double currentRightMM = countsToDistance(moveCurrentRightCount);
 
-    if (abs(leftPositionError) <= tolerance &&
-        abs(rightPositionError) <= tolerance)
+    double currentX = (currentLeftMM + currentRightMM) / 2.0;
+    double currentY = (currentLeftMM - currentRightMM) / 2.0;
+
+    double xPositionError_mm = x - currentX;
+    double yPositionError_mm = y - currentY;
+
+    if (abs(xPositionError_mm) <= tolerance_mm &&
+        abs(yPositionError_mm) <= tolerance_mm)
     {
         moveActive = false;
         moveStarted = false;
@@ -350,11 +363,10 @@ void move_FSM(int x, int y, int vf)
 
     unsigned long timeSinceStart = current_time - elapsed_from_move_start;
 
-
     if (elapsed_ms >= 10)
     {
         previous_time = current_time;
-        addDataPoint(abs(leftPositionError), abs(rightPositionError), timeSinceStart);
+        addDataPoint(abs(distanceToCounts(xPositionError_mm)), abs(distanceToCounts(yPositionError_mm)), timeSinceStart);
     }
 
     // Serial.println("Left Position Error: " + String(leftPositionError));
