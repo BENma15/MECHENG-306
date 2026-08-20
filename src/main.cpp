@@ -43,8 +43,10 @@ void loop()
     /*Serial.println(countA);
     Serial.println(countB);
     setLeftMotor(1,150);
+    setRightMotor(1,150);
     delay(1000);
     setLeftMotor(0,0);
+    setRightMotor(0,0);
     Serial.println(countA);
     Serial.println(countB);
     delay(1000000);*/

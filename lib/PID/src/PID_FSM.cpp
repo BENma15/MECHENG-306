@@ -104,7 +104,7 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t)
         // Move finished
         integral_left = 0;
         integral_right = 0;
-        return 0;
+        return 5;
     }
 }
 
@@ -197,9 +197,10 @@ void move_FSM(int x, int y, int vf)
 
     SystemState state = FSM_getCurrentState();
 
-    if(state == STATE_FAULT){
-        setLeftMotor(0,0);
-        setRightMotor(0,0);
+    if (state == STATE_FAULT)
+    {
+        setLeftMotor(0, 0);
+        setRightMotor(0, 0);
         return;
     }
 
@@ -363,10 +364,15 @@ void move_FSM(int x, int y, int vf)
 
     unsigned long timeSinceStart = current_time - elapsed_from_move_start;
 
+    long leftEncoderError =
+        moveTargetLeftCount - moveCurrentLeftCount;
+
+    long rightEncoderError =
+        moveTargetRightCount - moveCurrentRightCount;
     if (elapsed_ms >= 10)
     {
         previous_time = current_time;
-        addDataPoint(abs(distanceToCounts(xPositionError_mm)), abs(distanceToCounts(yPositionError_mm)), timeSinceStart);
+        addDataPoint(abs(leftEncoderError), abs(rightEncoderError), timeSinceStart);
     }
 
     // Serial.println("Left Position Error: " + String(leftPositionError));
