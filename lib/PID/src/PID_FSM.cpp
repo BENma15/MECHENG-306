@@ -30,15 +30,15 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 11, ki_left = 0,/*10*/ kd_left = 0, kff_left = 7;/*11*/ // all some variation of mm/s
+double kp_left = 20, ki_left = 5,/*10*/ kd_left = 0, kff_left = 7;/*11*/ // all some variation of mm/s
 double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 1, ki_right = 0,/*10*/ kd_right = 0, kff_right = 7;/*11*/ // all some variation of mm/s
+double kp_right = 20, ki_right = 5,/*10*/ kd_right = 0, kff_right = 7;/*11*/ // all some variation of mm/s
 double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
-double kp_sync = 0, ki_sync = 0, kd_sync = 0;
+double kp_sync = 1, ki_sync = 0, kd_sync = 0;
 double integral_sync = 0, lastError_sync = 0;
 
 // Time Control Variables
@@ -126,7 +126,7 @@ void plan_FSM(double x, double y, double vf_target)
     moveUnitY = y / S;
 
     // Ramp distance per unit of commanded velocity (constant, since T1/T2 are fixed)
-    double k = ((4.0 / 6.0) * T1 * T1 + T2 * T2) / (T1 + T2);
+    double k = T1 + T2/2;
 
     double vf;
     double t4;
@@ -267,14 +267,18 @@ void move_FSM(int x, int y, int vf)
 
     // left velocity PID
     double error_left = targetLeft - velocity_left;
+    if((integral_left + error_left * dt) * kp_left < 50 ){
     integral_left += error_left * dt;
+    }
     double derivative_left = (error_left - lastError_left) / dt;
     double outputLeft = kp_left * error_left + ki_left * integral_left + kd_left * derivative_left;
     lastError_left = error_left;
 
     // right velocity PID
     double error_right = targetRight - velocity_right;
+    if((integral_right + error_right * dt) * kp_right < 50 ){
     integral_right += error_right * dt;
+    }
     double derivative_right = (error_right - lastError_right) / dt;
     double outputRight = kp_right * error_right + ki_right * integral_right + kd_right * derivative_right;
     lastError_right = error_right;

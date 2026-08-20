@@ -155,8 +155,8 @@ static void printStateIfChanged()
     {
     case STATE_IDLE:
         Serial.println("IDLE");
-        Serial.println(countsToDistance(countA));
-        Serial.println(countsToDistance(countB));
+        Serial.println(countA);
+        Serial.println(countB);
 
         Serial.println(" ");
         int dx = (countsToDistance(countA) + countsToDistance(countB))/2;
