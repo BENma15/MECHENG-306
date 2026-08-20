@@ -30,11 +30,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 20, ki_left = 5,/*10*/ kd_left = 0, kff_left = 7;/*11*/ // all some variation of mm/s
+double kp_left = 15, ki_left = 3,/**/ kd_left = 1, kff_left = 7;/**/ // all some variation of mm/s
 double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 20, ki_right = 5,/*10*/ kd_right = 0, kff_right = 7;/*11*/ // all some variation of mm/s
+double kp_right = 15, ki_right = 3,/**/ kd_right = 1, kff_right = 7;/**/ // all some variation of mm/s
 double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
@@ -59,6 +59,8 @@ long moveTargetRightCount = 0;
 
 const double tolerance_mm = 0.5;
 unsigned long elapsed_from_move_start = 0; // Variable to track elapsed time from the start of the movement
+
+int integral_maxPWM = 20;
 
 // Returns the target velocity at different stages in the movement, using an s-curve profile.
 double velocityProfile_FSM(double J, double Vf, double t4, double t)
@@ -126,7 +128,7 @@ void plan_FSM(double x, double y, double vf_target)
     moveUnitY = y / S;
 
     // Ramp distance per unit of commanded velocity (constant, since T1/T2 are fixed)
-    double k = T1 + T2/2;
+    double k = T1 + T2/2; //da chat told me to change ts, lmk why this is the case
 
     double vf;
     double t4;
@@ -267,7 +269,7 @@ void move_FSM(int x, int y, int vf)
 
     // left velocity PID
     double error_left = targetLeft - velocity_left;
-    if((integral_left + error_left * dt) * kp_left < 50 ){
+    if(abs((integral_left + error_left * dt) * ki_left) < integral_maxPWM){
     integral_left += error_left * dt;
     }
     double derivative_left = (error_left - lastError_left) / dt;
@@ -276,7 +278,7 @@ void move_FSM(int x, int y, int vf)
 
     // right velocity PID
     double error_right = targetRight - velocity_right;
-    if((integral_right + error_right * dt) * kp_right < 50 ){
+    if(abs((integral_right + error_right * dt) * ki_right) < integral_maxPWM ){
     integral_right += error_right * dt;
     }
     double derivative_right = (error_right - lastError_right) / dt;
