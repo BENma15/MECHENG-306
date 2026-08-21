@@ -8,7 +8,7 @@
 #include <PID_FSM.h>
 #include <Motor.h>
 #include <Graph.h>
-static SystemState currentState = STATE_IDLE; // System begins in IDLE state
+static volatile SystemState currentState = STATE_IDLE; // System begins in IDLE state
 // static MotionSubstate motionState = MOTION_ACCEL;   // Motion_state begins in Acceloration
 
 static SystemState lastPrintedState = (SystemState)-1;
@@ -85,7 +85,11 @@ static void handleMotion()
     long vf = Parsing_getToken(F_token).GetValue();
 
     move_FSM(x, y, vf);
-
+    if(currentState == STATE_FAULT) {
+        moveStarted = false;
+        moveActive = false;
+        return;
+    }
     if (moveActive == false)
     {
         currentState = STATE_IDLE;

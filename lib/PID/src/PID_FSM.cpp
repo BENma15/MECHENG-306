@@ -30,15 +30,15 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 15, ki_left = 3,/**/ kd_left = 1, kff_left = 7;/**/ // all some variation of mm/s
+double kp_left = 15, ki_left = 2,/**/ kd_left = 0, kff_left = 7;/**/ // all some variation of mm/s
 double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 15, ki_right = 3,/**/ kd_right = 1, kff_right = 7;/**/ // all some variation of mm/s
+double kp_right = 15, ki_right = 2,/**/ kd_right = 0, kff_right = 7;/**/ // all some variation of mm/s
 double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
-double kp_sync = 1, ki_sync = 0, kd_sync = 0;
+double kp_sync = 0, ki_sync = 0, kd_sync = 0;
 double integral_sync = 0, lastError_sync = 0;
 
 // Time Control Variables
@@ -57,7 +57,7 @@ long moveCurrentRightCount = 0;
 long moveTargetLeftCount = 0;
 long moveTargetRightCount = 0;
 
-const double tolerance_mm = 0.5;
+const double tolerance_mm = 1;
 unsigned long elapsed_from_move_start = 0; // Variable to track elapsed time from the start of the movement
 
 int integral_maxPWM = 20;
@@ -128,7 +128,7 @@ void plan_FSM(double x, double y, double vf_target)
     moveUnitY = y / S;
 
     // Ramp distance per unit of commanded velocity (constant, since T1/T2 are fixed)
-    double k = T1 + T2/2; //da chat told me to change ts, lmk why this is the case
+    double k = T1 + T2/2; //da chat told me to change ts, lmk why this is the case 
 
     double vf;
     double t4;
@@ -294,6 +294,19 @@ void move_FSM(int x, int y, int vf)
     double syncCorrection = kp_sync * percentError + ki_sync * integral_sync + kd_sync * derivative_sync;
     lastError_sync = percentError;
 
+        static unsigned long previous_time = 0;
+
+    unsigned long current_time = millis();
+    unsigned long elapsed_ms = current_time - previous_time;
+
+    unsigned long timeSinceStart = current_time - elapsed_from_move_start;
+
+    long leftEncoderError =
+        moveTargetLeftCount - moveCurrentLeftCount;
+
+    long rightEncoderError =
+        moveTargetRightCount - moveCurrentRightCount;
+
     int leftTargetDir = 0;
     int rightTargetDir = 0;
 
@@ -363,18 +376,6 @@ void move_FSM(int x, int y, int vf)
     String leftSuccess = setLeftMotor(leftDir, leftPWM);
     String rightSuccess = setRightMotor(rightDir, rightPWM);
 
-    static unsigned long previous_time = 0;
-
-    unsigned long current_time = millis();
-    unsigned long elapsed_ms = current_time - previous_time;
-
-    unsigned long timeSinceStart = current_time - elapsed_from_move_start;
-
-    long leftEncoderError =
-        moveTargetLeftCount - moveCurrentLeftCount;
-
-    long rightEncoderError =
-        moveTargetRightCount - moveCurrentRightCount;
     if (elapsed_ms >= 10)
     {
         previous_time = current_time;
