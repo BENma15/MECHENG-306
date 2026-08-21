@@ -7,14 +7,14 @@ static const unsigned long HOMING_STATE_DELAY_MS = 20;
 
 enum HomingState
 {
-    HOMING_UP,
-    HOMING_BACKOFF_DOWN,
+    HOMING_DOWN,
+    HOMING_BACKOFF_UP,
     HOMING_LEFT,
     HOMING_BACKOFF_RIGHT,
     HOMING_DONE
 };
 
-static HomingState homingState = HOMING_UP;
+static HomingState homingState = HOMING_DOWN;
 
 static bool waiting = false;
 static unsigned long waitStart = 0;
@@ -78,7 +78,7 @@ void homingStart()
 {
     stopMotors();
 
-    homingState = HOMING_UP;
+    homingState = HOMING_DOWN;
 
     waiting = false;
     waitStart = 0;
@@ -88,7 +88,7 @@ HomingResult homingUpdate()
 {
     switch (homingState)
     {
-        case HOMING_UP:
+        case HOMING_DOWN:
         {
             if (waiting)
             {
@@ -99,28 +99,28 @@ HomingResult homingUpdate()
                     return HOMING_RUNNING;
                 }
                 waiting = false;
-                homingState = HOMING_BACKOFF_DOWN;
+                homingState = HOMING_BACKOFF_UP;
                 return HOMING_RUNNING;
             }
 
             if (LimitSwitch_leftPressed() ||
                 LimitSwitch_rightPressed() ||
-                LimitSwitch_bottomPressed())
+                LimitSwitch_topPressed())
             {
                 stopMotors();
                 return HOMING_FAULT;
             }
 
-            if (LimitSwitch_topPressed())
+            if (LimitSwitch_bottomPressed())
             {
                 startWait();
                 return HOMING_RUNNING;
             }
-            driveUp();
+            driveDown();
             return HOMING_RUNNING;
         }
         
-        case HOMING_BACKOFF_DOWN:
+        case HOMING_BACKOFF_UP:
         {
             if (waiting)
             {
@@ -138,18 +138,18 @@ HomingResult homingUpdate()
 
             if (LimitSwitch_leftPressed() ||
                 LimitSwitch_rightPressed() ||
-                LimitSwitch_bottomPressed())
+                LimitSwitch_topPressed())
             {
                 stopMotors();
                 return HOMING_FAULT;
             }
 
-            if (!LimitSwitch_topPressed())
+            if (!LimitSwitch_bottomPressed())
             {
                 startWait();
                 return HOMING_RUNNING;
             }
-            driveDown();
+            driveUp();
             return HOMING_RUNNING;
         }
 
@@ -220,6 +220,8 @@ HomingResult homingUpdate()
         case HOMING_DONE:
         {
             stopMotors();
+            Encoder_setLeftEncoderCountZero();
+            Encoder_setRightEncoderCountZero();
             return HOMING_COMPLETE;
         }
     }
