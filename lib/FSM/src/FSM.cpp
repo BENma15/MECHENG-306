@@ -94,8 +94,8 @@ static void handleMotion()
     {
         currentState = STATE_IDLE;
         moveStarted = false;
-        exportData();
-        clearData();
+        //exportData();
+        //clearData();
         resetTokenArray();
         return;
     }
@@ -123,8 +123,10 @@ static void handleHoming()
 
 static void handleFault()
 {
-    String fault1 = setLeftMotor(0, 0);
-    String fault2 = setRightMotor(0, 0);
+    moveActive = false;
+    moveStarted = false;
+    setLeftMotor(0, 0);
+    setRightMotor(0, 0);
 
     if (Serial.available() > 0)
     {
@@ -170,7 +172,7 @@ static void printStateIfChanged()
         Serial.println(dx);
         Serial.print("Y = ");
         Serial.println(dy);*/
-        break;
+        break; 
 
     case STATE_PARSING:
         Serial.println("PARSING");

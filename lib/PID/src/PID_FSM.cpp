@@ -201,6 +201,8 @@ void move_FSM(int x, int y, int vf)
 
     if (state == STATE_FAULT)
     {
+        moveActive = false;
+        moveStarted = false;
         setLeftMotor(0, 0);
         setRightMotor(0, 0);
         return;
@@ -376,11 +378,11 @@ void move_FSM(int x, int y, int vf)
     String leftSuccess = setLeftMotor(leftDir, leftPWM);
     String rightSuccess = setRightMotor(rightDir, rightPWM);
 
-    if (elapsed_ms >= 10)
+    /*if (elapsed_ms >= 10)
     {
         previous_time = current_time;
         addDataPoint(abs(leftEncoderError), abs(rightEncoderError), timeSinceStart);
-    }
+    }*/
 
     // Serial.println("Left Position Error: " + String(leftPositionError));
     // Serial.println("Right Position Error: " + String(rightPositionError));
