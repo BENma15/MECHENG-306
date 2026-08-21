@@ -11,6 +11,8 @@ const long X_MIN = 0;
 
 extern volatile long countA;
 extern volatile long countB;
+extern volatile long globalCountA;
+extern volatile long globalCountB;
 
 extern double Encoder_getLeftVelocity(double dt);
 extern double Encoder_getRightVelocity(double dt);

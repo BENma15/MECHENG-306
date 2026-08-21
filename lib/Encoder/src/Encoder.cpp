@@ -17,8 +17,8 @@ volatile long countA = 0;
 volatile long countB = 0;
 
 // encoder counters for global position tracking (single definition)
-static volatile long globalCountA = 0;
-static volatile long globalCountB = 0;
+volatile long globalCountA = 0;
+volatile long globalCountB = 0;
 
 // Predetermined table to see which way the motor is spinning
 const int8_t encTable[16] = {
@@ -54,6 +54,7 @@ void updateLeft() {
     uint8_t newState = (a << 1) | b;
     uint8_t index = (stateA << 2) | newState;
     countA += encTable[index];
+    globalCountA += encTable[index];
     stateA = newState;
 }
 
@@ -64,6 +65,7 @@ void updateRight() {
     uint8_t newState = (a << 1) | b;
     uint8_t index = (stateB << 2) | newState;
     countB += encTable[index];
+    globalCountB += encTable[index];
     stateB = newState;
 }
 
