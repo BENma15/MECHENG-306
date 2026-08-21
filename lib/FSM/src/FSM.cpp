@@ -133,14 +133,9 @@ static void handleFault()
 
         int err = readLine();
 
-<<<<<<< HEAD
-        if (err)
-        {
-=======
         if (err == 2) {
             // Still reading command (stay in fault)
             currentState = STATE_FAULT;
->>>>>>> ef2aa9c (fsm error change handleFault)
             return;
 
         } else if (err = 1) {
