@@ -138,7 +138,7 @@ static void handleFault()
             currentState = STATE_FAULT;
             return;
 
-        } else if (err = 1) {
+        } else if (err == 1) {
             // command invalid (stay in fault)
             resetTokenArray();
             currentState = STATE_FAULT;

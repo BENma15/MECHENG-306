@@ -196,7 +196,6 @@ HomingResult homingUpdate()
             {
                 return HOMING_RUNNING;
             }
-            delay(1000);
             Encoder_setLeftGlobalEncoderCountZero();
             Encoder_setRightGlobalEncoderCountZero();
             waiting = false;
