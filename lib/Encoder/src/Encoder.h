@@ -36,5 +36,7 @@ long Encoder_getLeftEncoderCount();
 long Encoder_getRightEncoderCount();
 void Encoder_setLeftEncoderCountZero();
 void Encoder_setRightEncoderCountZero();
+void Encoder_setLeftGlobalEncoderCountZero();
+void Encoder_setRightGlobalEncoderCountZero();
 
 #endif

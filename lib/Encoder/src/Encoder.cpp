@@ -12,9 +12,13 @@ const int R_ENCB = 21; // INT0
 volatile uint8_t stateA = 0;
 volatile uint8_t stateB = 0;
 
-// encoder counters (single definition)
+// encoder counters for relative position tracking (single definition)
 volatile long countA = 0;
 volatile long countB = 0;
+
+// encoder counters for global position tracking (single definition)
+static volatile long globalCountA = 0;
+static volatile long globalCountB = 0;
 
 // Predetermined table to see which way the motor is spinning
 const int8_t encTable[16] = {
@@ -105,6 +109,18 @@ void Encoder_setRightEncoderCountZero() {
     cli();
     countB = 0;
     prevRightCount = 0;
+    sei();
+}
+
+void Encoder_setLeftGlobalEncoderCountZero() {
+    cli();
+    globalCountA = 0;
+    sei();
+}
+
+void Encoder_setRightGlobalEncoderCountZero() {
+    cli();
+    globalCountB = 0;
     sei();
 }
 
