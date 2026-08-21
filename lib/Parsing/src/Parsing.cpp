@@ -15,7 +15,7 @@ void initialiseTokenArray(void) {
     TokenArray[X].Set("X0");
     TokenArray[Y].Set("Y0");
     TokenArray[F_token].Set("F20");
-    TokenArray[M].Set("M0");
+    //TokenArray[M].Set("M0");  // uncomment if random error comes up
 }
 
 /* reads line from arduino serial buffer into input buffer */
@@ -43,6 +43,15 @@ int readLine(void) {
 int tokenise(String line) {
 
     line = tidyString(line);   // remove spaces, make uppercase, and remove comment
+    int err = additionalLetterCheck(line);
+
+    if (err == 2) { // too many letters
+        Serial.println("Too many letters brev");
+        return 1;
+    } else if (err == 1) {  // invalid -ve sign/s
+        Serial.println("invalid -ve signs");
+        return 1;
+    }
 
     bool xToken = true, yToken = true;  // assuming there is an X and Y token
 
@@ -209,4 +218,74 @@ void resetTokenArray() {
     TokenArray[X].Set("X0");
     TokenArray[Y].Set("Y0");
     // F token remains as it was in the previous intruction.
+}
+
+int additionalLetterCheck(String line) {   // pass tidied string into it to check there there is at most 4 letters and 2 -ve signs
+
+    if (line.length() == 0) {
+        return;
+    }
+    int numOfLetters = 0;
+    int numOfSigns = 0;
+    int indexOfSign[line.length()] = {-1};   // array for indices of -ve signs
+
+    for (int i = 0; i < line.length(); i++) {
+        char c = line[i];
+
+        if (isAlpha(c)) {
+            numOfLetters++;
+        } else if (c == '-') {
+            indexOfSign[numOfSigns] = i;
+            numOfSigns++;
+        }
+    }
+
+
+    
+    if (numOfLetters > 4) {
+        return 2;   // error: too many letters
+    } else if (numOfSigns > 2) {
+        return 1;   // error: too many -ve signs
+    } else if (numOfSigns > 0) {    // 1 or 2 -ves
+        int indexOfSign[2] = {-1};   // array for indices of -ve signs (should only be 2 -ve signs)
+        int j = 0;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line[i];
+            if (c == '-') {
+                indexOfSign[j] = i;
+                j++;
+            }
+        }
+
+        int err = checkValidSign(indexOfSign, line);
+        if (err == 1) {
+            return 1;   //error from signs not being valid
+        } else {
+            return 0;   //letter and signs correct
+        }
+    }
+    
+
+    
+
+
+}
+
+int checkValidSign(int indices[], String line) {
+
+    for (int i = 0; i < 2; i++) {
+        int pos = indices[i];
+        if (indices[i] == -1) { break;  }
+        
+        if (pos == 0 || pos == line.length() - 1) {
+            return 1; // error
+        } else {
+            if (!isAlpha(line[pos-1] || !isDigit(line[pos+1]))) { // letter before and number after
+                return 1;   // error (either no letter before or no number after)
+            }
+        }
+    }
+    return 0; // 1 or both are valid -ve signs
+
 }
