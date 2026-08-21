@@ -14,7 +14,7 @@ void initialiseTokenArray(void) {
     TokenArray[G].Set("G0");
     TokenArray[X].Set("X0");
     TokenArray[Y].Set("Y0");
-    TokenArray[F_token].Set("F25");
+    TokenArray[F_token].Set("F20");
     TokenArray[M].Set("M0");
 }
 

@@ -28,8 +28,6 @@ void setup()
     setupLimitSwitches();
     Motor_Init();
     initialiseTokenArray();
-    Serial.println(countA);
-    Serial.println(countB);
 
     // MotorMoveConfig config = {4, 5, 6, 7, 255, 1000};
     // motorMoveBegin(config);
@@ -40,16 +38,7 @@ void setup()
 void loop()
 {
     FSM_update();
-    /*Serial.println(countA);
-    Serial.println(countB);
-    setLeftMotor(1,150);
-    setRightMotor(1,150);
-    delay(1000);
-    setLeftMotor(0,0);
-    setRightMotor(0,0);
-    Serial.println(countA);
-    Serial.println(countB);
-    delay(1000000);*/
+
 }
 
 // 1 is cw, 0 is stop, -1 is ccw

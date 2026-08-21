@@ -123,8 +123,8 @@ static void handleHoming()
 
 static void handleFault()
 {
-    setLeftMotor(0, 0);
-    setRightMotor(0, 0);
+    String fault1 = setLeftMotor(0, 0);
+    String fault2 = setRightMotor(0, 0);
 
     if (Serial.available() > 0)
     {
@@ -158,8 +158,9 @@ static void printStateIfChanged()
     switch (currentState)
     {
     case STATE_IDLE:
+    
         Serial.println("IDLE");
-        Serial.println(countA);
+        /*Serial.println(countA);
         Serial.println(countB);
 
         Serial.println(" ");
@@ -168,7 +169,7 @@ static void printStateIfChanged()
         Serial.print("X = ");
         Serial.println(dx);
         Serial.print("Y = ");
-        Serial.println(dy);
+        Serial.println(dy);*/
         break;
 
     case STATE_PARSING:
