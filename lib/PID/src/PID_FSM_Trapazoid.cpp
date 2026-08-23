@@ -28,7 +28,7 @@ bool trapMoveStarted = false;
 double trapDistanceTraveled = 0;
 double trapPrevX = 0, trapPrevY = 0;
 
-void planTrapezoid(double x, double y, double vf_target)
+void plan_FSM(double x, double y, double vf_target)
 {
     double S = sqrt(x * x + y * y);
 
@@ -93,7 +93,7 @@ double velocityProfile_trapezoid(double s)
 }
 
 
-void moveTrapezoid(int x, int y, int vf)
+void move_FSM(int x, int y, int vf)
 {
     if (trapMoveStarted == false)
     {
