@@ -1,10 +1,10 @@
-#include <Arduino.h>
+/* #include <Arduino.h>
 #include <avr/interrupt.h>
 #include <LimitSwitch.h>
 #include <math.h>
 
 #include <Encoder.h>
-#include "PID_FSM.h"
+#include "PID_FSM_Trapazoid.h"
 #include <Motor.h>
 #include <HelperFunctions.h>
 #include <Graph.h>
@@ -106,7 +106,7 @@ void move_FSM(int x, int y, int vf)
         integral_sync = 0;
         lastError_sync = 0;
 
-        planTrapezoid(x, y, vf);
+        plan_FSM(x, y, vf);
         if (!trapMoveActive)
         {
             return;
@@ -227,4 +227,4 @@ void move_FSM(int x, int y, int vf)
 
     setLeftMotor(leftDir, leftPWM);
     setRightMotor(rightDir, rightPWM);
-}
+}*/

@@ -1,5 +1,5 @@
-#ifndef PID_FSM_TRAPEZOIDAL_H
-#define PID_FSM_TRAPEZOIDAL_H
+#ifndef PID_FSM_TRAPEZOID_H
+#define PID_FSM_TRAPEZOID_H
 
 #include <Arduino.h>
 
@@ -69,4 +69,4 @@ extern long moveTargetRightCount;
 extern int8_t leftDir;
 extern int8_t rightDir;
 
-#endif // PID_FSM_TRAPEZOIDAL_H
+#endif // PID_FSM_TRAPEZOID_H

@@ -30,15 +30,15 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 15, ki_left = 2,/**/ kd_left = 0, kff_left = 7;/**/ // all some variation of mm/s
+double kp_left = 30, ki_left = 10,/**/ kd_left = 0, kff_left = 7;/**/ // all some variation of mm/s
 double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 15, ki_right = 2,/**/ kd_right = 0, kff_right = 7;/**/ // all some variation of mm/s
+double kp_right = 30, ki_right = 10,/**/ kd_right = 0, kff_right = 7;/**/ // all some variation of mm/s
 double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
-double kp_sync = 0, ki_sync = 0, kd_sync = 0;
+double kp_sync = 0, ki_sync = 2, kd_sync = 0;
 double integral_sync = 0, lastError_sync = 0;
 
 // Time Control Variables
@@ -57,10 +57,13 @@ long moveCurrentRightCount = 0;
 long moveTargetLeftCount = 0;
 long moveTargetRightCount = 0;
 
-const double tolerance_mm = 1;
+const double tolerance_mm = 0.2;
 unsigned long elapsed_from_move_start = 0; // Variable to track elapsed time from the start of the movement
 
 int integral_maxPWM = 20;
+
+bool xTargetReached = false;
+bool yTargetReached = false;
 
 // Returns the target velocity at different stages in the movement, using an s-curve profile.
 double velocityProfile_FSM(double J, double Vf, double t4, double t)
@@ -236,8 +239,14 @@ void move_FSM(int x, int y, int vf)
     double xPositionError_mm = x - currentX;
     double yPositionError_mm = y - currentY;
 
-    if (abs(xPositionError_mm) <= tolerance_mm &&
-        abs(yPositionError_mm) <= tolerance_mm)
+    if (!xTargetReached) {
+        xTargetReached = abs(xPositionError_mm) <= tolerance_mm;
+    }
+    if (!yTargetReached) {
+        yTargetReached = abs(yPositionError_mm) <= tolerance_mm;
+    }
+
+    if (xTargetReached && yTargetReached)
     {
         moveActive = false;
         moveStarted = false;
@@ -245,11 +254,18 @@ void move_FSM(int x, int y, int vf)
         setLeftMotor(0, 0);
         setRightMotor(0, 0);
 
+        // NEW: total distance travelled this move, printed once here at completion.
+        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+
+        yTargetReached = false;
+        xTargetReached = false;
+
         return;
     }
 
     // timeout function (always happening right now due to velocity profile going to 0 too soon)
-    if (t >= TA + moveT4 + TA + 3)
+    if (t >= TA + moveT4 + TA)
     {
         moveActive = false;
         moveStarted = false;
@@ -257,6 +273,11 @@ void move_FSM(int x, int y, int vf)
         setLeftMotor(0, 0);
         setRightMotor(0, 0);
         Serial.println("Move timed out, stopping motors.");
+        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+
+        yTargetReached = false;
+        xTargetReached = false;
         return;
     }
 
@@ -387,10 +408,10 @@ void move_FSM(int x, int y, int vf)
     // Serial.println("Left Position Error: " + String(leftPositionError));
     // Serial.println("Right Position Error: " + String(rightPositionError));
 
-    // Serial.println("Left Velocity Error: " + String(error_left));
-    // Serial.println("Right Velocity Error: " + String(error_right));
+    Serial.println("Left Velocity Error: " + String(error_left));
+    Serial.println("Right Velocity Error: " + String(error_right));
 
-    // Serial.println("Left PWM: " + String(leftPWM));
-    // Serial.println("Right PWM: " + String(rightPWM));
+    Serial.println("Left PWM: " + String(leftPWM));
+    Serial.println("Right PWM: " + String(rightPWM));
     // Serial.println(moveCurrentLeftCount);
 }
