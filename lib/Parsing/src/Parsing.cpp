@@ -224,7 +224,7 @@ void resetTokenArray() {
 int additionalLetterCheck(String line) {   // pass tidied string into it to check there there is at most 4 letters and 2 -ve signs
 
     if (line.length() == 0) {
-        return 2;   // line small (should never trigger due to previous code checks)
+        return 2;   // line small (should never trigger due to previous code checks) // this is triggering
     }
     int numOfLetters = 0;
     int numOfSigns = 0;
