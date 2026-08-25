@@ -143,11 +143,11 @@ void plan_FSM(double x, double y, double vf_target)
         t4 = 0.0;
         triangleProfile = true;
     }
-    else
-    {
+    else {
         vf = vf_target;
         t4 = (S - 2.0 * k * vf) / vf;
         triangleProfile = false;
+        //Serial.println("Vf: " + String(vf));
     }
 
     moveVf = vf;
@@ -254,7 +254,6 @@ void move_FSM(int x, int y, int vf)
         setLeftMotor(0, 0);
         setRightMotor(0, 0);
 
-        // NEW: total distance travelled this move, printed once here at completion.
         Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
         Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
 
@@ -408,10 +407,11 @@ void move_FSM(int x, int y, int vf)
     // Serial.println("Left Position Error: " + String(leftPositionError));
     // Serial.println("Right Position Error: " + String(rightPositionError));
 
-    Serial.println("Left Velocity Error: " + String(error_left));
-    Serial.println("Right Velocity Error: " + String(error_right));
-
-    Serial.println("Left PWM: " + String(leftPWM));
-    Serial.println("Right PWM: " + String(rightPWM));
+    //Serial.println("Left Velocity Error: " + String(error_left));
+    //Serial.println("Right Velocity Error: " + String(error_right));
+    Serial.println("Left Velocity: " + String(velocity_left));
+    Serial.println("Right Velocity: " + String(velocity_right));
+    //Serial.println("Left PWM: " + String(leftPWM));
+    //Serial.println("Right PWM: " + String(rightPWM));
     // Serial.println(moveCurrentLeftCount);
 }
