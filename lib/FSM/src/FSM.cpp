@@ -85,22 +85,30 @@ static void handleMotion()
     long vf = Parsing_getToken(F_token).GetValue();
 
     move_FSM(x, y, vf);
-    if(currentState == STATE_FAULT) {
+    if (currentState == STATE_FAULT)
+    {
         moveStarted = false;
         moveActive = false;
         return;
     }
     if (moveActive == false)
     {
-        currentState = STATE_IDLE;
         moveStarted = false;
-        //exportData();
-        //clearData();
+        setLeftMotor(0, 0);
+        setRightMotor(0, 0);
+        bool timerDone = timer(10);
+        if (timerDone == false)
+        {
+            return;
+        }
+
+        currentState = STATE_IDLE;
+        // exportData();
+        // clearData();
         resetTokenArray();
         return;
-        }
+    }
 }
-
 
 static void handleHoming()
 {
@@ -134,17 +142,18 @@ static void handleFault()
 
         int err = readLine();
 
-        if (err == 2) {
+        if (err == 2)
+        {
             // Still reading command (stay in fault)
             currentState = STATE_FAULT;
             return;
-
-        } else if (err == 1) {
+        }
+        else if (err == 1)
+        {
             // command invalid (stay in fault)
             resetTokenArray();
             currentState = STATE_FAULT;
             return;
-
         }
 
         GcodeToken token = Parsing_getToken(M);
@@ -169,11 +178,11 @@ static void printStateIfChanged()
     switch (currentState)
     {
     case STATE_IDLE:
-    
+
         Serial.println("IDLE");
-        //Serial.println((globalCountA + globalCountB)/2);
-        //Serial.println((globalCountA - globalCountB)/2);
-    
+        // Serial.println((globalCountA + globalCountB)/2);
+        // Serial.println((globalCountA - globalCountB)/2);
+
         /*
         Serial.println(" ");
         int dx = (countsToDistance(countA) + countsToDistance(countB))/2;
@@ -182,7 +191,7 @@ static void printStateIfChanged()
         Serial.println(dx);
         Serial.print("Y = ");
         Serial.println(dy);*/
-        break; 
+        break;
 
     case STATE_PARSING:
         Serial.println("PARSING");
