@@ -62,6 +62,8 @@ unsigned long elapsed_from_move_start = 0; // Variable to track elapsed time fro
 
 int integral_maxPWM = 20;
 
+const int MIN_DRIVE_PWM = 90; // measure this: lowest PWM that reliably turns the motor under load
+
 bool xTargetReached = false;
 bool yTargetReached = false;
 
@@ -116,6 +118,7 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t)
 // Initial speed plan to find distance, time at constant velocity and if it is a triangular profile.
 void plan_FSM(double x, double y, double vf_target)
 {
+    vf_target = vf_target / 60.0;
     double S = sqrt(x * x + y * y);
 
     Encoder_setLeftEncoderCountZero();
@@ -384,6 +387,16 @@ void move_FSM(int x, int y, int vf)
     int leftPWM = (int)abs(finalOutputLeft);
     int rightPWM = (int)abs(finalOutputRight);
 
+    if (leftDir != 0)
+    {
+        leftPWM += MIN_DRIVE_PWM;
+    }
+
+    if (rightDir != 0)
+    {
+        rightPWM += MIN_DRIVE_PWM;
+    }
+
     if (leftPWM > 255)
     {
         leftPWM = 255;
@@ -411,7 +424,7 @@ void move_FSM(int x, int y, int vf)
     //Serial.println("Right Velocity Error: " + String(error_right));
     Serial.println("Left Velocity: " + String(velocity_left));
     Serial.println("Right Velocity: " + String(velocity_right));
-    //Serial.println("Left PWM: " + String(leftPWM));
-    //Serial.println("Right PWM: " + String(rightPWM));
+    Serial.println("Left PWM: " + String(leftPWM));
+    Serial.println("Right PWM: " + String(rightPWM));
     // Serial.println(moveCurrentLeftCount);
 }
