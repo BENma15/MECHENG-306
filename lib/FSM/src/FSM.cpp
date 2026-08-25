@@ -102,11 +102,10 @@ static void handleMotion()
         {
             return;
         }
-
+        resetTokenArray();
         currentState = STATE_IDLE;
         // exportData();
         // clearData();
-        resetTokenArray();
         return;
     }
 }
