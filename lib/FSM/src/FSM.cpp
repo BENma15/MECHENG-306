@@ -98,8 +98,9 @@ static void handleMotion()
         //clearData();
         resetTokenArray();
         return;
-    }
+        }
 }
+
 
 static void handleHoming()
 {
@@ -170,8 +171,8 @@ static void printStateIfChanged()
     case STATE_IDLE:
     
         Serial.println("IDLE");
-        Serial.println((globalCountA + globalCountB)/2);
-        Serial.println((globalCountA - globalCountB)/2);
+        //Serial.println((globalCountA + globalCountB)/2);
+        //Serial.println((globalCountA - globalCountB)/2);
     
         /*
         Serial.println(" ");

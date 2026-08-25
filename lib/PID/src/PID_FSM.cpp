@@ -255,8 +255,8 @@ void move_FSM(int x, int y, int vf)
         setRightMotor(0, 0);
 
         // NEW: total distance travelled this move, printed once here at completion.
-        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
-        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        //Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        //Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
 
         yTargetReached = false;
         xTargetReached = false;
@@ -272,9 +272,9 @@ void move_FSM(int x, int y, int vf)
 
         setLeftMotor(0, 0);
         setRightMotor(0, 0);
-        Serial.println("Move timed out, stopping motors.");
-        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
-        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        //Serial.println("Move timed out, stopping motors.");
+        //Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        //Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
 
         yTargetReached = false;
         xTargetReached = false;
@@ -408,10 +408,10 @@ void move_FSM(int x, int y, int vf)
     // Serial.println("Left Position Error: " + String(leftPositionError));
     // Serial.println("Right Position Error: " + String(rightPositionError));
 
-    Serial.println("Left Velocity Error: " + String(error_left));
-    Serial.println("Right Velocity Error: " + String(error_right));
+    //Serial.println("Left Velocity Error: " + String(error_left));
+    //Serial.println("Right Velocity Error: " + String(error_right));
 
-    Serial.println("Left PWM: " + String(leftPWM));
-    Serial.println("Right PWM: " + String(rightPWM));
+    //Serial.println("Left PWM: " + String(leftPWM));
+    //Serial.println("Right PWM: " + String(rightPWM));
     // Serial.println(moveCurrentLeftCount);
 }
