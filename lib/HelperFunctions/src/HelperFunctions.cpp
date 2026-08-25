@@ -15,25 +15,36 @@ double countsToDistance(long counts)
     return counts / COUNTS_PER_MM;
 }
 
-bool timer(unsigned long waitTime)
+Timer::Timer()
 {
-    if (!timerActive)
+    startTime = 0;
+    timerActive = false;
+}
+
+bool Timer::startTimer(unsigned long waitTime)
+{
+    if (timerActive == false)
     {
         startTime = millis();
         timerActive = true;
+
         return false;
     }
-    currentTime = millis();
+
+    unsigned long currentTime = millis();
+
     if ((currentTime - startTime) >= waitTime)
     {
         timerActive = false;
+
         return true;
     }
+
     return false;
 }
 
-// Wrapper so calls that pass an int still link
-bool timer(int waitTime)
+void Timer::reset()
 {
-    return timer((unsigned long)waitTime);
+    startTime = 0;
+    timerActive = false;
 }

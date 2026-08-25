@@ -9,6 +9,7 @@
 #include <Motor.h>
 #include <Graph.h>
 static volatile SystemState currentState = STATE_IDLE; // System begins in IDLE state
+static Timer motionTimer;
 // static MotionSubstate motionState = MOTION_ACCEL;   // Motion_state begins in Acceloration
 
 static SystemState lastPrintedState = (SystemState)-1;
@@ -96,7 +97,7 @@ static void handleMotion()
         moveStarted = false;
         setLeftMotor(0, 0);
         setRightMotor(0, 0);
-        bool timerDone = timer(10);
+        bool timerDone = motionTimer.startTimer(100);
         if (timerDone == false)
         {
             return;
