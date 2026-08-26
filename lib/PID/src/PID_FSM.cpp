@@ -31,11 +31,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 15, ki_left = 3,/**/ kd_left = 0, kff_left = 6;
+double kp_left = 10, ki_left = 3,/**/ kd_left = 0, kff_left = 6;
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 15, ki_right = 3,/**/ kd_right = 0, kff_right = 6;
+double kp_right = 10, ki_right = 3,/**/ kd_right = 0, kff_right = 6;
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
@@ -64,7 +64,7 @@ unsigned long elapsed_from_move_start = 0;  // Tracks how long since movement st
 int integral_maxPWM = 40;                   // Anti-integral windup term to keep integral from accumulating
 
 // NEEDS TUNING
-const int MIN_DRIVE_PWM = 50;               // Lowest PWM that reliably turns the motor under load
+const int MIN_DRIVE_PWM = 60;               // Lowest PWM that reliably turns the motor under load
 
 bool xTargetReached = false;                // If X-axis has reached target
 bool yTargetReached = false;                // If Y-axis has reached target
@@ -349,9 +349,6 @@ void move_FSM(int x, int y, int vf)
     else if (targetRight < 0)
         rightTargetDir = -1;
 
-    leftDir = outputToDirection(finalOutputLeft);
-    rightDir = outputToDirection(finalOutputRight);
-
     // Feedforward calculations
     double feedforwardLeft = targetLeft * kff_left;
     double feedforwardRight = targetRight * kff_right;
@@ -359,6 +356,9 @@ void move_FSM(int x, int y, int vf)
     // Final output
     double finalOutputLeft = outputLeft - syncCorrection * leftTargetDir + feedforwardLeft;
     double finalOutputRight = outputRight + syncCorrection * rightTargetDir + feedforwardRight;
+
+    leftDir = outputToDirection(finalOutputLeft);
+    rightDir = outputToDirection(finalOutputRight);
 
     // Sets the desired pwm of the motors
     int leftPWM = (int)abs(finalOutputLeft);
