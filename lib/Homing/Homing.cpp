@@ -1,192 +1,315 @@
 #include "Homing.h"
 #include <Motor.h>
 #include <LimitSwitch.h>
-#include <PID_FSM>
+#include <PID_FSM.h>
+#include <Encoder.h>
 
+
+// Homing movement settings
 static const int homingFeedrate = 600;
 static const int slowHomingFeedrate = 300;
-static const int homingTravel = -99999;
+static const int homingTravel = 99999;
 static const int homingBackoffmm = 10;
+
 
 enum HomingState
 {
-    HOMING_DOWN,
-    HOMING_BACKOFF_UP,
-    HOMING_LEFT,
-    HOMING_BACKOFF_RIGHT,
+    HOMING_DOWN_FAST,
+    HOMING_BACKOFF_UP_1,
+    HOMING_DOWN_SLOW,
+    HOMING_BACKOFF_UP_2,
+
+    HOMING_LEFT_FAST,
+    HOMING_BACKOFF_RIGHT_1,
+    HOMING_LEFT_SLOW,
+    HOMING_BACKOFF_RIGHT_2,
+
     HOMING_DONE
 };
 
-static HomingState homingState = HOMING_DOWN;
+static HomingState homingState = HOMING_DOWN_FAST;
 
 static bool waiting = false;
 
 static void stopMotors()
 {
-    analogWrite(E1, 0);
-    analogWrite(E2, 0);
+    setLeftMotor(0, 0);
+    setRightMotor(0, 0);
 }
+
+static HomingResult moveToLimit(int x, int y, int feedrate, bool targetSwitchPressed, bool invalidSwitchPressed, HomingState nextState)
+    {
+ 
+        if (waiting)
+        {
+            stopMotors();
+
+            if (encoderCountsChanged())
+            {
+                return HOMING_RUNNING;
+            }
+
+            waiting = false;
+            homingState = nextState;
+
+            return HOMING_RUNNING;
+        }
+
+        if (invalidSwitchPressed)
+        {
+            stopMotors();
+
+            moveActive = false;
+            moveStarted = false;
+
+            return HOMING_FAULT;
+        }
+
+        if (targetSwitchPressed)
+        {
+            moveActive = false;
+            moveStarted = false;
+
+            stopMotors();
+
+            waiting = true;
+
+            return HOMING_RUNNING;
+        }
+        move_FSM(x, y, feedrate);
+        return HOMING_RUNNING;
+    }
+
+
+static HomingResult backoffMove(int x, int y, int feedrate, bool invalidSwitchPressed, HomingState nextState)
+    {
+        if (waiting)
+        {
+            stopMotors();
+
+            if (encoderCountsChanged())
+            {
+                return HOMING_RUNNING;
+            }
+
+            waiting = false;
+            homingState = nextState;
+
+            if (nextState == HOMING_DONE)
+            {
+                return HOMING_COMPLETE;
+            }
+            return HOMING_RUNNING;
+        }
+
+        if (invalidSwitchPressed)
+        {
+            stopMotors();
+
+            moveActive = false;
+            moveStarted = false;
+
+            return HOMING_FAULT;
+        }
+
+        move_FSM(x, y, feedrate);
+
+        if (moveFinished)
+        {
+            waiting = true;
+        }
+        return HOMING_RUNNING;
+    }
+
 
 void homingStart()
 {
     stopMotors();
 
-    homingState = HOMING_DOWN;
+    homingState = HOMING_DOWN_FAST;
 
     waiting = false;
+
+    moveActive = false;
+    moveStarted = false;
+    moveFinished = false;
 }
+
 
 HomingResult homingUpdate()
 {
     switch (homingState)
     {
-    case HOMING_DOWN:
+
+    /*
+        ============================================================
+        Y AXIS - FIRST PASS
+        ============================================================
+    */
+
+    case HOMING_DOWN_FAST:
     {
-        if (waiting)
-        {
-            stopMotors();
+        return moveToLimit(
+            0,
+            -homingTravel,
+            homingFeedrate,
 
-            if (encoderCountsChanged())
-            {
-                return HOMING_RUNNING;
-            }
+            LimitSwitch_bottomPressed(),
 
-            waiting = false;
-            homingState = HOMING_BACKOFF_UP;
-            return HOMING_RUNNING;
-        }
-
-        if (LimitSwitch_leftPressed() ||
+            LimitSwitch_leftPressed() ||
             LimitSwitch_rightPressed() ||
-            LimitSwitch_topPressed())
-        {
-            stopMotors();
-            return HOMING_FAULT;
-        }
+            LimitSwitch_topPressed(),
 
-        if (LimitSwitch_bottomPressed())
-        {
-            moveActive = false;
-            moveStarted = false;
-
-            startWait();
-            waiting = true;
-
-            return HOMING_RUNNING;
-        }
-        move_FSM(0, homingTravel, homingFeedrate);
-        return HOMING_RUNNING;
+            HOMING_BACKOFF_UP_1);
     }
 
-    case HOMING_BACKOFF_UP:
+
+    case HOMING_BACKOFF_UP_1:
     {
-        if (waiting)
-        {
-            stopMotors();
+        return backoffMove(
+            0,
+            homingBackoffmm,
+            homingFeedrate,
 
-            if (encodercountsChanged())
-            {
-                return HOMING_RUNNING;
-            }
-
-            waiting = false;
-            homingState = HOMING_LEFT;
-            return HOMING_RUNNING;
-        }
-
-        if (LimitSwitch_leftPressed() ||
+            LimitSwitch_leftPressed() ||
             LimitSwitch_rightPressed() ||
-            LimitSwitch_topPressed())
-        {
-            stopMotors();
-            return HOMING_FAULT;
-        }
+            LimitSwitch_topPressed(),
 
-        move_FSM(0, homingBackoffmm, homingFeedrate);
-
-        if (moveFinished)
-        {
-            waiting = true;
-        }
-        return HOMING_RUNNING;
+            HOMING_DOWN_SLOW);
     }
 
-    case HOMING_LEFT:
+
+    /*
+        ============================================================
+        Y AXIS - SECOND / SLOW PASS
+        ============================================================
+    */
+
+    case HOMING_DOWN_SLOW:
     {
-        if (waiting)
-        {
-            stopMotors();
+        return moveToLimit(
+            0,
+            -homingTravel,
+            slowHomingFeedrate,
 
-            if (encoderCountsChanged())
-            {
-                return HOMING_RUNNING;
-            }
+            LimitSwitch_bottomPressed(),
 
-            waiting = false;
-            homingState = HOMING_BACKOFF_RIGHT;
-            return HOMING_RUNNING;
-        }
-
-        if (LimitSwitch_topPressed() ||
+            LimitSwitch_leftPressed() ||
             LimitSwitch_rightPressed() ||
-            LimitSwitch_bottomPressed())
-        {
-            stopMotors();
-            return HOMING_FAULT;
-        }
+            LimitSwitch_topPressed(),
 
-        if (LimitSwitch_leftPressed())
-        {
-            moveActive = false;
-            moveStarted = false;
-
-            startWait();
-            waiting = true;
-
-            return HOMING_RUNNING;
-        }
-        move_FSM(homingTravel, 0, homingFeedrate);
-        return HOMING_RUNNING;
+            HOMING_BACKOFF_UP_2);
     }
 
-    case HOMING_BACKOFF_RIGHT:
+
+    case HOMING_BACKOFF_UP_2:
     {
-        if (waiting)
+        return backoffMove(
+            0,
+            homingBackoffmm,
+            homingFeedrate,
+
+            LimitSwitch_leftPressed() ||
+            LimitSwitch_rightPressed() ||
+            LimitSwitch_topPressed(),
+
+            HOMING_LEFT_FAST);
+    }
+
+
+    /*
+        ============================================================
+        X AXIS - FIRST PASS
+        ============================================================
+    */
+
+    case HOMING_LEFT_FAST:
+    {
+        return moveToLimit(
+            -homingTravel,
+            0,
+            homingFeedrate,
+
+            LimitSwitch_leftPressed(),
+
+            LimitSwitch_topPressed() ||
+            LimitSwitch_rightPressed() ||
+            LimitSwitch_bottomPressed(),
+
+            HOMING_BACKOFF_RIGHT_1);
+    }
+
+
+    case HOMING_BACKOFF_RIGHT_1:
+    {
+        return backoffMove(
+            homingBackoffmm,
+            0,
+            homingFeedrate,
+
+            LimitSwitch_topPressed() ||
+            LimitSwitch_rightPressed() ||
+            LimitSwitch_bottomPressed(),
+
+            HOMING_LEFT_SLOW);
+    }
+
+
+    /*
+        ============================================================
+        X AXIS - SECOND / SLOW PASS
+        ============================================================
+    */
+
+    case HOMING_LEFT_SLOW:
+    {
+        return moveToLimit(
+            -homingTravel,
+            0,
+            slowHomingFeedrate,
+
+            LimitSwitch_leftPressed(),
+
+            LimitSwitch_topPressed() ||
+            LimitSwitch_rightPressed() ||
+            LimitSwitch_bottomPressed(),
+
+            HOMING_BACKOFF_RIGHT_2);
+    }
+
+
+    case HOMING_BACKOFF_RIGHT_2:
+    {
+        return backoffMove(
+            homingBackoffmm,
+            0,
+            homingFeedrate,
+
+            LimitSwitch_topPressed() ||
+            LimitSwitch_rightPressed() ||
+            LimitSwitch_bottomPressed(),
+
+            HOMING_DONE);
+    }
+
+
+    /*
+        ============================================================
+        HOMING COMPLETE
+        ============================================================
+    */
+
+        case HOMING_DONE:
         {
             stopMotors();
 
-            if (encodercountsChanged())
-            {
-                return HOMING_RUNNING;
-            }
-            waiting = false;
-            homingState = HOMING_DONE;
             return HOMING_COMPLETE;
         }
-
-        if (LimitSwitch_topPressed() ||
-            LimitSwitch_rightPressed() ||
-            LimitSwitch_bottomPressed())
-        {
-            stopMotors();
-            return HOMING_FAULT;
-        }
-
-        move_FSM(homingBackoffmm, 0, homingFeedrate);
-
-        if (moveFinished)
-        {
-            waiting = true;
-        }
-        return HOMING_RUNNING;
-    }
-
-    case HOMING_DONE:
-    {
-        stopMotors();
-        return HOMING_COMPLETE;
-    }
     }
     stopMotors();
+
+    moveActive = false;
+    moveStarted = false;
+
     return HOMING_FAULT;
 }

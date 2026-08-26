@@ -40,5 +40,6 @@ void Encoder_setLeftEncoderCountZero();
 void Encoder_setRightEncoderCountZero();
 void Encoder_setLeftGlobalEncoderCountZero();
 void Encoder_setRightGlobalEncoderCountZero();
+bool encoderCountsChanged();
 
 #endif
