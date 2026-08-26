@@ -178,8 +178,7 @@ void plan_FSM(double x, double y, double vf_target)
 void move_FSM(int x, int y, int vf)
 {
     // If movement has not started yet we need to reset all variables and call movement plan
-    if (moveStarted == false)
-    {
+    if (moveStarted == false) {
         elapsed_from_move_start = millis(); // Reset the elapsed time from the start of the movement
         moveStarted = true;
         moveFinished = false;
@@ -196,8 +195,7 @@ void move_FSM(int x, int y, int vf)
 
         // Call movement plan to find jerk and t4
         plan_FSM(x, y, vf);
-        if (!moveActive)
-        {
+        if (!moveActive) {
             return;
         }
 
@@ -285,20 +283,45 @@ void move_FSM(int x, int y, int vf)
         return;
     }
 
+    // Timeout when movement stops if the total projected run time has elapsed
+    if (t >= TA + moveT4 + TA) {
+        // Sets all variables to show movement is finished
+        moveActive = false;
+        moveStarted = false;
+        moveFinished = true;
+
+        // Stops motors
+        stopMotors();
+
+        Serial.println("Move timed out, stopping motors.");
+        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+
+        // Sets target reached to false so it does not interfere with next movement
+        yTargetReached = false;
+        xTargetReached = false;
+
+        return;
+    }
+
     // left velocity PID
     double error_left = targetLeft - velocity_left;
-    if(abs((integral_left + error_left * dt) * ki_left) < integral_maxPWM){
-    integral_left += error_left * dt;
+
+    if(abs((integral_left + error_left * dt) * ki_left) < integral_maxPWM) {
+        integral_left += error_left * dt;
     }
+
     double derivative_left = (error_left - lastError_left) / dt;
     double outputLeft = kp_left * error_left + ki_left * integral_left + kd_left * derivative_left;
     lastError_left = error_left;
 
     // right velocity PID
     double error_right = targetRight - velocity_right;
-    if(abs((integral_right + error_right * dt) * ki_right) < integral_maxPWM ){
-    integral_right += error_right * dt;
+
+    if(abs((integral_right + error_right * dt) * ki_right) < integral_maxPWM ) {
+        integral_right += error_right * dt;
     }
+
     double derivative_right = (error_right - lastError_right) / dt;
     double outputRight = kp_right * error_right + ki_right * integral_right + kd_right * derivative_right;
     lastError_right = error_right;
@@ -312,19 +335,7 @@ void move_FSM(int x, int y, int vf)
     double syncCorrection = kp_sync * percentError + ki_sync * integral_sync + kd_sync * derivative_sync;
     lastError_sync = percentError;
 
-        static unsigned long previous_time = 0;
-
-    unsigned long current_time = millis();
-    unsigned long elapsed_ms = current_time - previous_time;
-
-    unsigned long timeSinceStart = current_time - elapsed_from_move_start;
-
-    long leftEncoderError =
-        moveTargetLeftCount - moveCurrentLeftCount;
-
-    long rightEncoderError =
-        moveTargetRightCount - moveCurrentRightCount;
-
+    // Direction the motors need to spin
     int leftTargetDir = 0;
     int rightTargetDir = 0;
 
@@ -338,20 +349,16 @@ void move_FSM(int x, int y, int vf)
     else if (targetRight < 0)
         rightTargetDir = -1;
 
+    leftDir = outputToDirection(finalOutputLeft);
+    rightDir = outputToDirection(finalOutputRight);
+
+    // Feedforward calculations
     double feedforwardLeft = targetLeft * kff_left;
     double feedforwardRight = targetRight * kff_right;
 
-    double finalOutputLeft =
-        outputLeft - syncCorrection * leftTargetDir + feedforwardLeft; //<--- feedforward
-
-    double finalOutputRight =
-        outputRight + syncCorrection * rightTargetDir + feedforwardRight; //<--- feedforward
-    // to get feedforward the target is being added to the output, and the pid will work to correct the error of the target
-    // 1mm/s = kff pwm so if kff was 6 and the motor is told to go at "1mm/s" motors will recieve +6 pwm
-
-    // Finds the direction of the motors
-    leftDir = outputToDirection(finalOutputLeft);
-    rightDir = outputToDirection(finalOutputRight);
+    // Final output
+    double finalOutputLeft = outputLeft - syncCorrection * leftTargetDir + feedforwardLeft;
+    double finalOutputRight = outputRight + syncCorrection * rightTargetDir + feedforwardRight;
 
     // Sets the desired pwm of the motors
     int leftPWM = (int)abs(finalOutputLeft);
@@ -365,18 +372,7 @@ void move_FSM(int x, int y, int vf)
     String leftSuccess = setLeftMotor(leftDir, leftPWM);
     String rightSuccess = setRightMotor(rightDir, rightPWM);
 
-    /*if (elapsed_ms >= 10)
-    {
-        previous_time = current_time;
-        addDataPoint(abs(leftEncoderError), abs(rightEncoderError), timeSinceStart);
-    }*/
-
-    // Serial.println("Left Position Error: " + String(leftPositionError));
-    // Serial.println("Right Position Error: " + String(rightPositionError));
-
-    //Serial.println("Left Velocity Error: " + String(error_left));
-    //Serial.println("Right Velocity Error: " + String(error_right));
+    // Prints to serial monitor the current velocity
     double actualPathVelocity = sqrt(pow((velocity_left + velocity_right) / 2.0, 2) + pow((velocity_left - velocity_right) / 2.0, 2));
     Serial.println("Actual Velocity: " + String(actualPathVelocity));
-    // Serial.println(moveCurrentLeftCount);
 }
