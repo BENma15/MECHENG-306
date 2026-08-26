@@ -97,11 +97,11 @@ static void handleMotion()
     {
         setLeftMotor(0, 0);
         setRightMotor(0, 0);
-        bool timerDone = motionTimer.startTimer(100);
-        if (timerDone == false)
-        {
+        
+        if (encoderCountsChanged()) {
             return;
         }
+
         resetTokenArray();
         moveStarted = false;
         moveFinished = false;
