@@ -67,7 +67,7 @@ const int MIN_DRIVE_PWM = 90; // measure this: lowest PWM that reliably turns th
 bool xTargetReached = false;
 bool yTargetReached = false;
 
-static bool moveFinished = false;
+bool moveFinished = false;
 
 // Returns the target velocity at different stages in the movement, using an s-curve profile.
 double velocityProfile_FSM(double J, double Vf, double t4, double t)
