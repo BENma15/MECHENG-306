@@ -58,9 +58,9 @@ static void handleParsing()
 
     // check if G01 command will hit a limit switch
     /* ASSUMING WE CHANGE 0,0 TO BOTTOM LEFT!!! */ // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<**************
-    long left = Encoder_getLeftEncoderCount();
-    long right = Encoder_getRightEncoderCount();
-    
+    long left = Encoder_getLeftGlobalEncoderCount();
+    long right = Encoder_getRightGlobalEncoderCount();
+
     long Xpos = (left + right) / 2;
     long Ypos = (left - right) / 2;
 
@@ -75,7 +75,6 @@ static void handleParsing()
         currentState = STATE_IDLE;
         return;
     }
-
 
     currentState = STATE_MOTION;
     return;
