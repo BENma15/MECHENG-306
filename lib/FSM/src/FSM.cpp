@@ -166,6 +166,10 @@ static void handleFault()
         GcodeToken token = Parsing_getToken(M);
         if (token.GetLetter() == 'M' && token.GetValue() == 999)
         {
+            if (LimitSwitch_leftPressed() || LimitSwitch_rightPressed() || LimitSwitch_topPressed() || LimitSwitch_bottomPressed()) {
+                resetTokenArray();
+                return;
+            }
             resetTokenArray();
             currentState = STATE_IDLE;
             return;
