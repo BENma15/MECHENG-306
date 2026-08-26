@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 #define MAX_TOKENS 4
-#define MAX_SPEED 1200    // max speed
+#define MAX_SPEED 1000    // max speed
 #define MIN_SPEED 300
 
 class GcodeToken {

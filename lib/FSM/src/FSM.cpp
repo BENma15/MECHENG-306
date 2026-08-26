@@ -168,6 +168,7 @@ static void handleFault()
         {
             if (LimitSwitch_leftPressed() || LimitSwitch_rightPressed() || LimitSwitch_topPressed() || LimitSwitch_bottomPressed()) {
                 resetTokenArray();
+                Serial.println("FAULT");
                 return;
             }
             resetTokenArray();
