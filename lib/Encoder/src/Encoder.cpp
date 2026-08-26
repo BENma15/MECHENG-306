@@ -32,7 +32,7 @@ const int8_t encTable[16] = {
 };
 
 // Distance represented by one encoder tick (mm)
-double distance_per_encoder_tick = 0.0051358;
+double distance_per_encoder_tick = 1.0 / 167.37;
 
 static long prevLeftCount = 0;
 static long prevRightCount = 0;
@@ -91,6 +91,30 @@ long Encoder_getRightEncoderCount()
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
         count = countB;
+    }
+
+    return count;
+}
+
+long Encoder_getLeftGlobalEncoderCount()
+{
+    long count;
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        count = globalCountA;
+    }
+
+    return count;
+}
+
+long Encoder_getRightGlobalEncoderCount()
+{
+    long count;
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        count = globalCountB;
     }
 
     return count;
