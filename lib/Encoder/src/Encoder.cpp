@@ -1,4 +1,5 @@
 #include "Encoder.h"
+#include <HelperFunctions.h>
 
 // Left Motor Encoder Pins
 const int L_ENCA = 18; // INT3
@@ -124,6 +125,38 @@ void Encoder_setRightGlobalEncoderCountZero() {
     cli();
     globalCountB = 0;
     sei();
+}
+
+bool encoderCountsChanged()
+{
+    static Timer encoderTimer;
+    static long previousLeft = 0;
+    static long previousRight = 0;
+    static bool initialized = false;
+
+    if (!initialized)
+    {
+        previousLeft = Encoder_getLeftEncoderCount();
+        previousRight = Encoder_getRightEncoderCount();
+        initialized = true;
+        return true;
+    }
+
+    // Don't compare until 10 ms has passed
+    if (!encoderTimer.startTimer(10))
+    {
+        return true;
+    }
+
+    long currentLeft = Encoder_getLeftEncoderCount();
+    long currentRight = Encoder_getRightEncoderCount();
+
+    bool changed = (currentLeft != previousLeft) || (currentRight != previousRight);
+
+    previousLeft = currentLeft;
+    previousRight = currentRight;
+
+    return changed;
 }
 
 ISR(INT0_vect) { updateRight(); } // pin 21 = R_ENCB

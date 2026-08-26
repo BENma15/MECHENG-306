@@ -124,6 +124,11 @@ static void handleHoming()
 
     if (result == HOMING_COMPLETE)
     {
+        if (encoderCountsChanged()) {
+            return;
+        }
+        Encoder_setLeftGlobalEncoderCountZero();
+        Encoder_setRightGlobalEncoderCountZero();
         currentState = STATE_IDLE;
         moveActive = false;  // Reset moveActive to false after homing is complete
         moveStarted = false; // Reset moveStarted to false after homing is complete
@@ -182,8 +187,8 @@ static void printStateIfChanged()
     case STATE_IDLE:
 
         Serial.println("IDLE");
-        // Serial.println((globalCountA + globalCountB)/2);
-        // Serial.println((globalCountA - globalCountB)/2);
+        //Serial.println((globalCountA + globalCountB)/2);
+        //Serial.println((globalCountA - globalCountB)/2);
 
         /*
         Serial.println(" ");

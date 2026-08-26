@@ -7,6 +7,7 @@ extern const double COUNTS_PER_MM;
 
 long distanceToCounts(double distance_mm);
 double countsToDistance(long counts);
+bool encoderCountsChanged();
 class Timer
 {
 private:
