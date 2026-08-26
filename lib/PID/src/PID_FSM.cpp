@@ -30,11 +30,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 30, ki_left = 10,/**/ kd_left = 0, kff_left = 7;/**/ // all some variation of mm/s
+double kp_left = 10, ki_left = 2,/**/ kd_left = 0, kff_left = 5;/**/ // all some variation of mm/s
 double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
 
 // Right Motor PID Variables
-double kp_right = 30, ki_right = 10,/**/ kd_right = 0, kff_right = 7;/**/ // all some variation of mm/s
+double kp_right = 10, ki_right = 2,/**/ kd_right = 0, kff_right = 5;/**/ // all some variation of mm/s
 double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
 
 // Sync PID Variables
@@ -62,7 +62,7 @@ unsigned long elapsed_from_move_start = 0; // Variable to track elapsed time fro
 
 int integral_maxPWM = 25;
 
-const int MIN_DRIVE_PWM = 30; // measure this: lowest PWM that reliably turns the motor under load
+const int MIN_DRIVE_PWM = 40; // measure this: lowest PWM that reliably turns the motor under load
 
 bool xTargetReached = false;
 bool yTargetReached = false;
