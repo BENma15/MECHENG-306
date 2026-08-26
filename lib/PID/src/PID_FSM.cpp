@@ -9,33 +9,34 @@
 #include <Graph.h>
 
 #include <FSM.h>
-// Time Constant Variables
 
-// test increase of t1 and t2 from 0.05 and 0.10 to 0.1 and 0.2
+// Time Constant Variables
 double T1 = 0.2;
 double T2 = 0.4;
 double TA = T1 + T2 + T1;
 
 // Movement Variables
-double moveJ = 0;
-double moveVf = 0;
-double moveT4 = 0;
+double moveJ = 0;               // Jerk required for movement based on T1, T2 and final velocity
+double moveVf = 0;              // Final movement speed
+double moveT4 = 0;              // Time at final velocity
 double moveUnitX = 0;
 double moveUnitY = 0;
 double moveStartTime = 0;
 
+// Movement Active Variables    
 bool moveActive = false;
 bool moveStarted = false;
 
+// If T4 is negative it becomes a triangle profile as it doesnt have the time to accelerate to final velocity
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 15, ki_left = 3,/**/ kd_left = 0, kff_left = 6;/**/ // all some variation of mm/s
-double integral_left = 0, lastError_left = 0;                // kff is k_feedforward
+double kp_left = 15, ki_left = 3,/**/ kd_left = 0, kff_left = 6;
+double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 15, ki_right = 3,/**/ kd_right = 0, kff_right = 6;/**/ // all some variation of mm/s
-double integral_right = 0, lastError_right = 0;                  // kff is k_feedforward
+double kp_right = 15, ki_right = 3,/**/ kd_right = 0, kff_right = 6;
+double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
 double kp_sync = 0, ki_sync = 2, kd_sync = 0;
@@ -43,31 +44,36 @@ double integral_sync = 0, lastError_sync = 0;
 
 // Time Control Variables
 uint32_t lastControlLoopMicros = 0;
-const uint32_t CONTROL_LOOP_INTERVAL_US = 20000;        // 50Hz
-const double dt = CONTROL_LOOP_INTERVAL_US / 1000000.0; // Seconds per control loop tick
+const uint32_t CONTROL_LOOP_INTERVAL_US = 20000;            // 50Hz
+const double dt = CONTROL_LOOP_INTERVAL_US / 1000000.0;     // Seconds per control loop tick
 
 // Motor Direction Variables
 int8_t leftDir;
 int8_t rightDir;
 
-// encoder tracking
+// Encoder tracking
 long moveCurrentLeftCount = 0;
 long moveCurrentRightCount = 0;
 
 long moveTargetLeftCount = 0;
 long moveTargetRightCount = 0;
 
-const double tolerance_mm = 0.2;
-unsigned long elapsed_from_move_start = 0; // Variable to track elapsed time from the start of the movement
+const double tolerance_mm = 0.2;            // Stops when it reaches within 0.2mm of target
+unsigned long elapsed_from_move_start = 0;  // Tracks how long since movement started
 
-int integral_maxPWM = 40;
+int integral_maxPWM = 40;                   // Anti-integral windup term to keep integral from accumulating
 
-const int MIN_DRIVE_PWM = 50; // measure this: lowest PWM that reliably turns the motor under load
+// NEEDS TUNING
+const int MIN_DRIVE_PWM = 50;               // Lowest PWM that reliably turns the motor under load
 
-bool xTargetReached = false;
-bool yTargetReached = false;
+bool xTargetReached = false;                // If X-axis has reached target
+bool yTargetReached = false;                // If Y-axis has reached target
 
 bool moveFinished = false;
+
+// Target velocities for left and right motors
+double targetLeft;
+double targetRight;
 
 // Returns the target velocity at different stages in the movement, using an s-curve profile.
 double velocityProfile_FSM(double J, double Vf, double t4, double t)
@@ -118,45 +124,52 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t)
 // Initial speed plan to find distance, time at constant velocity and if it is a triangular profile.
 void plan_FSM(double x, double y, double vf_target)
 {
-    vf_target = vf_target / 60.0;
-    double S = sqrt(x * x + y * y);
+    vf_target = vf_target / 60.0;           // Converts the mm/min to mm/s
+    double S = sqrt(x * x + y * y);         // Finds straight line distance
 
+    // Resets encoder counts to zero
     Encoder_setLeftEncoderCountZero();
     Encoder_setRightEncoderCountZero();
 
+    // If distance is zero return
     if (S <= 0.0)
     {
         moveActive = false;
         moveStarted = false;
         return;
     }
+
+    // Direction of travel (x and y as fractions of total distance, magnitude removed)
+    // Unit vectors
     moveUnitX = x / S;
     moveUnitY = y / S;
 
-    // Ramp distance per unit of commanded velocity (constant, since T1/T2 are fixed)
-    double k = T1 + T2/2; //da chat told me to change ts, lmk why this is the case 
+    // Distance covered in one ramp time
+    double k = T1 + T2/2;
 
     double vf;
     double t4;
+
+    // If distance of ramp up and down is greater then distance
+    // This means it will never reach cruise velocity and need to implement a triangular profile
     if (S < 2.0 * k * vf_target)
     {
-        // Move too short to reach vf_target - solve for the reduced peak velocity
-        // that makes the ramp (accel+decel, no cruise) exactly fit S.
-        vf = S / (2.0 * k);
-        t4 = 0.0;
+        vf = S / (2.0 * k);             // New final velocity
+        t4 = 0.0;                       // No time cruising at final velocity
         triangleProfile = true;
     }
     else {
         vf = vf_target;
-        t4 = (S - 2.0 * k * vf) / vf;
+        t4 = (S - 2.0 * k * vf) / vf;   // Time at final velocity calculation
         triangleProfile = false;
-        //Serial.println("Vf: " + String(vf));
     }
 
+    // Main variables to calculate target speed at any time
     moveVf = vf;
     moveJ = moveVf / (T1 * (T1 + T2));
     moveT4 = t4;
 
+    // Movement start time set
     moveStartTime = millis() / 1000.0;
     moveActive = true;
 }
@@ -164,13 +177,14 @@ void plan_FSM(double x, double y, double vf_target)
 // Main PID loop.
 void move_FSM(int x, int y, int vf)
 {
-    // If movement has not started then set all the errors to 0 and call the movement plan
+    // If movement has not started yet we need to reset all variables and call movement plan
     if (moveStarted == false)
     {
         elapsed_from_move_start = millis(); // Reset the elapsed time from the start of the movement
         moveStarted = true;
         moveFinished = false;
 
+        // Ensuring variables are zeroed
         integral_left = 0;
         lastError_left = 0;
 
@@ -180,24 +194,27 @@ void move_FSM(int x, int y, int vf)
         integral_sync = 0;
         lastError_sync = 0;
 
+        // Call movement plan to find jerk and t4
         plan_FSM(x, y, vf);
         if (!moveActive)
         {
             return;
         }
 
+        // Sets last loop time to the present
         lastControlLoopMicros = micros();
 
+        // Zeros the encoders
         moveCurrentLeftCount = Encoder_getLeftEncoderCount();
         moveCurrentRightCount = Encoder_getRightEncoderCount();
 
-        moveTargetLeftCount =
-            moveCurrentLeftCount + distanceToCounts(x) + distanceToCounts(y);
+        // Finds the target encoder count for both motors
+        moveTargetLeftCount = moveCurrentLeftCount + distanceToCounts(x) + distanceToCounts(y);
 
-        moveTargetRightCount =
-            moveCurrentRightCount + distanceToCounts(x) - distanceToCounts(y);
+        moveTargetRightCount = moveCurrentRightCount + distanceToCounts(x) - distanceToCounts(y);
     }
 
+    // Gets the current encoder count
     moveCurrentLeftCount = Encoder_getLeftEncoderCount();
     moveCurrentRightCount = Encoder_getRightEncoderCount();
 
@@ -206,31 +223,40 @@ void move_FSM(int x, int y, int vf)
     // Ensures there is a constant frequency of 50Hz which we are using for the PID loop as to not
     // call the motors too frequently.
     uint32_t nowMicros = micros();
-    if (nowMicros - lastControlLoopMicros < CONTROL_LOOP_INTERVAL_US)
-    {
+
+    if (nowMicros - lastControlLoopMicros < CONTROL_LOOP_INTERVAL_US) {
         return;
     }
-    lastControlLoopMicros += CONTROL_LOOP_INTERVAL_US;
 
+    lastControlLoopMicros += CONTROL_LOOP_INTERVAL_US;          // Sets new last loop time
+
+    // Gets both motor velocities
     double velocity_left = Encoder_getLeftVelocity(dt);
     double velocity_right = Encoder_getRightVelocity(dt);
 
-    // Gets current time in reference to start time and then finds target velocity
+    // Gets current time in reference to start time
     double t = (millis() / 1000.0) - moveStartTime;
+
+    // Sees what the velocity should be at the moment
     double V = velocityProfile_FSM(moveJ, moveVf, moveT4, t);
 
-    // This currently stops the motors once the time is finsihed, I think we should change this
-    // to when the distance is met and not time.
+    // Breaks total veloity into velocity needed from each motor
+    targetLeft = V * (moveUnitX + moveUnitY);
+    targetRight = V * (moveUnitX - moveUnitY);
 
+    // Converts current encoder counts to mm
     double currentLeftMM = countsToDistance(moveCurrentLeftCount);
     double currentRightMM = countsToDistance(moveCurrentRightCount);
 
+    // Converts mm moved by each motor to the actual x and y movement
     double currentX = (currentLeftMM + currentRightMM) / 2.0;
     double currentY = (currentLeftMM - currentRightMM) / 2.0;
 
+    // Calculates the distance error in terms of x and y coordinates
     double xPositionError_mm = x - currentX;
     double yPositionError_mm = y - currentY;
 
+    // Checks to see if both the x and y coordinates have moved the desired amount
     if (!xTargetReached) {
         xTargetReached = abs(xPositionError_mm) <= tolerance_mm;
     }
@@ -238,34 +264,26 @@ void move_FSM(int x, int y, int vf)
         yTargetReached = abs(yPositionError_mm) <= tolerance_mm;
     }
 
-    if (xTargetReached && yTargetReached)
-    {
+    // Has reached target before time
+    if (xTargetReached && yTargetReached) {
+        // Sets all variables to show movement is finished
         moveActive = false;
         moveStarted = false;
         moveFinished = true;
 
+        // Stops motors
         stopMotors();
 
         Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
         Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        Serial.println("Vf: " + String(moveVf));
 
+        // Sets target reached to false so it does not interfere with next movement
         yTargetReached = false;
         xTargetReached = false;
 
-        Serial.println("Vf: " + String(moveVf));
-
-
         return;
     }
-
-    // Splits target velocity into left and right motor target velocities using unit vectors
-    double targetLeft;
-    double targetRight;
-
-    targetLeft = V * (moveUnitX + moveUnitY);
-    targetRight = V * (moveUnitX - moveUnitY);
-
-    // NEED TO ADD ANTI-WINDUP FOR ALL OF THEM
 
     // left velocity PID
     double error_left = targetLeft - velocity_left;
