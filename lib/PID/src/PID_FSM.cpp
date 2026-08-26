@@ -60,9 +60,9 @@ long moveTargetRightCount = 0;
 const double tolerance_mm = 0.2;
 unsigned long elapsed_from_move_start = 0; // Variable to track elapsed time from the start of the movement
 
-int integral_maxPWM = 20;
+int integral_maxPWM = 25;
 
-const int MIN_DRIVE_PWM = 90; // measure this: lowest PWM that reliably turns the motor under load
+const int MIN_DRIVE_PWM = 30; // measure this: lowest PWM that reliably turns the motor under load
 
 bool xTargetReached = false;
 bool yTargetReached = false;
