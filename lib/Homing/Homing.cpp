@@ -1,10 +1,12 @@
 #include "Homing.h"
 #include <Motor.h>
 #include <LimitSwitch.h>
-#include <Encoder.h>
+#include <PID_FSM>
 
-static const int HOMING_PWM = 150;
-static const unsigned long HOMING_STATE_DELAY_MS = 20;
+static const int homingFeedrate = 600;
+static const int slowHomingFeedrate = 300;
+static const int homingTravel = -99999;
+static const int homingBackoffmm = 10;
 
 enum HomingState
 {
@@ -18,61 +20,11 @@ enum HomingState
 static HomingState homingState = HOMING_DOWN;
 
 static bool waiting = false;
-static unsigned long waitStart = 0;
 
 static void stopMotors()
 {
     analogWrite(E1, 0);
     analogWrite(E2, 0);
-}
-
-static void driveUp()
-{
-    digitalWrite(M1, HIGH);
-    digitalWrite(M2, LOW);
-
-    analogWrite(E1, HOMING_PWM);
-    analogWrite(E2, HOMING_PWM);
-}
-
-static void driveDown()
-{
-    digitalWrite(M1, LOW);
-    digitalWrite(M2, HIGH);
-
-    analogWrite(E1, HOMING_PWM);
-    analogWrite(E2, HOMING_PWM);
-}
-
-static void driveLeft()
-{
-    digitalWrite(M1, LOW);
-    digitalWrite(M2, LOW);
-
-    analogWrite(E1, HOMING_PWM);
-    analogWrite(E2, HOMING_PWM);
-}
-
-static void driveRight()
-{
-    digitalWrite(M1, HIGH);
-    digitalWrite(M2, HIGH);
-
-    analogWrite(E1, HOMING_PWM);
-    analogWrite(E2, HOMING_PWM);
-}
-
-static void startWait()
-{
-    stopMotors();
-
-    waiting = true;
-    waitStart = millis();
-}
-
-static bool waitFinished()
-{
-    return (millis() - waitStart) >= HOMING_STATE_DELAY_MS;
 }
 
 void homingStart()
@@ -82,7 +34,6 @@ void homingStart()
     homingState = HOMING_DOWN;
 
     waiting = false;
-    waitStart = 0;
 }
 
 HomingResult homingUpdate()
@@ -95,10 +46,11 @@ HomingResult homingUpdate()
         {
             stopMotors();
 
-            if (!waitFinished())
+            if (encoderCountsChanged())
             {
                 return HOMING_RUNNING;
             }
+
             waiting = false;
             homingState = HOMING_BACKOFF_UP;
             return HOMING_RUNNING;
@@ -114,10 +66,15 @@ HomingResult homingUpdate()
 
         if (LimitSwitch_bottomPressed())
         {
+            moveActive = false;
+            moveStarted = false;
+
             startWait();
+            waiting = true;
+
             return HOMING_RUNNING;
         }
-        driveDown();
+        move_FSM(0, homingTravel, homingFeedrate);
         return HOMING_RUNNING;
     }
 
@@ -127,7 +84,7 @@ HomingResult homingUpdate()
         {
             stopMotors();
 
-            if (!waitFinished())
+            if (encodercountsChanged())
             {
                 return HOMING_RUNNING;
             }
@@ -145,12 +102,12 @@ HomingResult homingUpdate()
             return HOMING_FAULT;
         }
 
-        if (!LimitSwitch_bottomPressed())
+        move_FSM(0, homingBackoffmm, homingFeedrate);
+
+        if (moveFinished)
         {
-            startWait();
-            return HOMING_RUNNING;
+            waiting = true;
         }
-        driveUp();
         return HOMING_RUNNING;
     }
 
@@ -160,10 +117,11 @@ HomingResult homingUpdate()
         {
             stopMotors();
 
-            if (!waitFinished())
+            if (encoderCountsChanged())
             {
                 return HOMING_RUNNING;
             }
+
             waiting = false;
             homingState = HOMING_BACKOFF_RIGHT;
             return HOMING_RUNNING;
@@ -179,10 +137,15 @@ HomingResult homingUpdate()
 
         if (LimitSwitch_leftPressed())
         {
+            moveActive = false;
+            moveStarted = false;
+
             startWait();
+            waiting = true;
+
             return HOMING_RUNNING;
         }
-        driveLeft();
+        move_FSM(homingTravel, 0, homingFeedrate);
         return HOMING_RUNNING;
     }
 
@@ -192,7 +155,7 @@ HomingResult homingUpdate()
         {
             stopMotors();
 
-            if (!waitFinished())
+            if (encodercountsChanged())
             {
                 return HOMING_RUNNING;
             }
@@ -209,12 +172,12 @@ HomingResult homingUpdate()
             return HOMING_FAULT;
         }
 
-        if (!LimitSwitch_leftPressed())
+        move_FSM(homingBackoffmm, 0, homingFeedrate);
+
+        if (moveFinished)
         {
-            startWait();
-            return HOMING_RUNNING;
+            waiting = true;
         }
-        driveRight();
         return HOMING_RUNNING;
     }
 

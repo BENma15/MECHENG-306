@@ -46,10 +46,10 @@ int tokenise(String line) {
     int err = additionalLetterCheck(line);
 
     if (err == 2) { // too many letters
-        Serial.println("Too many letters brev");
+        Serial.println("Invalid Gcode: Too many command letters");
         return 1;
     } else if (err == 1) {  // invalid -ve sign/s
-        Serial.println("invalid -ve signs");
+        Serial.println("Invalid Gcode: Invalid negative sign placement");
         return 1;
     }
 
