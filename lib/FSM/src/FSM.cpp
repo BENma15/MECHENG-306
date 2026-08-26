@@ -84,8 +84,9 @@ static void handleMotion()
     long x = Parsing_getToken(X).GetValue();
     long y = Parsing_getToken(Y).GetValue();
     long vf = Parsing_getToken(F_token).GetValue();
-
+    if((moveFinished == false) && (currentState == STATE_MOTION)){
     move_FSM(x, y, vf);
+    }
     if (currentState == STATE_FAULT)
     {
         moveStarted = false;
@@ -94,7 +95,6 @@ static void handleMotion()
     }
     if (moveActive == false)
     {
-        moveStarted = false;
         setLeftMotor(0, 0);
         setRightMotor(0, 0);
         bool timerDone = motionTimer.startTimer(100);
@@ -103,6 +103,8 @@ static void handleMotion()
             return;
         }
         resetTokenArray();
+        moveStarted = false;
+        moveFinished = false;
         currentState = STATE_IDLE;
         // exportData();
         // clearData();

@@ -67,6 +67,8 @@ const int MIN_DRIVE_PWM = 90; // measure this: lowest PWM that reliably turns th
 bool xTargetReached = false;
 bool yTargetReached = false;
 
+static bool moveFinished = false;
+
 // Returns the target velocity at different stages in the movement, using an s-curve profile.
 double velocityProfile_FSM(double J, double Vf, double t4, double t)
 {
@@ -169,6 +171,7 @@ void move_FSM(int x, int y, int vf)
     {
         elapsed_from_move_start = millis(); // Reset the elapsed time from the start of the movement
         moveStarted = true;
+        moveFinished = false;
 
         integral_left = 0;
         lastError_left = 0;
@@ -253,6 +256,7 @@ void move_FSM(int x, int y, int vf)
     {
         moveActive = false;
         moveStarted = false;
+        moveFinished = true;
 
         setLeftMotor(0, 0);
         setRightMotor(0, 0);
@@ -263,6 +267,7 @@ void move_FSM(int x, int y, int vf)
         yTargetReached = false;
         xTargetReached = false;
 
+
         return;
     }
 
@@ -271,6 +276,7 @@ void move_FSM(int x, int y, int vf)
     {
         moveActive = false;
         moveStarted = false;
+        moveFinished = true;
 
         setLeftMotor(0, 0);
         setRightMotor(0, 0);

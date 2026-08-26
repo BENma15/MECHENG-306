@@ -39,4 +39,6 @@ extern double kd_sync;
 extern double integral_sync;
 extern double lastError_sync;
 
+extern bool moveFinished;
+
 #endif // PID_FSM_H
