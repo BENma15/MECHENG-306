@@ -273,24 +273,6 @@ void move_FSM(int x, int y, int vf)
         return;
     }
 
-    // timeout function (always happening right now due to velocity profile going to 0 too soon)
-    if (t >= TA + moveT4 + TA)
-    {
-        moveActive = false;
-        moveStarted = false;
-        moveFinished = true;
-
-        setLeftMotor(0, 0);
-        setRightMotor(0, 0);
-        Serial.println("Move timed out, stopping motors.");
-        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
-        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
-
-        yTargetReached = false;
-        xTargetReached = false;
-        return;
-    }
-
     // Splits target velocity into left and right motor target velocities using unit vectors
     double targetLeft;
     double targetRight;
