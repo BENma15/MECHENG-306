@@ -267,6 +267,8 @@ void move_FSM(int x, int y, int vf)
         yTargetReached = false;
         xTargetReached = false;
 
+        Serial.println("Vf: " + String(moveVf));
+
 
         return;
     }
@@ -428,9 +430,7 @@ void move_FSM(int x, int y, int vf)
 
     //Serial.println("Left Velocity Error: " + String(error_left));
     //Serial.println("Right Velocity Error: " + String(error_right));
-    Serial.println("Left Velocity: " + String(velocity_left));
-    Serial.println("Right Velocity: " + String(velocity_right));
-    Serial.println("Left PWM: " + String(leftPWM));
-    Serial.println("Right PWM: " + String(rightPWM));
+    double actualPathVelocity = sqrt(pow((velocity_left + velocity_right) / 2.0, 2) + pow((velocity_left - velocity_right) / 2.0, 2));
+    Serial.println("Actual Velocity: " + String(actualPathVelocity));
     // Serial.println(moveCurrentLeftCount);
 }
