@@ -14,5 +14,6 @@ const int M2 = 7;
 void Motor_Init();  // initialise pins for motor control
 String setLeftMotor(int8_t dir, int pwm);   // returns "FAULT" for fault or "SUCCESS" for success
 String setRightMotor(int8_t dir, int pwm);  // returns "FAULT" for fault or "SUCCESS" for success
+void stopMotors();
 
 #endif

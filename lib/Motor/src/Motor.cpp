@@ -1,5 +1,4 @@
 #include "Motor.h"
-#include <FSM.h>
 
 // Initialise Motor Pins
 void Motor_Init()
@@ -13,14 +12,7 @@ void Motor_Init()
 // Left motor movement
 String setLeftMotor(int8_t dir, int pwm)
 {
-
-    if (FSM_getCurrentState() == STATE_FAULT)
-    {
-        digitalWrite(M1, dir > 0 ? HIGH : LOW);
-        analogWrite(E1, pwm);
-        return "FAULT";
-    }
-    else if (dir == 0)
+    if (dir == 0)
     {
         analogWrite(E1, 0);
         return "STOP";
@@ -35,14 +27,7 @@ String setLeftMotor(int8_t dir, int pwm)
 // Right motor movement
 String setRightMotor(int8_t dir, int pwm)
 {
-
-    if (FSM_getCurrentState() == STATE_FAULT)
-    {
-        digitalWrite(M2, dir > 0 ? HIGH : LOW);
-        analogWrite(E2, pwm);
-        return "FAULT";
-    }
-    else if (dir == 0)
+    if (dir == 0)
     {
         analogWrite(E2, 0);
         return "STOP";
@@ -52,4 +37,10 @@ String setRightMotor(int8_t dir, int pwm)
     analogWrite(E2, pwm);
 
     return "SUCCESS";
+}
+
+void stopMotors()
+{
+    setLeftMotor(0, 0);
+    setRightMotor(0, 0);
 }

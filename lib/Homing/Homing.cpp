@@ -31,12 +31,6 @@ static HomingState homingState = HOMING_DOWN_FAST;
 
 static bool waiting = false;
 
-static void stopMotors()
-{
-    setLeftMotor(0, 0);
-    setRightMotor(0, 0);
-}
-
 static HomingResult moveToLimit(int x, int y, int feedrate, bool targetSwitchPressed, bool invalidSwitchPressed, HomingState nextState)
     {
  

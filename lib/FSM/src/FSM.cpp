@@ -9,7 +9,6 @@
 #include <Motor.h>
 #include <Graph.h>
 static volatile SystemState currentState = STATE_IDLE; // System begins in IDLE state
-static Timer motionTimer;
 // static MotionSubstate motionState = MOTION_ACCEL;   // Motion_state begins in Acceloration
 
 static SystemState lastPrintedState = (SystemState)-1;
@@ -59,10 +58,9 @@ static void handleParsing()
 
     // check if G01 command will hit a limit switch
     /* ASSUMING WE CHANGE 0,0 TO BOTTOM LEFT!!! */ // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<**************
-    cli();
     long left = Encoder_getLeftEncoderCount();
     long right = Encoder_getRightEncoderCount();
-    sei();
+    
     long Xpos = (left + right) / 2;
     long Ypos = (left - right) / 2;
 
@@ -86,7 +84,7 @@ static void handleMotion()
     long x = Parsing_getToken(X).GetValue();
     long y = Parsing_getToken(Y).GetValue();
     long vf = Parsing_getToken(F_token).GetValue();
-    if((moveFinished == false) && (currentState == STATE_MOTION)){
+    if(moveFinished == false){
     move_FSM(x, y, vf);
     }
     if (currentState == STATE_FAULT)
@@ -97,8 +95,7 @@ static void handleMotion()
     }
     if (moveActive == false)
     {
-        setLeftMotor(0, 0);
-        setRightMotor(0, 0);
+        stopMotors();
         
         if (encoderCountsChanged()) {
             return;
@@ -143,8 +140,7 @@ static void handleFault()
 {
     moveActive = false;
     moveStarted = false;
-    setLeftMotor(0, 0);
-    setRightMotor(0, 0);
+    stopMotors();
 
     if (Serial.available() > 0)
     {

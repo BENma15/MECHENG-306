@@ -111,8 +111,6 @@ double velocityProfile_FSM(double J, double Vf, double t4, double t)
     else
     {
         // Move finished
-        integral_left = 0;
-        integral_right = 0;
         return 0;
     }
 }
@@ -190,10 +188,8 @@ void move_FSM(int x, int y, int vf)
 
         lastControlLoopMicros = micros();
 
-        cli();
         moveCurrentLeftCount = Encoder_getLeftEncoderCount();
         moveCurrentRightCount = Encoder_getRightEncoderCount();
-        sei();
 
         moveTargetLeftCount =
             moveCurrentLeftCount + distanceToCounts(x) + distanceToCounts(y);
@@ -201,21 +197,11 @@ void move_FSM(int x, int y, int vf)
         moveTargetRightCount =
             moveCurrentRightCount + distanceToCounts(x) - distanceToCounts(y);
     }
-    cli();
-    moveCurrentLeftCount = countA;
-    moveCurrentRightCount = countB;
-    sei();
+
+    moveCurrentLeftCount = Encoder_getLeftEncoderCount();
+    moveCurrentRightCount = Encoder_getRightEncoderCount();
 
     SystemState state = FSM_getCurrentState();
-
-    if (state == STATE_FAULT)
-    {
-        moveActive = false;
-        moveStarted = false;
-        setLeftMotor(0, 0);
-        setRightMotor(0, 0);
-        return;
-    }
 
     // Ensures there is a constant frequency of 50Hz which we are using for the PID loop as to not
     // call the motors too frequently.
@@ -258,8 +244,7 @@ void move_FSM(int x, int y, int vf)
         moveStarted = false;
         moveFinished = true;
 
-        setLeftMotor(0, 0);
-        setRightMotor(0, 0);
+        stopMotors();
 
         Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
         Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");

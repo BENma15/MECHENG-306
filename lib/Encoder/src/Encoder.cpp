@@ -1,6 +1,8 @@
 #include "Encoder.h"
 #include <HelperFunctions.h>
 
+#include <util/atomic.h>
+
 // Left Motor Encoder Pins
 const int L_ENCA = 18; // INT3
 const int L_ENCB = 19; // INT2
@@ -70,19 +72,27 @@ void updateRight() {
     stateB = newState;
 }
 
-long Encoder_getLeftEncoderCount() {
+long Encoder_getLeftEncoderCount()
+{
     long count;
-    cli();
-    count = countA;
-    sei();
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        count = countA;
+    }
+
     return count;
 }
 
-long Encoder_getRightEncoderCount() {
+long Encoder_getRightEncoderCount()
+{
     long count;
-    cli();
-    count = countB;
-    sei();
+
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        count = countB;
+    }
+
     return count;
 }
 
@@ -100,31 +110,38 @@ double Encoder_getRightVelocity(double dt) {
     return velocity; // mm/s
 }
 
-void Encoder_setLeftEncoderCountZero() {
-    
-    cli();
-    countA = 0;
-    prevLeftCount = 0;
-    sei();
+void Encoder_setLeftEncoderCountZero()
+{
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        countA = 0;
+        prevLeftCount = 0;
+    }
 }
 
-void Encoder_setRightEncoderCountZero() {
-    cli();
-    countB = 0;
-    prevRightCount = 0;
-    sei();
+void Encoder_setRightEncoderCountZero()
+{
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        countB = 0;
+        prevRightCount = 0;
+    }
 }
 
-void Encoder_setLeftGlobalEncoderCountZero() {
-    cli();
-    globalCountA = 0;
-    sei();
+void Encoder_setLeftGlobalEncoderCountZero()
+{
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        globalCountA = 0;
+    }
 }
 
-void Encoder_setRightGlobalEncoderCountZero() {
-    cli();
-    globalCountB = 0;
-    sei();
+void Encoder_setRightGlobalEncoderCountZero()
+{
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        globalCountB = 0;
+    }
 }
 
 bool encoderCountsChanged()
