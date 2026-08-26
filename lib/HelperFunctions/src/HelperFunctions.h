@@ -7,6 +7,8 @@ extern const double COUNTS_PER_MM;
 
 long distanceToCounts(double distance_mm);
 double countsToDistance(long counts);
+int8_t outputToDirection(double output);
+int applyMotorPwmLimits(int pwm, int8_t direction, int minimumDrivePwm);
 bool encoderCountsChanged();
 class Timer
 {

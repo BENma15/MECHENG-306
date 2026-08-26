@@ -1,9 +1,6 @@
 #include "HelperFunctions.h"
 
 const double COUNTS_PER_MM = 167.37; //  167.37 counts/mm
-unsigned long startTime = 0;
-unsigned long currentTime = 0;
-bool timerActive = false;
 
 long distanceToCounts(double distance_mm)
 {
@@ -13,6 +10,28 @@ long distanceToCounts(double distance_mm)
 double countsToDistance(long counts)
 {
     return counts / COUNTS_PER_MM;
+}
+
+int8_t outputToDirection(double output)
+{
+    if (output > 0)
+    {
+        return 1;
+    }
+    if (output < 0)
+    {
+        return -1;
+    }
+    return 0;
+}
+
+int applyMotorPwmLimits(int pwm, int8_t direction, int minimumDrivePwm)
+{
+    if (direction != 0)
+    {
+        pwm += minimumDrivePwm;
+    }
+    return min(pwm, 255);
 }
 
 Timer::Timer()

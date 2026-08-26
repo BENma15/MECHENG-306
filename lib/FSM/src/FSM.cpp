@@ -59,8 +59,10 @@ static void handleParsing()
 
     // check if G01 command will hit a limit switch
     /* ASSUMING WE CHANGE 0,0 TO BOTTOM LEFT!!! */ // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<**************
+    cli();
     long left = Encoder_getLeftEncoderCount();
     long right = Encoder_getRightEncoderCount();
+    sei();
     long Xpos = (left + right) / 2;
     long Ypos = (left - right) / 2;
 

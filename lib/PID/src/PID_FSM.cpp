@@ -347,55 +347,16 @@ void move_FSM(int x, int y, int vf)
     // 1mm/s = kff pwm so if kff was 6 and the motor is told to go at "1mm/s" motors will recieve +6 pwm
 
     // Finds the direction of the motors
-    if (finalOutputLeft > 0)
-    {
-        leftDir = 1;
-    }
-    else if (finalOutputLeft < 0)
-    {
-        leftDir = -1;
-    }
-    else
-    {
-        leftDir = 0;
-    }
-
-    if (finalOutputRight > 0)
-    {
-        rightDir = 1;
-    }
-    else if (finalOutputRight < 0)
-    {
-        rightDir = -1;
-    }
-    else
-    {
-        rightDir = 0;
-    }
+    leftDir = outputToDirection(finalOutputLeft);
+    rightDir = outputToDirection(finalOutputRight);
 
     // Sets the desired pwm of the motors
     int leftPWM = (int)abs(finalOutputLeft);
     int rightPWM = (int)abs(finalOutputRight);
 
-    if (leftDir != 0)
-    {
-        leftPWM += MIN_DRIVE_PWM;
-    }
-
-    if (rightDir != 0)
-    {
-        rightPWM += MIN_DRIVE_PWM;
-    }
-
-    if (leftPWM > 255)
-    {
-        leftPWM = 255;
-    }
-
-    if (rightPWM > 255)
-    {
-        rightPWM = 255;
-    }
+    //applies appropriate constraints to the pwm if they are below or above min or max
+    leftPWM = applyMotorPwmLimits(leftPWM, leftDir, MIN_DRIVE_PWM);
+    rightPWM = applyMotorPwmLimits(rightPWM, rightDir, MIN_DRIVE_PWM);
 
     // Motor movement
     String leftSuccess = setLeftMotor(leftDir, leftPWM);
