@@ -21,7 +21,9 @@ void resetTokenArray();
 int tokenise(String Line);  // return 1 if token invalid. error messages printed by function.
 String returnToken(String line, char Letter);
 String tidyString(String line);
-int additionalLetterCheck(String line);
+int letterSignCheck(String line);
 int checkValidSign(int indices[], String line);
+
+bool checkBounds(String token); // Returns 1 if out of bounds
 
 #endif
