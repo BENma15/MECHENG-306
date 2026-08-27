@@ -53,6 +53,8 @@ static void handleParsing()
         homingStart();
         return;
     }
+    globalPosX = globalPosX + Parsing_getToken(X).GetValue();
+    globalPosY = globalPosY + Parsing_getToken(Y).GetValue();
 
     // other value G01 therfore, motion
     currentState = STATE_MOTION;
@@ -114,6 +116,9 @@ static void handleHoming()
         moveActive = false;
         moveStarted = false;
         moveFinished = false;
+        
+        globalPosX = 0;
+        globalPosY = 0;
 
         currentState = STATE_IDLE;
         resetTokenArray();
