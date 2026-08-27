@@ -404,7 +404,7 @@ int checkValidSign(int indices[], String line) {
 }
 
 bool checkBounds(String token) {
-    long value = distanceToCounts(token.substring(1).toInt());
+    long value = token.substring(1).toInt();
     Serial.println(value);
 
     if (token[0] == 'X') {
