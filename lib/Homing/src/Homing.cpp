@@ -129,7 +129,8 @@ static HomingResult backoffMove(int x, int y, int feedrate, bool invalidSwitchPr
         return HOMING_RUNNING;
     }
 
-
+// Enters from FSM, Parsing --> Homing
+// Sets the initial homing state to HOMING_DOWN_FAST and all variables to false
 void homingStart() {
     stopMotors();
 
@@ -142,17 +143,13 @@ void homingStart() {
     moveFinished = false;
 }
 
-
+// Called from FSM, Homing --> Homing
+// Runs through all possible states and calls their respective movement functions
 HomingResult homingUpdate() {
     switch (homingState)
     {
 
-    /*
-        ============================================================
-        Y AXIS - FIRST PASS
-        ============================================================
-    */
-
+    // Intial fast movement towards bottom limit switch
     case HOMING_DOWN_FAST:
     {
         return moveToLimit(
@@ -169,7 +166,7 @@ HomingResult homingUpdate() {
             HOMING_BACKOFF_UP_1);
     }
 
-
+    // First move off bottom limit switch
     case HOMING_BACKOFF_UP_1:
     {
         return backoffMove(
@@ -184,13 +181,7 @@ HomingResult homingUpdate() {
             HOMING_DOWN_SLOW);
     }
 
-
-    /*
-        ============================================================
-        Y AXIS - SECOND / SLOW PASS
-        ============================================================
-    */
-
+    // Secondary downwards movement towards bottom limit switch (slow)
     case HOMING_DOWN_SLOW:
     {
         return moveToLimit(
@@ -207,7 +198,7 @@ HomingResult homingUpdate() {
             HOMING_BACKOFF_UP_2);
     }
 
-
+    // Second move up from bottom limit switch (slow)
     case HOMING_BACKOFF_UP_2:
     {
         return backoffMove(
@@ -222,13 +213,7 @@ HomingResult homingUpdate() {
             HOMING_LEFT_FAST);
     }
 
-
-    /*
-        ============================================================
-        X AXIS - FIRST PASS
-        ============================================================
-    */
-
+    // Inital fast movement towards left limit switch
     case HOMING_LEFT_FAST:
     {
         return moveToLimit(
@@ -245,7 +230,7 @@ HomingResult homingUpdate() {
             HOMING_BACKOFF_RIGHT_1);
     }
 
-
+    // First move off left limit switch
     case HOMING_BACKOFF_RIGHT_1:
     {
         return backoffMove(
@@ -260,13 +245,7 @@ HomingResult homingUpdate() {
             HOMING_LEFT_SLOW);
     }
 
-
-    /*
-        ============================================================
-        X AXIS - SECOND / SLOW PASS
-        ============================================================
-    */
-
+    // Second move towards left limit switch (slow)
     case HOMING_LEFT_SLOW:
     {
         return moveToLimit(
@@ -283,7 +262,7 @@ HomingResult homingUpdate() {
             HOMING_BACKOFF_RIGHT_2);
     }
 
-
+    // Second move away from left limit switch (slow)
     case HOMING_BACKOFF_RIGHT_2:
     {
         return backoffMove(
@@ -298,13 +277,9 @@ HomingResult homingUpdate() {
             HOMING_DONE);
     }
 
-
-    /*
-        ============================================================
-        HOMING COMPLETE
-        ============================================================
-    */
-
+        // If the homing state is set to HOMING_DONE after the last homing move away from 
+        // the left switch, and the encoder count has not changed, the homing movment is done.
+        // Will return HOMING_COMPLETE to the FSM and then the FSM will switch to idle
         case HOMING_DONE:
         {
             stopMotors();
@@ -317,5 +292,7 @@ HomingResult homingUpdate() {
     moveStarted = false;
     moveFinished = true;
 
+    // Wrong limit switch has been hit.
+    // Return HOMING_FAULT to FSM, then FSM will change state to FAULT state
     return HOMING_FAULT;
 }
