@@ -11,9 +11,8 @@ static const int slowHomingFeedrate = 300;
 static const int homingTravel = 10000;
 static const int homingBackoffmm = 10;
 
-
-enum HomingState
-{
+// Enums in order to keep track of current homing state
+enum HomingState {
     HOMING_DOWN_FAST,
     HOMING_BACKOFF_UP_1,
     HOMING_DOWN_SLOW,
@@ -27,30 +26,35 @@ enum HomingState
     HOMING_DONE
 };
 
+// Initial homing state
 static HomingState homingState = HOMING_DOWN_FAST;
 
 static bool waiting = false;
 
-static HomingResult moveToLimit(int x, int y, int feedrate, bool targetSwitchPressed, bool invalidSwitchPressed, HomingState nextState)
-    {
- 
-        if (waiting)
-        {
-            stopMotors();
+// Straight line until desired limit switch is hit
+static HomingResult moveToLimit(int x, int y, int feedrate, bool targetSwitchPressed, bool invalidSwitchPressed, HomingState nextState) {
 
-            if (encoderCountsChanged())
-            {
+        // If a move is finished and we are waiting for encoders to stop moving slightly
+        if (waiting) {
+            stopMotors();       // Halts all movement
+
+            // Encoders are still moving slightly so return without changing 'waiting' variable
+            if (encoderCountsChanged()) {
                 return HOMING_RUNNING;
             }
 
+            // Encoders are not moving so switch to next state in homing
             waiting = false;
             homingState = nextState;
 
             return HOMING_RUNNING;
         }
 
-        if (invalidSwitchPressed)
-        {
+        // If an unexpected limit switch is press
+        // For example if we are moving down we only expected bottom limit switch to be hit
+        // So if any of the three others are hit, then we return HOMING_FAULT to FSM, and in the 
+        // FSM it changes states from homing to FAULT
+        if (invalidSwitchPressed) {
             stopMotors();
 
             moveActive = false;
@@ -59,8 +63,8 @@ static HomingResult moveToLimit(int x, int y, int feedrate, bool targetSwitchPre
             return HOMING_FAULT;
         }
 
-        if (targetSwitchPressed)
-        {
+        // If the switch we were aiming for is pressed, set waiting to true and stop moving
+        if (targetSwitchPressed) {
             moveActive = false;
             moveStarted = false;
 
@@ -70,34 +74,41 @@ static HomingResult moveToLimit(int x, int y, int feedrate, bool targetSwitchPre
 
             return HOMING_RUNNING;
         }
+
+        // If it is still currently moving towards the target limit switch
         move_FSM(x, y, feedrate);
         return HOMING_RUNNING;
     }
 
+// Hits the target limit switch and now has to back off it
+static HomingResult backoffMove(int x, int y, int feedrate, bool invalidSwitchPressed, HomingState nextState) {
+        
+        // If a move is finished and we are waiting for encoders to stop moving slightly
+        if (waiting) {
+            stopMotors();           // Halts all movement
 
-static HomingResult backoffMove(int x, int y, int feedrate, bool invalidSwitchPressed, HomingState nextState)
-    {
-        if (waiting)
-        {
-            stopMotors();
-
-            if (encoderCountsChanged())
-            {
+            // Encoders are still moving slightly so return without changing 'waiting' variable
+            if (encoderCountsChanged()) {
                 return HOMING_RUNNING;
             }
 
             waiting = false;
             homingState = nextState;
 
-            if (nextState == HOMING_DONE)
-            {
+            // If encoder count is not changing and there are no more homing states 
+            // Return HOMING_COMPLETE to FSM to switch states to IDLE
+            if (nextState == HOMING_DONE) {
                 return HOMING_COMPLETE;
             }
+
             return HOMING_RUNNING;
         }
 
-        if (invalidSwitchPressed)
-        {
+        // If an unexpected limit switch is press
+        // For example if we are moving down we only expected bottom limit switch to be hit
+        // So if any of the three others are hit, then we return HOMING_FAULT to FSM, and in the 
+        // FSM it changes states from homing to FAULT
+        if (invalidSwitchPressed) {
             stopMotors();
 
             moveActive = false;
@@ -106,18 +117,20 @@ static HomingResult backoffMove(int x, int y, int feedrate, bool invalidSwitchPr
             return HOMING_FAULT;
         }
 
+        // If it is still currently moving away from limit switch
         move_FSM(x, y, feedrate);
 
-        if (moveFinished)
-        {
+        // If the movement is finished then switch variable to waiting which will halt movement 
+        // until motors settle
+        if (moveFinished) {
             waiting = true;
         }
+
         return HOMING_RUNNING;
     }
 
 
-void homingStart()
-{
+void homingStart() {
     stopMotors();
 
     homingState = HOMING_DOWN_FAST;
@@ -130,8 +143,7 @@ void homingStart()
 }
 
 
-HomingResult homingUpdate()
-{
+HomingResult homingUpdate() {
     switch (homingState)
     {
 
