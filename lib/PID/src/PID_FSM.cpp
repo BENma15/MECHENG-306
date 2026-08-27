@@ -31,11 +31,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 10, ki_left = 2,/**/ kd_left = 0, kff_left = 4.5;
+double kp_left = 40, ki_left = 5,/**/ kd_left = 0, kff_left = 6.5;
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 10, ki_right = 2,/**/ kd_right = 0, kff_right = 4.5;
+double kp_right = 40, ki_right = 5, /**/ kd_right = 0, kff_right = 6.5;
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
@@ -61,7 +61,7 @@ long moveTargetRightCount = 0;
 const double tolerance_mm = 0.2;            // Stops when it reaches within 0.2mm of target
 unsigned long elapsed_from_move_start = 0;  // Tracks how long since movement started
 
-int integral_maxPWM = 40;                   // Anti-integral windup term to keep integral from accumulating
+int integral_maxPWM = 80;                   // Anti-integral windup term to keep integral from accumulating
 
 // NEEDS TUNING
 const int MIN_DRIVE_PWM = 60;               // Lowest PWM that reliably turns the motor under load
@@ -272,9 +272,9 @@ void move_FSM(int x, int y, int vf)
         // Stops motors
         stopMotors();
 
-        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
-        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
-        Serial.println("Vf: " + String(moveVf));
+        //Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        //Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        //Serial.println("Vf: " + String(moveVf));
 
         // Sets target reached to false so it does not interfere with next movement
         yTargetReached = false;
@@ -296,6 +296,8 @@ void move_FSM(int x, int y, int vf)
         Serial.println("Move timed out, stopping motors.");
         Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
         Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        Serial.println("Target Velocity: " + String(moveVf));
+        Serial.println("Target Distance: " + String(sqrt(x*x + y*y)));
 
         // Sets target reached to false so it does not interfere with next movement
         yTargetReached = false;
@@ -372,7 +374,10 @@ void move_FSM(int x, int y, int vf)
     String leftSuccess = setLeftMotor(leftDir, leftPWM);
     String rightSuccess = setRightMotor(rightDir, rightPWM);
 
+    Serial.println(leftPWM);
+    Serial.println(rightPWM);
+
     // Prints to serial monitor the current velocity
     double actualPathVelocity = sqrt(pow((velocity_left + velocity_right) / 2.0, 2) + pow((velocity_left - velocity_right) / 2.0, 2));
-    //Serial.println("Actual Velocity: " + String(actualPathVelocity));
+    Serial.println("Actual Velocity: " + String(actualPathVelocity));
 }
