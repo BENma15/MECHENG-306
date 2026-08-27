@@ -209,6 +209,9 @@ int tokenise(String line) {
         } else if (token == "ERROR") {
             Serial.println("Not Bosh Bosh Fail No Bueno :( ");
             return 1;
+        } else {
+            Serial.println("Invalid Command: Expected G01 Or G28.");
+            return 1;
         }
 
         return 1;
