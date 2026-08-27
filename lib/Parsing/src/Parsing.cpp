@@ -391,18 +391,18 @@ int checkValidSign(int indices[], String line) {
 }
 
 bool checkBounds(String token) {
-    int value = distanceToCounts(token.substring(1).toInt());
-    int currentLeft = Encoder_getLeftGlobalEncoderCount();
-    int currentRight = Encoder_getRightGlobalEncoderCount();
+    long value = distanceToCounts(token.substring(1).toInt());
+    long currentLeft = Encoder_getLeftGlobalEncoderCount();
+    long currentRight = Encoder_getRightGlobalEncoderCount();
 
 
     if (token[0] == 'X') {
-        int currentX = (currentLeft + currentRight) / 2;
+        long currentX = (currentLeft + currentRight) / 2;
         if ((currentX + value) > X_MAX || (currentX + value) < X_MIN) {
             return 1;   // 1 = out of bounds
         }
     } else if (token[0] == 'Y') {
-        int currentY = (currentLeft - currentRight) / 2;
+        long currentY = (currentLeft - currentRight) / 2;
         if ((currentY + value) > Y_MAX || (currentY + value) < Y_MIN) {
             return 1;   // 1 = out of bounds
         }
