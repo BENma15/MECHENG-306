@@ -285,7 +285,7 @@ void move_FSM(int x, int y, int vf)
         // Stops motors
         stopMotors();
 
-        Serial.println("Vf: " + String(moveVf));
+        //Serial.println("Vf: " + String(moveVf));
 
         // Sets target reached to false so it does not interfere with next movement
         yTargetReached = false;

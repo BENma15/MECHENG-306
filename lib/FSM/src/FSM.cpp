@@ -94,8 +94,8 @@ static void handleMotion() {
         currentX = (currentLeftMM + currentRightMM) / 2.0;
         currentY = (currentLeftMM - currentRightMM) / 2.0;
 
-        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
-        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        //Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        //Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
 
         resetTokenArray();
         moveStarted = false;
@@ -187,8 +187,8 @@ static void printStateIfChanged() {
     case STATE_IDLE:
 
         Serial.println("IDLE");
-        Serial.println((globalCountA + globalCountB)/2);
-        Serial.println((globalCountA - globalCountB)/2);
+        //Serial.println((globalCountA + globalCountB)/2);
+        //Serial.println((globalCountA - globalCountB)/2);
 
         /*
         Serial.println(" ");
