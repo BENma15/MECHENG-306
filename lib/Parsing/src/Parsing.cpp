@@ -402,6 +402,7 @@ int checkValidSign(int indices[], String line) {
 
 bool checkBounds(String token) {
     long value = distanceToCounts(token.substring(1).toInt());
+    Serial.println(value);
     long currentLeft = Encoder_getLeftGlobalEncoderCount();
     long currentRight = Encoder_getRightGlobalEncoderCount();
 

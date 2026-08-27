@@ -23,6 +23,9 @@ double moveUnitX = 0;
 double moveUnitY = 0;
 double moveStartTime = 0;
 
+double currentX = 0;
+double currentY = 0;
+
 // Movement Active Variables    
 bool moveActive = false;
 bool moveStarted = false;
@@ -216,8 +219,6 @@ void move_FSM(int x, int y, int vf)
     moveCurrentLeftCount = Encoder_getLeftEncoderCount();
     moveCurrentRightCount = Encoder_getRightEncoderCount();
 
-    SystemState state = FSM_getCurrentState();
-
     // Ensures there is a constant frequency of 50Hz which we are using for the PID loop as to not
     // call the motors too frequently.
     uint32_t nowMicros = micros();
@@ -247,8 +248,8 @@ void move_FSM(int x, int y, int vf)
     double currentRightMM = countsToDistance(moveCurrentRightCount);
 
     // Converts mm moved by each motor to the actual x and y movement
-    double currentX = (currentLeftMM + currentRightMM) / 2.0;
-    double currentY = (currentLeftMM - currentRightMM) / 2.0;
+    currentX = (currentLeftMM + currentRightMM) / 2.0;
+    currentY = (currentLeftMM - currentRightMM) / 2.0;
 
     // Calculates the distance error in terms of x and y coordinates
     double xPositionError_mm = x - currentX;
@@ -272,8 +273,7 @@ void move_FSM(int x, int y, int vf)
         // Stops motors
         stopMotors();
 
-        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
-        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        
         Serial.println("Vf: " + String(moveVf));
 
         // Sets target reached to false so it does not interfere with next movement

@@ -41,4 +41,7 @@ extern double lastError_sync;
 
 extern bool moveFinished;
 
+extern double currentX;
+extern double currentY;
+
 #endif // PID_FSM_H

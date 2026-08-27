@@ -54,30 +54,7 @@ static void handleParsing()
         return;
     }
 
-    // bounds checking needs to be implemented after homing and pid are finished
-
-    // check if G01 command will hit a limit switch
-    /* ASSUMING WE CHANGE 0,0 TO BOTTOM LEFT!!! */ // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<**************
-    long left = Encoder_getLeftGlobalEncoderCount();
-    long right = Encoder_getRightGlobalEncoderCount();
-
-    long Xpos = (left + right) / 2;
-    long Ypos = (left - right) / 2;
-
-    Xpos += distanceToCounts(Parsing_getToken(X).GetValue());
-    Ypos += distanceToCounts(Parsing_getToken(Y).GetValue());
-
-    Serial.println(Xpos);
-    
-    if (Xpos > X_MAX || Xpos < X_MIN ||
-        Ypos > Y_MAX || Ypos < Y_MIN)
-    {
-        Serial.println("Invalid Gcode: Move outside workspace");
-        resetTokenArray();
-        currentState = STATE_IDLE;
-        return;
-    }
-
+    // other value G01 therfore, motion
     currentState = STATE_MOTION;
     return;
 }
@@ -103,6 +80,8 @@ static void handleMotion()
         if (encoderCountsChanged()) {
             return;
         }
+        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
 
         resetTokenArray();
         moveStarted = false;
