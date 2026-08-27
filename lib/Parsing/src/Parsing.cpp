@@ -141,6 +141,20 @@ int tokenise(String line) {
             String Ytoken = returnToken(line, 'Y');
             String Ftoken = returnToken(line, 'F');
 
+            if (Xtoken == "ERROR" && Ytoken == "ERROR") {
+                Serial.println("Invalid Command: X and Y Distance");
+                return 1;
+            } else if (Xtoken == "ERROR") {
+                Serial.println("Invalid Command: No X Distance");
+                return 1;
+            } else if (Ytoken == "ERROR") {
+                Serial.println("Invalid Command: No Y Distance");
+                return 1;
+            } else if (Ftoken == "ERROR") {
+                Serial.println("Invalid Command: Invalid Speed Value");
+                return 1;
+            }
+
             if (line.indexOf("X") == -1 && line.indexOf("Y") == -1) {   // does not contain X or Y
 
                 Serial.println("Invalid Command: G01 Command Does Not Contain An X Or Y Distance");
@@ -162,11 +176,6 @@ int tokenise(String line) {
                     Serial.println("Invalid Command: Y Distance Goes Out Of Bounds");
                     return 1;
 
-                }else if (Ftoken == "ERROR") {
-                    // Invalid Speed
-                    Serial.println("Invalid Command: Invalid Speed Value");
-                    return 1;
-            
                 } else {
                     /* Both X and Y in bounds */
                     TokenArray[G].Set(token);
@@ -183,6 +192,7 @@ int tokenise(String line) {
                 if (checkBounds(Xtoken)) {
                     Serial.println("Invalid Command: X Distance Goes Out Of Bounds");
                     return 1;
+
                 } else {
                     TokenArray[G].Set(token);
                     TokenArray[X].Set(Xtoken);
@@ -197,6 +207,7 @@ int tokenise(String line) {
                 if(checkBounds(Ytoken)) {
                     Serial.println("Invalid Command: Y Distance Goes Out Of Bounds");
                     return 1;
+
                 } else {
                     TokenArray[G].Set(token);
                     TokenArray[Y].Set(Ytoken);
