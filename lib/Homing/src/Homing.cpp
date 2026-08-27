@@ -8,7 +8,7 @@
 // Homing movement settings
 static const int homingFeedrate = 600;
 static const int slowHomingFeedrate = 300;
-static const int homingTravel = 99999;
+static const int homingTravel = 10000;
 static const int homingBackoffmm = 10;
 
 
@@ -296,7 +296,6 @@ HomingResult homingUpdate()
         case HOMING_DONE:
         {
             stopMotors();
-
             return HOMING_COMPLETE;
         }
     }
@@ -304,6 +303,7 @@ HomingResult homingUpdate()
 
     moveActive = false;
     moveStarted = false;
+    moveFinished = true;
 
     return HOMING_FAULT;
 }

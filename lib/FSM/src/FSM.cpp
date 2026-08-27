@@ -85,6 +85,9 @@ static void handleMotion()
     long x = Parsing_getToken(X).GetValue();
     long y = Parsing_getToken(Y).GetValue();
     long vf = Parsing_getToken(F_token).GetValue();
+    Serial.println(String(moveFinished) + " moveFinished");
+    Serial.println(String(moveStarted) + " moveStarted");
+    Serial.println(String(moveActive) + " moveActive");
     if(moveFinished == false){
     move_FSM(x, y, vf);
     }
@@ -130,8 +133,6 @@ static void handleHoming()
         Encoder_setLeftGlobalEncoderCountZero();
         Encoder_setRightGlobalEncoderCountZero();
         currentState = STATE_IDLE;
-        moveActive = false;  // Reset moveActive to false after homing is complete
-        moveStarted = false; // Reset moveStarted to false after homing is complete
         resetTokenArray();
         return;
     }
