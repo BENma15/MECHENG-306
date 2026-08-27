@@ -13,42 +13,41 @@ static volatile SystemState currentState = STATE_IDLE; // System begins in IDLE 
 
 static SystemState lastPrintedState = (SystemState)-1;
 
-void FSM_init()
-{
-
+// Initialises current state to idle.
+void FSM_init() {
     currentState = STATE_IDLE;
 }
 
-static void handleIdle()
-{ // Idle --> Parsing. Event: Serial buffer recieves input
-
-    if (Serial.available() > 0)
-    {
+// Idle can only go to parsing or stay in idle
+// Idle --> Parsing. Event: Serial buffer recieves input
+static void handleIdle() {
+    if (Serial.available() > 0) {
         currentState = STATE_PARSING;
     }
 }
 
-static void handleParsing()
-{
+// Parsing can go to idle, homing or motion, or stay in idle
+// Parsing --> Parsing. Event: User has not yet pressed enter '\n'
+// Parsing --> Idle. Event: After user presses enter, command is invalid
+// Parsing --> Homing. Event: If command is valid and G value is 28
+// Parsing --> Motion. Event: If all above do not occur
+static void handleParsing() {
     int err = readLine();
-    if (err == 2)
-    {
-        // stay in Parsing
+    if (err == 2) {
+        // Stay in Parsing
         return;
     }
 
-    // check if command was invalid
-    if (err == 1)
-    {
+    // Check if command was invalid
+    if (err == 1) {
         resetTokenArray();
         currentState = STATE_IDLE;
         return;
     }
 
-    int value = (Parsing_getToken(G)).GetValue(); // returns value of G token
+    int value = (Parsing_getToken(G)).GetValue();       // returns value of G token
 
-    if (value == 28)
-    {
+    if (value == 28) {
         currentState = STATE_HOMING;
         homingStart();
         return;
@@ -59,27 +58,32 @@ static void handleParsing()
     return;
 }
 
-static void handleMotion()
-{
+// Motion can go to either fault or idle, or stay in motion
+// Motion --> Fault. Event: If it hits a limit switch it goes to fault state
+// Motion --> Idle. Event: If the move is completed go to idle
+// Motion --> Motion. Event: If the moveFinished state is still false (plotter still moving)
+static void handleMotion() {
     long x = Parsing_getToken(X).GetValue();
     long y = Parsing_getToken(Y).GetValue();
     long vf = Parsing_getToken(F_token).GetValue();
-    if(moveFinished == false){
-    move_FSM(x, y, vf);
+
+    if (moveFinished == false) {
+        move_FSM(x, y, vf);
     }
-    if (currentState == STATE_FAULT)
-    {
+
+    if (currentState == STATE_FAULT) {
         moveStarted = false;
         moveActive = false;
         return;
     }
-    if (moveActive == false)
-    {
+
+    if (moveActive == false) {
         stopMotors();
         
         if (encoderCountsChanged()) {
             return;
         }
+
         Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
         Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
 
@@ -93,18 +97,18 @@ static void handleMotion()
     }
 }
 
-static void handleHoming()
-{
+// Homing can go to either fault or idle, or stay in motion
+// Homing --> Fault. Event: If it hits a limit switch that it is not meant to hit at that time
+// Homing --> Idle. Event: If the homing is completed
+static void handleHoming() {
     HomingResult result = homingUpdate();
 
-    if (result == HOMING_FAULT)
-    {
+    if (result == HOMING_FAULT) {
         currentState = STATE_FAULT;
         return;
     }
 
-    if (result == HOMING_COMPLETE)
-    {
+    if (result == HOMING_COMPLETE) {
         if (encoderCountsChanged()) {
             return;
         }
@@ -122,57 +126,54 @@ static void handleHoming()
     }
 }
 
-static void handleFault()
-{
+// Fault can go to either fault or idle, or stay in motion
+// Fault --> Fault. Event: If user is still typing a command, the command after entered is invalid
+//                         or it is a valid M999 but limit switch is still being pressed
+// Fault --> Idle. Event: M999 entered and not touching a limit switch
+static void handleFault() {
     moveActive = false;
     moveStarted = false;
     stopMotors();
 
-    if (Serial.available() > 0)
-    {
+    if (Serial.available() > 0) {
 
         int err = readLine();
 
-        if (err == 2)
-        {
+        if (err == 2) {
             // Still reading command (stay in fault)
             currentState = STATE_FAULT;
             return;
-        }
-        else if (err == 1)
-        {
-            // command invalid (stay in fault)
+        } else if (err == 1) {
+            // Command invalid (stay in fault)
             resetTokenArray();
             currentState = STATE_FAULT;
             return;
         }
 
         GcodeToken token = Parsing_getToken(M);
-        if (token.GetLetter() == 'M' && token.GetValue() == 999)
-        {
+        if (token.GetLetter() == 'M' && token.GetValue() == 999) {
+            // M999 entered but still on limit switch
             if (LimitSwitch_leftPressed() || LimitSwitch_rightPressed() || LimitSwitch_topPressed() || LimitSwitch_bottomPressed()) {
                 resetTokenArray();
                 Serial.println("FAULT");
                 return;
             }
+
             resetTokenArray();
-            currentState = STATE_IDLE;
+            currentState = STATE_IDLE;      // M999 entered and not touching a limit switch
             return;
         }
     }
 }
 
-static void printStateIfChanged()
-{
-    if (currentState == lastPrintedState)
-    {
+static void printStateIfChanged() {
+    if (currentState == lastPrintedState) {
         return;
     }
 
     lastPrintedState = currentState;
 
-    switch (currentState)
-    {
+    switch (currentState) {
     case STATE_IDLE:
 
         Serial.println("IDLE");
@@ -207,39 +208,35 @@ static void printStateIfChanged()
     }
 }
 
-void FSM_update()
-{
+void FSM_update() {
     updateLimits();
 
     // Call the handler for the current state (non-blocking)
-    switch (currentState)
-    {
-    case STATE_IDLE:
-        handleIdle();
-        break;
-    case STATE_PARSING:
-        handleParsing();
-        break;
-    case STATE_MOTION:
-        handleMotion();
-        break;
-    case STATE_HOMING:
-        handleHoming();
-        break;
-    case STATE_FAULT:
-        handleFault();
-        break;
+    switch (currentState) {
+        case STATE_IDLE:
+            handleIdle();
+            break;
+        case STATE_PARSING:
+            handleParsing();
+            break;
+        case STATE_MOTION:
+            handleMotion();
+            break;
+        case STATE_HOMING:
+            handleHoming();
+            break;
+        case STATE_FAULT:
+            handleFault();
+            break;
     }
 
     printStateIfChanged();
 }
 
-SystemState FSM_getCurrentState()
-{
+SystemState FSM_getCurrentState() {
     return currentState;
 }
 
-void FSM_triggerFault()
-{
+void FSM_triggerFault() {
     currentState = STATE_FAULT;
 }
