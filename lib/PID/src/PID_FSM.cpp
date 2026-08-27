@@ -390,12 +390,9 @@ void move_FSM(int x, int y, int vf)
     String rightSuccess = setRightMotor(rightDir, rightPWM);
 
     double actualPathVelocity = sqrt(velocity_left * velocity_left + velocity_right * velocity_right);
-    bool timerDone = recordTimer.startTimer(5);
+    //bool timerDone = recordTimer.startTimer(5);
 
-    if (timerDone == false)
-    {
-        addDataPoint(actualPathVelocity, sqrt(targetLeft * targetLeft + targetRight * targetRight), millis());
-    }
+    addDataPoint(actualPathVelocity, sqrt(targetLeft * targetLeft + targetRight * targetRight), millis());
     if(moveFinished == true)
     {
         exportData();
