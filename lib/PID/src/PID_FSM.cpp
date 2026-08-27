@@ -392,11 +392,11 @@ void move_FSM(int x, int y, int vf)
     double actualPathVelocity = sqrt(velocity_left * velocity_left + velocity_right * velocity_right);
     bool timerDone = recordTimer.startTimer(5);
 
-    if (!timerDone)
+    if (timerDone == false)
     {
         addDataPoint(actualPathVelocity, sqrt(targetLeft * targetLeft + targetRight * targetRight), millis());
     }
-    else
+    if(moveFinished == true)
     {
         exportData();
         clearData();
