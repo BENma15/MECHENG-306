@@ -145,7 +145,7 @@ void plan_FSM(double x, double y, double vf_target)
     moveUnitY = y / S;
 
     // Distance covered in one ramp time
-    double k = T1 + T2/2;
+    double k = T1 + T2/2; 
 
     double vf;
     double t4;
@@ -272,9 +272,9 @@ void move_FSM(int x, int y, int vf)
         // Stops motors
         stopMotors();
 
-        //Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
-        //Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
-        //Serial.println("Vf: " + String(moveVf));
+        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        Serial.println("Vf: " + String(moveVf));
 
         // Sets target reached to false so it does not interfere with next movement
         yTargetReached = false;
@@ -294,8 +294,8 @@ void move_FSM(int x, int y, int vf)
         stopMotors();
 
         Serial.println("Move timed out, stopping motors.");
-        //Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
-        //Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
 
         // Sets target reached to false so it does not interfere with next movement
         yTargetReached = false;

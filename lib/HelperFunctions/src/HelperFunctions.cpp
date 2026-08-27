@@ -1,6 +1,6 @@
 #include "HelperFunctions.h"
 
-const double COUNTS_PER_MM = 167.37; //  167.37 counts/mm
+const double COUNTS_PER_MM = 185; //  167.37 counts/mm
 
 long distanceToCounts(double distance_mm)
 {

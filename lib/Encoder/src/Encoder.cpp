@@ -32,7 +32,7 @@ const int8_t encTable[16] = {
 };
 
 // Distance represented by one encoder tick (mm)
-double distance_per_encoder_tick = 1.0 / 167.37;
+double distance_per_encoder_tick = 1.0 / COUNTS_PER_MM;
 
 static long prevLeftCount = 0;
 static long prevRightCount = 0;
