@@ -44,4 +44,13 @@ extern bool moveFinished;
 extern double currentX;
 extern double currentY;
 
+extern double currentX;
+extern double currentY;
+
+extern double currentLeftMM;
+extern double currentRightMM;
+
+extern long moveCurrentLeftCount;
+extern long moveCurrentRightCount;
+
 #endif // PID_FSM_H

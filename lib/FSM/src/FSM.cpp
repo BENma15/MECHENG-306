@@ -80,9 +80,19 @@ static void handleMotion() {
     if (moveActive == false) {
         stopMotors();
         
+        // Waits for the encoder counts to settle and not change
         if (encoderCountsChanged()) {
             return;
         }
+
+        moveCurrentLeftCount = Encoder_getLeftEncoderCount();
+        moveCurrentRightCount = Encoder_getRightEncoderCount();
+
+        currentLeftMM = countsToDistance(moveCurrentLeftCount);
+        currentRightMM = countsToDistance(moveCurrentRightCount);
+
+        currentX = (currentLeftMM + currentRightMM) / 2.0;
+        currentY = (currentLeftMM - currentRightMM) / 2.0;
 
         Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
         Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");

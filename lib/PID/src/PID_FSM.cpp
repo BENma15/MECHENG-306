@@ -26,6 +26,9 @@ double moveStartTime = 0;
 double currentX = 0;
 double currentY = 0;
 
+double currentLeftMM = 0;
+double currentRightMM = 0;
+
 // Movement Active Variables
 bool moveActive = false;
 bool moveStarted = false;
@@ -34,11 +37,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 10, ki_left = 10, /**/ kd_left = 0, kff_left = 6; // Revert kff to 5.5 if doesnt work
+double kp_left = 10, ki_left = 10, /**/ kd_left = 0, kff_left = 5.25; // Revert kff to 5.5 if doesnt work
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 10, ki_right = 10, /**/ kd_right = 0, kff_right = 6; // Revert kff to 5.5 if doesnt work
+double kp_right = 10, ki_right = 10, /**/ kd_right = 0, kff_right = 5.25; // Revert kff to 5.5 if doesnt work
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
@@ -61,7 +64,7 @@ long moveCurrentRightCount = 0;
 long moveTargetLeftCount = 0;
 long moveTargetRightCount = 0;
 
-const double tolerance_mm = 0.2;           // Stops when it reaches within 0.2mm of target
+const double tolerance_mm = 0.5;           // Stops when it reaches within 0.2mm of target
 unsigned long elapsed_from_move_start = 0; // Tracks how long since movement started
 
 int integral_maxPWM = 100; // Anti-integral windup term to keep integral from accumulating
