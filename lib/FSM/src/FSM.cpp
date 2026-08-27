@@ -110,8 +110,6 @@ static void handleHoming()
         if (encoderCountsChanged()) {
             return;
         }
-        Encoder_setLeftGlobalEncoderCountZero();
-        Encoder_setRightGlobalEncoderCountZero();
 
         moveActive = false;
         moveStarted = false;
@@ -180,8 +178,8 @@ static void printStateIfChanged()
     case STATE_IDLE:
 
         Serial.println("IDLE");
-        Serial.println((globalCountA + globalCountB)/2);
-        Serial.println((globalCountA - globalCountB)/2);
+        Serial.println(globalPosX);
+        Serial.println(globalPosY);
 
         /*
         Serial.println(" ");

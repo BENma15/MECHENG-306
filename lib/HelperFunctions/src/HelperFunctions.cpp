@@ -2,6 +2,7 @@
 
 const double COUNTS_PER_MM = 185; //  167.37 counts/mm
 
+
 long distanceToCounts(double distance_mm)
 {
     return (long)round(distance_mm * COUNTS_PER_MM);

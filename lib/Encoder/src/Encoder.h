@@ -12,8 +12,6 @@ const long X_MIN = 0;
 
 extern volatile long countA;
 extern volatile long countB;
-extern volatile long globalCountA;
-extern volatile long globalCountB;
 
 extern double Encoder_getLeftVelocity(double dt);
 extern double Encoder_getRightVelocity(double dt);
@@ -37,12 +35,8 @@ void Encoder_updateLeft();
 void Encoder_updateRight();
 long Encoder_getLeftEncoderCount();
 long Encoder_getRightEncoderCount();
-long Encoder_getLeftGlobalEncoderCount();
-long Encoder_getRightGlobalEncoderCount();
 void Encoder_setLeftEncoderCountZero();
 void Encoder_setRightEncoderCountZero();
-void Encoder_setLeftGlobalEncoderCountZero();
-void Encoder_setRightGlobalEncoderCountZero();
 bool encoderCountsChanged();
 
 #endif
