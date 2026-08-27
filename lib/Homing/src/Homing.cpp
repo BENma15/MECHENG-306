@@ -167,7 +167,7 @@ HomingResult homingUpdate()
 
             LimitSwitch_leftPressed() ||
             LimitSwitch_rightPressed() ||
-            LimitSwitch_topPressed(),
+            LimitSwitch_topPressed() || LimitSwitch_bottomPressed(),
 
             HOMING_DOWN_SLOW);
     }
@@ -205,7 +205,7 @@ HomingResult homingUpdate()
 
             LimitSwitch_leftPressed() ||
             LimitSwitch_rightPressed() ||
-            LimitSwitch_topPressed(),
+            LimitSwitch_topPressed() || LimitSwitch_bottomPressed(),
 
             HOMING_LEFT_FAST);
     }
@@ -241,6 +241,7 @@ HomingResult homingUpdate()
             0,
             homingFeedrate,
 
+            LimitSwitch_leftPressed() ||
             LimitSwitch_topPressed() ||
             LimitSwitch_rightPressed() ||
             LimitSwitch_bottomPressed(),
@@ -279,6 +280,7 @@ HomingResult homingUpdate()
             0,
             homingFeedrate,
 
+            LimitSwitch_leftPressed() ||
             LimitSwitch_topPressed() ||
             LimitSwitch_rightPressed() ||
             LimitSwitch_bottomPressed(),

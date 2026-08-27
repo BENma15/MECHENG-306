@@ -19,6 +19,8 @@ static volatile unsigned long rightLastEdgeTime  = 0;
 static volatile unsigned long topLastEdgeTime    = 0;
 static volatile unsigned long bottomLastEdgeTime = 0;
 
+static volatile bool limitSwitchTriggered = false;
+
 static void checkLimit(int pin, volatile bool &switchState, volatile unsigned long &lastEdgeTime) {
     unsigned long now = millis();
 
@@ -44,6 +46,19 @@ static void checkLimit(int pin, volatile bool &switchState, volatile unsigned lo
             FSM_triggerFault();
         }
     }
+}
+
+void updateLimits() {
+    if (!limitSwitchTriggered) {
+        return;
+    }
+
+    limitSwitchTriggered = false;
+
+    checkLimit(LEFT_LIMIT_PIN, leftState, leftLastEdgeTime);
+    checkLimit(RIGHT_LIMIT_PIN, rightState, rightLastEdgeTime);
+    checkLimit(TOP_LIMIT_PIN, topState, topLastEdgeTime);
+    checkLimit(BOTTOM_LIMIT_PIN, bottomState, bottomLastEdgeTime);
 }
 
 void setupLimitSwitches()
@@ -107,30 +122,5 @@ bool LimitSwitch_bottomPressed()
 
 ISR(PCINT0_vect)
 {
-    checkLimit(
-        LEFT_LIMIT_PIN,
-        leftState,
-        leftLastEdgeTime
-    );
-
-
-    checkLimit(
-        RIGHT_LIMIT_PIN,
-        rightState,
-        rightLastEdgeTime
-    );
-
-
-    checkLimit(
-        TOP_LIMIT_PIN,
-        topState,
-        topLastEdgeTime
-    );
-
-
-    checkLimit(
-        BOTTOM_LIMIT_PIN,
-        bottomState,
-        bottomLastEdgeTime
-    );
+    limitSwitchTriggered = true;
 }

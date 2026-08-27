@@ -227,6 +227,8 @@ static void printStateIfChanged()
 
 void FSM_update()
 {
+    updateLimits();
+
     // Call the handler for the current state (non-blocking)
     switch (currentState)
     {

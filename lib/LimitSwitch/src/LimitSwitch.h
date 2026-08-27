@@ -4,6 +4,7 @@
 #include <Arduino.h>
 
 void setupLimitSwitches();
+void updateLimits();
 
 bool LimitSwitch_leftPressed();
 bool LimitSwitch_rightPressed();
