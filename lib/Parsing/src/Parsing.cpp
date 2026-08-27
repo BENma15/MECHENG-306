@@ -55,27 +55,35 @@ int tokenise(String line) {
         {
         case 1:
             Serial.println("Too Many Letters");
+            break;
         case 2:
             Serial.println("Same Letter Repeated");
+            break;
         case 4:
             Serial.println("No G or M command");
+            break;
         case 5:
             Serial.println("Contains non-AlphaNumeric Character/s");
+            break;
         case 6:
             Serial.println("Invalid Negative Sign/s ");
+            break;
         case 7:
             Serial.println("Internal Logic Error");
+            break;
         case 8:
             Serial.println("Too Many Negative Signs");
+            break;
         case 9:
             Serial.println("Contains Letters Which Are Not G,M,X,Y or F");
+            break;
         case 10:
             Serial.println("Contains G And M Commands");
+            break;
         }
         return 1;   // all cases of errors return 1 to readline
     }
 
-    bool xToken = true, yToken = true;  // assuming there is an X and Y token
     
 
     String token = returnToken(line, 'M');
