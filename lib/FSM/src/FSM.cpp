@@ -194,8 +194,8 @@ static void printStateIfChanged()
     case STATE_IDLE:
 
         Serial.println("IDLE");
-        //Serial.println((globalCountA + globalCountB)/2);
-        //Serial.println((globalCountA - globalCountB)/2);
+        Serial.println((globalCountA + globalCountB)/2);
+        Serial.println((globalCountA - globalCountB)/2);
 
         /*
         Serial.println(" ");

@@ -201,7 +201,7 @@ HomingResult homingUpdate()
         return backoffMove(
             0,
             homingBackoffmm,
-            homingFeedrate,
+            slowHomingFeedrate,
 
             LimitSwitch_leftPressed() ||
             LimitSwitch_rightPressed() ||
@@ -277,7 +277,7 @@ HomingResult homingUpdate()
         return backoffMove(
             homingBackoffmm,
             0,
-            homingFeedrate,
+            slowHomingFeedrate,
 
             LimitSwitch_topPressed() ||
             LimitSwitch_rightPressed() ||

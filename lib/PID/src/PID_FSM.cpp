@@ -272,9 +272,9 @@ void move_FSM(int x, int y, int vf)
         // Stops motors
         stopMotors();
 
-        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
-        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
-        Serial.println("Vf: " + String(moveVf));
+        //Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        //Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        //Serial.println("Vf: " + String(moveVf));
 
         // Sets target reached to false so it does not interfere with next movement
         yTargetReached = false;
@@ -294,8 +294,8 @@ void move_FSM(int x, int y, int vf)
         stopMotors();
 
         Serial.println("Move timed out, stopping motors.");
-        Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
-        Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
+        //Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
+        //Serial.println("Total vertical distance travelled: " + String(currentY) + " mm");
 
         // Sets target reached to false so it does not interfere with next movement
         yTargetReached = false;
@@ -374,5 +374,5 @@ void move_FSM(int x, int y, int vf)
 
     // Prints to serial monitor the current velocity
     double actualPathVelocity = sqrt(pow((velocity_left + velocity_right) / 2.0, 2) + pow((velocity_left - velocity_right) / 2.0, 2));
-    Serial.println("Actual Velocity: " + String(actualPathVelocity));
+    //Serial.println("Actual Velocity: " + String(actualPathVelocity));
 }
