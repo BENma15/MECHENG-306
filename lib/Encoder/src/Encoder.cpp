@@ -19,9 +19,6 @@ volatile uint8_t stateB = 0;
 volatile long countA = 0;
 volatile long countB = 0;
 
-// encoder counters for global position tracking (single definition)
-volatile long globalCountA = 0;
-volatile long globalCountB = 0;
 
 // Predetermined table to see which way the motor is spinning
 const int8_t encTable[16] = {
@@ -57,7 +54,6 @@ void updateLeft() {
     uint8_t newState = (a << 1) | b;
     uint8_t index = (stateA << 2) | newState;
     countA += encTable[index];
-    globalCountA += encTable[index];
     stateA = newState;
 }
 
@@ -68,7 +64,6 @@ void updateRight() {
     uint8_t newState = (a << 1) | b;
     uint8_t index = (stateB << 2) | newState;
     countB += encTable[index];
-    globalCountB += encTable[index];
     stateB = newState;
 }
 
@@ -96,29 +91,6 @@ long Encoder_getRightEncoderCount()
     return count;
 }
 
-long Encoder_getLeftGlobalEncoderCount()
-{
-    long count;
-
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-    {
-        count = globalCountA;
-    }
-
-    return count;
-}
-
-long Encoder_getRightGlobalEncoderCount()
-{
-    long count;
-
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-    {
-        count = globalCountB;
-    }
-
-    return count;
-}
 
 double Encoder_getLeftVelocity(double dt) {
     long current = Encoder_getLeftEncoderCount();
@@ -152,21 +124,7 @@ void Encoder_setRightEncoderCountZero()
     }
 }
 
-void Encoder_setLeftGlobalEncoderCountZero()
-{
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-    {
-        globalCountA = 0;
-    }
-}
 
-void Encoder_setRightGlobalEncoderCountZero()
-{
-    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
-    {
-        globalCountB = 0;
-    }
-}
 
 bool encoderCountsChanged()
 {
