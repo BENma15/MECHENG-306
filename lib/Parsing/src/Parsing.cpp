@@ -387,7 +387,7 @@ int checkValidSign(int indices[], String line) {
     */
 
     for (int i = 0; i < 2; i++) {
-        unsigned int pos = indices[i];
+        int pos = indices[i];
         if (pos == -1) { break;  }
         
         if (pos == 0 || pos == line.length() - 1) {
