@@ -66,6 +66,8 @@ static void handleParsing()
 
     Xpos += distanceToCounts(Parsing_getToken(X).GetValue());
     Ypos += distanceToCounts(Parsing_getToken(Y).GetValue());
+
+    Serial.println(Xpos);
     
     if (Xpos > X_MAX || Xpos < X_MIN ||
         Ypos > Y_MAX || Ypos < Y_MIN)

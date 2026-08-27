@@ -5,9 +5,9 @@
 #include <Arduino.h>
 #include <avr/interrupt.h>
 
-const long Y_MAX = 140*COUNTS_PER_MM;   //max distance y in counts
+const long Y_MAX = 125*COUNTS_PER_MM;   //max distance y in counts
 const long Y_MIN = 0;
-const long X_MAX = 220*COUNTS_PER_MM;   //max distance x in counts
+const long X_MAX = 195*COUNTS_PER_MM;   //max distance x in counts
 const long X_MIN = 0;
 
 extern volatile long countA;
