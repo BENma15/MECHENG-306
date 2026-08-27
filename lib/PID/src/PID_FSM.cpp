@@ -291,8 +291,8 @@ void move_FSM(int x, int y, int vf)
         yTargetReached = false;
         xTargetReached = false;
 
-              exportData();
-        clearData();
+              //exportData();
+        //clearData();
 
         return;
     }
@@ -308,8 +308,8 @@ void move_FSM(int x, int y, int vf)
         // Stops motors
         stopMotors();
 
-              exportData();
-        clearData();
+              //exportData();
+        //clearData();
 
         // Serial.println("Move timed out, stopping motors.");
         // Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
@@ -401,7 +401,7 @@ void move_FSM(int x, int y, int vf)
     double actualPathVelocity = sqrt(velocity_left * velocity_left + velocity_right * velocity_right);
     //bool timerDone = recordTimer.startTimer(5);
 
-    addDataPoint(actualPathVelocity, sqrt(targetLeft * targetLeft + targetRight * targetRight), millis());
+    //addDataPoint(actualPathVelocity, sqrt(targetLeft * targetLeft + targetRight * targetRight), millis());
 
 
     // Serial.println(leftPWM);
