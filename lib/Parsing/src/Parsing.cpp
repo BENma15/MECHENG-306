@@ -391,7 +391,7 @@ int checkValidSign(int indices[], String line) {
 }
 
 bool checkBounds(String token) {
-    int value = token.substring(1).toInt();
+    int value = distanceToCounts(token.substring(1).toInt());
     int currentLeft = Encoder_getLeftGlobalEncoderCount();
     int currentRight = Encoder_getRightGlobalEncoderCount();
 
