@@ -2,9 +2,6 @@
 
 const double COUNTS_PER_MM = 182; //  167.37 counts/mm
 
-long globalPosX = 0;
-long globalPosY = 0;
-
 long distanceToCounts(double distance_mm)
 {
     return (long)round(distance_mm * COUNTS_PER_MM);

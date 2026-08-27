@@ -5,9 +5,6 @@
 
 extern const double COUNTS_PER_MM;
 
-extern long globalPosX; //mm
-extern long globalPosY; //mm
-
 long distanceToCounts(double distance_mm);
 double countsToDistance(long counts);
 int8_t outputToDirection(double output);

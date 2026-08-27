@@ -404,17 +404,19 @@ int checkValidSign(int indices[], String line) {
 }
 
 bool checkBounds(String token) {
-    long value = token.substring(1).toInt();
+    long value = distanceToCounts(token.substring(1).toInt());
     Serial.println(value);
+    long currentLeft = Encoder_getLeftGlobalEncoderCount();
+    long currentRight = Encoder_getRightGlobalEncoderCount();
 
     if (token[0] == 'X') {
-        long currentX = globalPosX;
-        if ((currentX + value) > X_MAX || (currentX + value) < X_MIN) {
+        long currentX = (currentLeft + currentRight) / 2;
+        if ((currentX + value) > X_MAX + BOUNDS_TOLERANCE || (currentX + value) < X_MIN - BOUNDS_TOLERANCE) {
             return 1;   // 1 = out of bounds
         }
     } else if (token[0] == 'Y') {
-        long currentY = globalPosY;
-        if ((currentY + value) > Y_MAX || (currentY + value) < Y_MIN) {
+        long currentY = (currentLeft - currentRight) / 2;
+        if ((currentY + value) > Y_MAX + BOUNDS_TOLERANCE || (currentY + value) < Y_MIN - BOUNDS_TOLERANCE) {
             return 1;   // 1 = out of bounds
         }
     }
