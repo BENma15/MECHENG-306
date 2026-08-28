@@ -37,11 +37,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 10, ki_left = 2, /**/ kd_left = 0, kff_left = 5; // Revert kff to 5.5 if doesnt work
+double kp_left = 10, ki_left = 2, /**/ kd_left = 0, kff_left = 4.3; // Revert kff to 5.5 if doesnt work
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 10, ki_right = 2, /**/ kd_right = 0, kff_right = 5; // Revert kff to 5.5 if doesnt work
+double kp_right = 10, ki_right = 3, /**/ kd_right = 0, kff_right = 4.3; // Revert kff to 5.5 if doesnt work
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
@@ -290,9 +290,9 @@ void move_FSM(int x, int y, int vf)
         // Sets target reached to false so it does not interfere with next movement
         yTargetReached = false;
         xTargetReached = false;
-        
+
         SystemState state = FSM_getCurrentState();
-        if(state == STATE_MOTION)
+        if (state == STATE_MOTION)
         {
             exportData();
             clearData();
@@ -313,7 +313,7 @@ void move_FSM(int x, int y, int vf)
         stopMotors();
 
         SystemState state = FSM_getCurrentState();
-        if(state == STATE_MOTION)
+        if (state == STATE_MOTION)
         {
             exportData();
             clearData();
@@ -410,13 +410,13 @@ void move_FSM(int x, int y, int vf)
         sqrt(
             pow((velocity_left + velocity_right) / 2.0, 2) +
             pow((velocity_left - velocity_right) / 2.0, 2));
-        SystemState state = FSM_getCurrentState();
-        
-        if(state == STATE_MOTION)
-        {
-            addDataPoint(actualPathVelocity, V, millis());
-        }
-    
+    SystemState state = FSM_getCurrentState();
+
+    if (state == STATE_MOTION)
+    {
+        addDataPoint(
+            actualPathVelocity, V, millis() - elapsed_from_move_start);
+    }
 
     // Serial.println(leftPWM);
     // Serial.println(rightPWM);
