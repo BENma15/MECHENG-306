@@ -25,13 +25,18 @@ int8_t outputToDirection(double output)
     return 0;
 }
 
-int applyMotorPwmLimits(int pwm, int8_t direction, int minimumDrivePwm)
+// Lowest PWM that reliably turns the motor under load
+const int MIN_DRIVE_PWM = 60;
+
+double staticFeedforward(double target, double kff)
 {
-    if (direction != 0)
-    {
-        pwm += minimumDrivePwm;
-    }
-    return min(pwm, 255);
+    if (target > 0)
+        return MIN_DRIVE_PWM + kff * target;
+
+    if (target < 0)
+        return -MIN_DRIVE_PWM + kff * target;
+
+    return 0;
 }
 
 Timer::Timer()

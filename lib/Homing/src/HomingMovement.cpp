@@ -18,17 +18,16 @@ static uint32_t lastControlLoopMicros = 0;
 static const uint32_t CONTROL_LOOP_INTERVAL_US = 20000;
 static const double dt = CONTROL_LOOP_INTERVAL_US / 1000000.0;
 
-static double kp_left = 10, ki_left = 2, kd_left = 0, kff_left = 4;
+static double kp_left = 18, ki_left = 2, kd_left = 0, kff_left = 5;
 static double integral_left = 0, lastError_left = 0;
 
-static double kp_right = 10, ki_right = 2, kd_right = 0, kff_right = 4;
+static double kp_right = 18, ki_right = 2, kd_right = 0, kff_right = 5;
 static double integral_right = 0, lastError_right = 0;
 
-static double kp_sync = 0, ki_sync = 1, kd_sync = 0;
+static double kp_sync = 0, ki_sync = 0, kd_sync = 0;
 static double integral_sync = 0, lastError_sync = 0;
 
 static int integral_maxPWM = 40;
-static const int MIN_DRIVE_PWM = 60;
 
 static double homingVelocityRamp(double t)
 {
@@ -136,13 +135,17 @@ void homingMove_tick()
 
     int leftTargetDir = 0;
     int rightTargetDir = 0;
-    if (targetLeft > 0) leftTargetDir = 1;
-    else if (targetLeft < 0) leftTargetDir = -1;
-    if (targetRight > 0) rightTargetDir = 1;
-    else if (targetRight < 0) rightTargetDir = -1;
+    if (targetLeft > 0)
+        leftTargetDir = 1;
+    else if (targetLeft < 0)
+        leftTargetDir = -1;
+    if (targetRight > 0)
+        rightTargetDir = 1;
+    else if (targetRight < 0)
+        rightTargetDir = -1;
 
-    double feedforwardLeft = targetLeft * kff_left;
-    double feedforwardRight = targetRight * kff_right;
+    double feedforwardLeft = staticFeedforward(targetLeft, kff_left);
+    double feedforwardRight = staticFeedforward(targetRight, kff_right);
 
     double finalOutputLeft = outputLeft - syncCorrection * leftTargetDir + feedforwardLeft;
     double finalOutputRight = outputRight + syncCorrection * rightTargetDir + feedforwardRight;
@@ -150,12 +153,8 @@ void homingMove_tick()
     int8_t leftDir = outputToDirection(finalOutputLeft);
     int8_t rightDir = outputToDirection(finalOutputRight);
 
-    int leftPWM = (int)abs(finalOutputLeft);
-    int rightPWM = (int)abs(finalOutputRight);
-
-    leftPWM = applyMotorPwmLimits(leftPWM, leftDir, MIN_DRIVE_PWM);
-    rightPWM = applyMotorPwmLimits(rightPWM, rightDir, MIN_DRIVE_PWM);
-
+    int leftPWM = constrain((int)abs(finalOutputLeft), 0, 255);
+    int rightPWM = constrain((int)abs(finalOutputRight), 0, 255);
     setLeftMotor(leftDir, leftPWM);
     setRightMotor(rightDir, rightPWM);
 }
