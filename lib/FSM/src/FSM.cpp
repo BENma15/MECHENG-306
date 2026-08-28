@@ -132,6 +132,8 @@ static void handleHoming() {
 
         currentState = STATE_IDLE;
         resetTokenArray();
+
+        delay(1000); //VERY NAUGHTY DELAY cause im lazy
         return;
     }
 }

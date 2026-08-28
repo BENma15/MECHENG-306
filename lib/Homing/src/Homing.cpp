@@ -6,7 +6,7 @@
 
 
 // Homing movement settings
-static const int homingFeedrate = 600;
+static const int homingFeedrate = 1000;
 static const int slowHomingFeedrate = 300;
 static const int homingTravel = 10000;
 static const int homingBackoffmm = 10;
