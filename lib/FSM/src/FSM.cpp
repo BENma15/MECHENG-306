@@ -177,6 +177,7 @@ static void handleFault() {
 }
 
 static void printStateIfChanged() {
+    return;
     if (currentState == lastPrintedState) {
         return;
     }

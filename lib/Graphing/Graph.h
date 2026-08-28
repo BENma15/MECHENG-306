@@ -2,13 +2,19 @@
 #define GRAPH_H
 
 #define MAX_SAMPLES 500
-// Global buffers (defined in Graph.cpp)
-extern long dataA[MAX_SAMPLES];
-extern long dataB[MAX_SAMPLES];
-extern int timeData[MAX_SAMPLES];
 
-void addDataPoint(long dataPointA, long dataPointB, unsigned int timePoint);
+// Global buffers (defined in Graph.cpp)
+
+extern double dataA[MAX_SAMPLES];
+
+extern double dataB[MAX_SAMPLES];
+
+extern unsigned long timeData[MAX_SAMPLES];
+
+void addDataPoint(double dataPointA, double dataPointB, unsigned long timePoint);
+
 void exportData();
+
 void clearData();
 
 #endif

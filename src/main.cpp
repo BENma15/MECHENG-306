@@ -29,6 +29,7 @@ void setup()
     Motor_Init();
     initialiseTokenArray();
 
+
     // MotorMoveConfig config = {4, 5, 6, 7, 255, 1000};
     // motorMoveBegin(config);
 
