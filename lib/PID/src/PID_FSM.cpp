@@ -37,11 +37,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 18, ki_left = 1.5, /**/ kd_left = 0, kff_left = 5.5; // Revert kff to 5.5 if doesnt work
+double kp_left = 18, ki_left = 2, /**/ kd_left = 0, kff_left = 6; // Revert kff to 5.5 if doesnt work
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 18, ki_right = 1.5, /**/ kd_right = 0, kff_right = 5.5; // Revert kff to 5.5 if doesnt work
+double kp_right = 18, ki_right = 2, /**/ kd_right = 0, kff_right = 6; // Revert kff to 5.5 if doesnt work
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables

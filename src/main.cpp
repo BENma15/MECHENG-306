@@ -29,7 +29,6 @@ void setup()
     Motor_Init();
     initialiseTokenArray();
 
-
     // MotorMoveConfig config = {4, 5, 6, 7, 255, 1000};
     // motorMoveBegin(config);
 
@@ -38,7 +37,7 @@ void setup()
 
 void loop()
 {
-    FSM_update();
+    FSM_update(); // DO NOT REMOVE
 }
 
 // 1 is cw, 0 is stop, -1 is ccw

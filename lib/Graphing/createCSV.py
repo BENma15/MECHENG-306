@@ -12,12 +12,12 @@ time.sleep(2)
 
 print("Connected to Arduino")
 
-# Send movement command
+# Send movement commands
 
 command = "G28"
 ser.write((command + "\n").encode())
 
-command = "G01 X50 Y25 F1000"
+command = "G01 X50 Y25 F300"
 ser.write((command + "\n").encode())
 
 print("Sent:", command)

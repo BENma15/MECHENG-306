@@ -26,7 +26,7 @@ int8_t outputToDirection(double output)
 }
 
 // Lowest PWM that reliably turns the motor under load
-const int MIN_DRIVE_PWM = 60;
+const int MIN_DRIVE_PWM = 45;
 
 double staticFeedforward(double target, double kff)
 {
