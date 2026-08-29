@@ -183,8 +183,8 @@ bool encoderCountsChanged()
         return true;
     }
 
-    // Don't compare until 10 ms has passed
-    if (!encoderTimer.startTimer(10))
+    // Don't compare until 50 ms has passed
+    if (!encoderTimer.startTimer(50))
     {
         return true;
     }

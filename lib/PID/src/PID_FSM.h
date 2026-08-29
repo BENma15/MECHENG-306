@@ -53,4 +53,9 @@ extern double currentRightMM;
 extern long moveCurrentLeftCount;
 extern long moveCurrentRightCount;
 
+extern double velocity_left;
+extern double velocity_right;
+
+extern double V;
+
 #endif // PID_FSM_H

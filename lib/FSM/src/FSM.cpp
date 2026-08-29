@@ -100,10 +100,16 @@ static void handleMotion()
 
     static unsigned long lastGraphTime = 0;
 
+    double actualPathVelocity =
+        sqrt(
+            pow((velocity_left + velocity_right) / 2.0, 2) +
+            pow((velocity_left - velocity_right) / 2.0, 2));
+
     if (elapsed_ms - lastGraphTime >= 50)
     {
         lastGraphTime = elapsed_ms;
-        addDataPoint(currentX, currentY, elapsed_ms);
+        //addDataPoint(x - currentX, y - currentY, elapsed_ms);
+        addDataPoint(actualPathVelocity, V, millis() - elapsed_from_move_start);
     }
 
     if (moveFinished == false)
@@ -126,7 +132,7 @@ static void handleMotion()
         stopMotors();
 
         // Waits for the encoder counts to settle and not change
-        if (encoderCountsChanged())
+        if (encoderCountsChanged() && elapsed_from_move_start < 200000)
         {
             return;
         }

@@ -37,11 +37,11 @@ bool moveStarted = false;
 bool triangleProfile = false;
 
 // Left Motor PID Variables
-double kp_left = 18, ki_left = 2, /**/ kd_left = 0, kff_left = 6; // Revert kff to 5.5 if doesnt work
+double kp_left = 30, /*18*/ ki_left = 10, /*2*/ kd_left = 0, kff_left = 10; // Revert kff to 5.5 if doesnt work
 double integral_left = 0, lastError_left = 0;
 
 // Right Motor PID Variables
-double kp_right = 18, ki_right = 2, /**/ kd_right = 0, kff_right = 6; // Revert kff to 5.5 if doesnt work
+double kp_right = 30, /*18*/ ki_right = 10, /*2*/ kd_right = 0, kff_right = 10; // Revert kff to 5.5 if doesnt work
 double integral_right = 0, lastError_right = 0;
 
 // Sync PID Variables
@@ -82,8 +82,12 @@ bool moveFinished = false;
 double targetLeft;
 double targetRight;
 
+double velocity_left = 0;
+double velocity_right = 0;
+
 Timer recordTimer;
 
+double V = 0; // Target velocity at any given time
 // Returns the target velocity at different stages in the movement, using an s-curve profile.
 double velocityProfile_FSM(double J, double Vf, double t4, double t)
 {
@@ -240,14 +244,14 @@ void move_FSM(int x, int y, int vf)
     lastControlLoopMicros += CONTROL_LOOP_INTERVAL_US; // Sets new last loop time
 
     // Gets both motor velocities
-    double velocity_left = Encoder_getLeftVelocity(dt);
-    double velocity_right = Encoder_getRightVelocity(dt);
+    velocity_left = Encoder_getLeftVelocity(dt);
+    velocity_right = Encoder_getRightVelocity(dt);
 
     // Gets current time in reference to start time
     double t = (millis() / 1000.0) - moveStartTime;
 
     // Sees what the velocity should be at the moment
-    double V = velocityProfile_FSM(moveJ, moveVf, moveT4, t);
+    V = velocityProfile_FSM(moveJ, moveVf, moveT4, t);
 
     // Breaks total veloity into velocity needed from each motor
     targetLeft = V * (moveUnitX + moveUnitY);
@@ -292,8 +296,6 @@ void move_FSM(int x, int y, int vf)
         yTargetReached = false;
         xTargetReached = false;
 
-
-
         return;
     }
 
@@ -307,8 +309,6 @@ void move_FSM(int x, int y, int vf)
 
         // Stops motors
         stopMotors();
-
-
 
         // Serial.println("Move timed out, stopping motors.");
         // Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
@@ -401,7 +401,7 @@ void move_FSM(int x, int y, int vf)
 
     if (state == STATE_MOTION)
     {
-        //addDataPoint(actualPathVelocity, V, millis() - elapsed_from_move_start);
+        // addDataPoint(actualPathVelocity, V, millis() - elapsed_from_move_start);
     }
 
     // Serial.println(leftPWM);

@@ -17,7 +17,7 @@ print("Connected to Arduino")
 command = "G28"
 ser.write((command + "\n").encode())
 
-command = "G01 X50 Y25 F300"
+command = "G01 X50 Y25 F750"
 ser.write((command + "\n").encode())
 
 print("Sent:", command)
