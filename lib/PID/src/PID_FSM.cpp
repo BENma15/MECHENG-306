@@ -292,12 +292,7 @@ void move_FSM(int x, int y, int vf)
         yTargetReached = false;
         xTargetReached = false;
 
-        SystemState state = FSM_getCurrentState();
-        if (state == STATE_MOTION)
-        {
-            exportData();
-            clearData();
-        }
+
 
         return;
     }
@@ -313,12 +308,7 @@ void move_FSM(int x, int y, int vf)
         // Stops motors
         stopMotors();
 
-        SystemState state = FSM_getCurrentState();
-        if (state == STATE_MOTION)
-        {
-            exportData();
-            clearData();
-        }
+
 
         // Serial.println("Move timed out, stopping motors.");
         // Serial.println("Total horizontal distance travelled: " + String(currentX) + " mm");
@@ -411,8 +401,7 @@ void move_FSM(int x, int y, int vf)
 
     if (state == STATE_MOTION)
     {
-        addDataPoint(
-            actualPathVelocity, V, millis() - elapsed_from_move_start);
+        //addDataPoint(actualPathVelocity, V, millis() - elapsed_from_move_start);
     }
 
     // Serial.println(leftPWM);
