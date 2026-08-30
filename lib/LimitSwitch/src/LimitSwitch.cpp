@@ -11,7 +11,6 @@ static const int BOTTOM_LIMIT_PIN = 10;
 // Limit switch debounce time
 static const unsigned long DEBOUNCE_TIME_MS = 10;
 
-// Limit switch inital state
 static volatile bool leftState = LOW;
 static volatile bool rightState = LOW;
 static volatile bool topState = LOW;

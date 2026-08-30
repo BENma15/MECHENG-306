@@ -1,6 +1,6 @@
 #include "Motor.h"
 
-// Initialise Motor Pins
+// Set up motor control pins.
 void Motor_Init()
 {
     pinMode(M1, OUTPUT);
@@ -9,7 +9,7 @@ void Motor_Init()
     pinMode(E2, OUTPUT);
 }
 
-// Left motor movement
+// Drive the left motor in a given direction.
 String setLeftMotor(int8_t dir, int pwm)
 {
     if (dir == 0)
@@ -24,7 +24,7 @@ String setLeftMotor(int8_t dir, int pwm)
     return "SUCCESS";
 }
 
-// Right motor movement
+// Drive the right motor in a given direction.
 String setRightMotor(int8_t dir, int pwm)
 {
     if (dir == 0)
@@ -39,6 +39,7 @@ String setRightMotor(int8_t dir, int pwm)
     return "SUCCESS";
 }
 
+// Stop both motors.
 void stopMotors()
 {
     setLeftMotor(0, 0);

@@ -6,18 +6,11 @@
 String inputBuffer = "";
 GcodeToken TokenArray[MAX_TOKENS];
 
-//bugs: g01 x----25 y----25 f25 is a valid input
-//a speed of 0 can be submitted, this shouldnt be possible
-//sending m999 in idle state sends the state to motion
-
-
-/* inintialise tokenArray */
 void initialiseTokenArray(void) {
     TokenArray[G].Set("G0");
     TokenArray[X].Set("X0");
     TokenArray[Y].Set("Y0");
     TokenArray[F_token].Set("F300");
-    //TokenArray[M].Set("M0");  // uncomment if random error comes up
 }
 
 
@@ -253,11 +246,10 @@ String returnToken(String line, char Letter) {
 
     String token = line.substring(letterPos, (tokenEnd + 1));   // substring excludes end, hence (tokenEnd + 1)
 
-    if ((Letter == 'M' || Letter == 'G' || Letter == 'F') && token.substring(1).toDouble() <= 0) { //this one doesn't have a proper error code for 0 f
+    if ((Letter == 'M' || Letter == 'G' || Letter == 'F') && token.substring(1).toDouble() <= 0) {
         Serial.println("Error 2");
         return "ERROR";
     }
-    //Serial.print(token);
     return token;
 
 }

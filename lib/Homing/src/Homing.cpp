@@ -149,7 +149,6 @@ HomingResult homingUpdate() {
     switch (homingState)
     {
 
-    // Intial fast movement towards bottom limit switch
     case HOMING_DOWN_FAST:
     {
         return moveToLimit(
@@ -213,7 +212,6 @@ HomingResult homingUpdate() {
             HOMING_LEFT_FAST);
     }
 
-    // Inital fast movement towards left limit switch
     case HOMING_LEFT_FAST:
     {
         return moveToLimit(

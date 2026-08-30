@@ -36,6 +36,7 @@ double distance_per_encoder_tick = 1.0 / COUNTS_PER_MM;
 static long prevLeftCount = 0;
 static long prevRightCount = 0;
 
+// Configure encoder pins and interrupts.
 void Encoder_Init() {
     pinMode(L_ENCA, INPUT_PULLUP);
     pinMode(L_ENCB, INPUT_PULLUP);
@@ -49,7 +50,7 @@ void Encoder_Init() {
     sei();
 }
 
-// Left encoder reading function - just updates the count, no timing/velocity here
+// Update the left encoder state.
 void updateLeft() {
     uint8_t a = digitalRead(L_ENCA);
     uint8_t b = digitalRead(L_ENCB);
@@ -60,7 +61,7 @@ void updateLeft() {
     stateA = newState;
 }
 
-// Right encoder reading function - just updates the count, no timing/velocity here
+// Update the right encoder state.
 void updateRight() {
     uint8_t a = digitalRead(R_ENCA);
     uint8_t b = digitalRead(R_ENCB);
@@ -168,6 +169,7 @@ void Encoder_setRightGlobalEncoderCountZero()
     }
 }
 
+// Check whether the encoder counts have settled.
 bool encoderCountsChanged()
 {
     static Timer encoderTimer;

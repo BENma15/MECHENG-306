@@ -8,6 +8,7 @@ unsigned long timeData[MAX_SAMPLES] = {0};
 
 int sampleIndex = 0;
 
+// Store a data point for later export.
 void addDataPoint(double dataPointA, double dataPointB, unsigned long timePoint)
 {
     if (sampleIndex < MAX_SAMPLES)
@@ -19,6 +20,7 @@ void addDataPoint(double dataPointA, double dataPointB, unsigned long timePoint)
     }
 }
 
+// Print captured data to the serial monitor.
 void exportData()
 {
     Serial.println("START_DATA");
@@ -39,6 +41,7 @@ void exportData()
     Serial.println("END_DATA");
 }
 
+// Clear stored motion samples.
 void clearData()
 {
     sampleIndex = 0;
